@@ -1,0 +1,527 @@
+
+body {
+  overscroll-behavior-y: contain;
+  text-align: center;
+}
+
+.title {
+  text-align: center;
+  color: #cab497;
+  font-weight: bold;
+}
+
+.linq {
+  color: white;
+  text-decoration: none;
+}
+
+.linq:hover {
+ color: #cab497;
+}
+
+.but {
+  margin-top: 12px;
+  border-radius: 10px;
+}
+.wrapper {
+  font-family: "Times New Roman";
+  text-align: center;
+  height: 90vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  perspective: 20px;
+}
+
+.autocomp {
+  background-color: #212529;
+  width: 455px;
+  border-width: 1px;
+  border-color: #f8dcb5; 
+  border-style: solid;
+}
+.inAutoCom{
+  padding-top: 8px;
+}
+
+
+.tab {
+ text-align: left;
+ color: black;
+ 
+}
+
+.linkTab {
+  text-decoration: none;
+}
+
+.inpCli {
+  width: 220px;
+  text-align: left;
+}
+
+.inp {
+  width: 455px;
+  text-align: left;
+}
+
+.inpDat {
+  text-align: left;
+  padding-top: 8px;
+}
+
+.inputSearch .MuiOutlinedInput-root {
+  font-family: "Times New Roman";
+  border: px solid;
+  border-radius: 20px;
+  width: 300px;
+  height: 60px;
+  margin-top: 50px;
+  margin-right: 1100px;
+}
+
+.totAsc {
+  margin-top: 40px;
+  text-align: left;
+}
+
+.AscCont {
+  width: 1200px;
+  padding-left: 10px;
+  margin: 0 auto;
+}
+
+.foglioA4{
+width: 792px;
+
+}
+
+.colNotaSini{
+  border-right-style: solid;
+  border-width: 1px
+}
+
+.rigaNota{
+  font-family: Arial, Helvetica, sans-serif;
+  border-top-style: solid;
+  border-bottom-style:solid;
+  border-width: 1px
+}
+
+.rigaNotaSot{
+  font-family: Arial, Helvetica, sans-serif;
+  border-bottom-style:solid;
+  border-width: 1px
+}
+
+.sinistraNota{
+  margin-bottom: -1px;
+  font-size: 11px
+}
+.sinistraNota6{
+  margin-bottom: -1px;
+  font-size: 9px
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap");
+
+.buttonApply {
+  background-color: #32cd32;
+  border: none;
+  color: black;
+  padding: 6px 17px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 17px;
+  border-radius: 6px;
+  user-select: none;
+}
+.butAddProd{
+  margin-top: 15px;
+  background-color: #2db92d;
+  border: none;
+  color: black;
+  padding: 6px 17px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 17px;
+  border-radius: 6px;
+  user-select: none;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.butRemProd{
+  background-color: #ff3838;
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 17px;
+  border-radius: 6px;
+  user-select: none;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.butAddProd:hover{
+  background-color: #29a829;
+}
+.butRemProd:hover{
+  background-color: #fb0604;
+}
+.buttonClose {
+  background-color: #dc3545;
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 17px;
+  border-radius: 6px;
+  user-select: none;
+}
+
+.divClose{
+  padding-bottom: 37px;
+}
+
+.divCloseSc{
+  padding-bottom: 45px;
+}
+
+.divDat {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 10px 20px;
+  margin-top: 10px;
+  background-color: #efefef;
+  border-width: 2px;
+  border-color: #f8dcb5; 
+  border-style: solid;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.formSD {
+  max-width: 500px;
+  height: 187px;
+  margin: 0 auto;
+  padding: 0px 0px;
+  margin-top: 50px;
+  border-width: 2px;
+  border-color: #f8dcb5; 
+  background-color: #efefef;
+  border-style: solid;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.formSC {
+  max-width: 500px;
+  height: 374px;
+  margin: 0 auto;
+  padding: 0px 0px;
+  margin-top: 20px;
+  border-width: 2px;
+  background-color: #efefef;
+  border-color: #f8dcb5; 
+  border-style: solid;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.formAddNot {
+  max-width: 500px;
+  height: 183px;
+  margin: 0 auto;
+  padding: 0px 0px;
+  margin-top: 20px;
+  border-width: 2px;
+  background-color: #efefef;
+  border-color: #f8dcb5; 
+  border-style: solid;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.formScort{
+  max-width: 500px;
+  height: 444px;
+  margin: 0 auto;
+  padding: 0px 0px;
+  margin-top: 50px;
+  border-width: 3px;
+  background-color: #efefef;
+  border-color: #f8dcb5; 
+  border-style: solid;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.formAC {
+  max-width: 500px;
+  height: 300px;
+  margin: 0 auto;
+  padding: 0px 0px;
+  margin-top: 50px;
+  border-width: 3px;
+  background-color: #efefef;
+  border-color: #f8dcb5; 
+  border-style: solid;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.formCli {
+  max-width: 500px;
+  height: 253px;
+  margin: 0 auto;
+  padding: 0px 0px;
+  margin-top: 50px;
+  border-width: 3px;
+  background-color: #efefef;
+  border-color: #f8dcb5; 
+  border-style: solid;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.coltext {
+  color: #cab497;
+}
+
+.input_container {
+  margin-bottom: 20px;
+  padding: 0px 20px;
+  
+}
+.btn_container {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.btn_container button {
+  color: black;
+  padding: 10px 20px;
+  outline: none;
+  border-width: 2px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.todo_container {
+  width: 1200px;
+  padding-left: 10px;
+  padding-top: 10px;
+  padding-bottom: 30px;
+  margin: 0 auto;
+  border-width: 3px;
+  background-color: #efefef;
+  border-color: #f8dcb5; 
+  border-style: solid;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.todo_containerCli {
+  width: 1400px;
+  padding-left: 10px;
+  padding-top: 10px;
+  padding-bottom: 30px;
+  margin: 0 auto;
+  border-width: 3px;
+  background-color: #efefef;
+  border-color: #f8dcb5; 
+  border-style: solid;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #00000044;
+  backdrop-filter: blur(0.5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  text-align: left;
+}
+
+.popup-inner {
+  background-color: var(--sabbia);
+  padding: 0rem;
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 350px;
+  overflow: auto;
+  max-height: calc(100vh - 4rem);
+}
+
+.popup h2 {
+  margin-bottom: 1rem;
+}
+
+.button-close {
+  color: white;
+  
+  margin-left: 50px;
+  background-color: rgb(255, 122, 98);
+  border: none;
+  outline: none;
+  border-radius: 0px 10px 0px 0px;
+}
+
+.button-close:hover {
+  background-color: #f0725b;
+}
+
+.button-complete,
+.button-delete,
+.button-edit {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  background-color: transparent;
+  border-radius: 50%;
+}
+#i {
+  font-size: 35px;
+}
+.button-complete {
+  color: #95faa3;
+  margin-right: 10px;
+}
+.button-edit {
+  color: #56cfff;
+  margin-right: 10px;
+}
+.button-delete {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  color: rgb(255, 122, 98);
+}
+@media screen and (max-width: 667px) {
+  .task_container {
+    width: 90%;
+  }
+  .task {
+    margin-right: 0px;
+  }
+}
+input:focus,
+button:focus {
+  outline: none;
+}
+
+
+.prova input {
+  color: black;
+  width: 100%;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  background-color: transparent;
+  font-size: 16px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+}
+
+.inpTab {
+  width: 100%;
+  cursor: pointer;
+  color: black;
+  text-align: left;
+  height: 40px;
+  width: 100%;
+  padding: 15px 5px;
+  outline: none;
+  font-size: 16px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+}
+
+.wrapper {
+  font-family: "Times New Roman";
+  width: 100%;
+  height: 90vh;
+  overflow: auto;
+  perspective: 20px;
+}
+
+.navb{
+  position: inherit;
+  width: 102.8%;
+  height: 65px;
+  line-height: 10px;
+  background-color: #212529;
+}
+
+
+@media screen and (max-width: 600px) { /* smartphone s20 ultra*/
+  .autocomp {
+    width: 100%;
+  }
+  .navb{
+    width: 102.8%;
+  }
+  .formSD {
+    width: 85%;
+  }
+  .formCli {
+    width: 85%;
+  }
+  .formScort{
+    width:85%
+  }
+  .formSC {
+    width: 85%;
+  }
+  .formAC {
+    width: 85%;
+  }
+  .inp {
+    width: 100%;
+  }
+  .todo_container {
+    width: 850x;
+    margin: 0 auto;
+  }
+
+}
+
+@media screen and (max-width: 392px) { /* smartphone iphone x*/ 
+  .autocomp {
+    width: 100%;
+  }
+  .navb{
+    width: 103.1%;
+  }
+  .formSC {
+    width: 85%;
+  }
+  .formSD {
+    width: 85%;
+  }
+  .formCli {
+    width: 85%;
+  }
+  .formScort{
+    width:85%
+  }
+  .formAC {
+    width: 85%;
+  }
+  .inp {
+    width: 100%;
+  }
+  .todo_container {
+    width: 750px;
+    margin: 0 auto;
+  }
+}
