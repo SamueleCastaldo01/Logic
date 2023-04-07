@@ -13,18 +13,20 @@ import { useNavigate } from "react-router-dom";
 import Todo from '../components/Todo';
 import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
-import { notifyUpdateProd} from '../components/Notify';
+import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
 import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from '@mui/material/InputAdornment';
-import { supa, guid, tutti } from '../components/utenti';
+import { supa, guid, tutti, flagStampa } from '../components/utenti';
 import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
 import PrintIcon from '@mui/icons-material/Print';
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from '@mui/icons-material/Add';
+import { AutoProdCli } from "../pages/AddNota";
 
-function Nota({notaId, cont, nomeCli, dataNota, dataNotaC }) {
+
+function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNota, debit, debTo }) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -36,8 +38,16 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC }) {
     const [partitaIvaC, setPartitaIvaC] = React.useState("");
     const [cellulareC, setCellulareC] = React.useState("");
     const [prodottoC, setProdottoC] = React.useState("");
+
+    const [flagStampa, setFlagStampa] = React.useState(false);  //quando è falso si vedono le icone,
+    const [prova, setProva] = React.useState("");
+    const [NumCart, setNumCart] = React.useState(numCart);
    
     const [sumTot, setSumTot] =React.useState("");
+    const [debitoTot, setDebTot] = React.useState(debTo);
+    const [debitoRes, setDebitoRes] = React.useState(debit);
+
+
 
     const [qtProdotto, setQtProdotto] = React.useState("1");
     const [prezzoUniProd, setprezzoUniProd] = React.useState("");
@@ -73,19 +83,16 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC }) {
         className: "rounded-4"
         })}
 //_________________________________________________________________________________________________________________
-
 const SomAsc = async () => {
   var sommaTot=0;
   const q = query(collection(db, "Nota"), where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC));
-  console.log(dataNotaC, nomeCli);
-
   const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       console.log(doc.id, "heeey", " => ", doc.data().nomeC, doc.data().dataC, doc.data().prezzoUniProd);
       sommaTot=+doc.data().prezzoTotProd +sommaTot;
       });
       setSumTot(sommaTot);
-      console.log("somma", sommaTot);
+      await updateDoc(doc(db, "addNota", notaId), { sommaTotale:sommaTot});  //aggiorna la somma totale nell'add nota
 }
 //********************************************************************************** */
     const cliEffect = async () => {  //funzione per l'anagrafica del cliente
@@ -145,6 +152,35 @@ const handleEdit = async ( todo, qt, prod, prezU, prezT) => {
   toast.clearWaitingQueue(); 
 };
 //_________________________________________________________________________________________________________________
+const handleEditNumCart = async (e) => {
+  e.preventDefault();
+  await updateDoc(doc(db, "addNota", notaId), { NumCartoni:NumCart});
+  notifyUpdateProd();
+  toast.clearWaitingQueue(); 
+};
+
+const handleEditDebitoRes = async (e) => {
+  e.preventDefault();
+  await updateDoc(doc(db, "addNota", notaId), { debitoRes:debitoRes});
+  notifyUpdateDebRes();
+  toast.clearWaitingQueue(); 
+};
+
+const handleConferma = async (e) => {
+  e.preventDefault();
+  var debTot= +sumTot+(+debitoRes);
+  setDebTot(debTot);
+  await updateDoc(doc(db, "addNota", notaId), { debitoTotale:debTot});  //aggiorna la somma totale nell'add nota
+      //aggiorna ded1 nel database debito
+  const q = query(collection(db, "debito"), where("nomeC", "==", nomeCli));
+  const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async (hi) => {
+      await updateDoc(doc(db, "debito", hi.id), { deb1:debTot});  //aggiorna deb1 nel database del debito
+      });
+  notifyUpdateNota();
+  toast.clearWaitingQueue(); 
+};
+//_________________________________________________________________________________________________________________
 const handleDelete = async (id) => {
   const colDoc = doc(db, "Nota", id); 
   //infine elimina la data
@@ -155,8 +191,16 @@ const handleDelete = async (id) => {
   //stampa
  const handlePrint = useReactToPrint({
   content: () => componentRef.current,
-  documentTitle: 'emp-data'
+  documentTitle: 'emp-data',
+  onAfterPrint: () => setFlagStampa(false)
 })
+
+const print = async () => {
+  setFlagStampa(true);
+  setTimeout(function(){
+    handlePrint();
+  },1);
+}
 //*************************************************************** */
 //************************************************************** */
 //          INTERFACE                                             /
@@ -166,7 +210,7 @@ const handleDelete = async (id) => {
     <div className="container wrapper" >
     <div><ToastContainer limit={1} /></div>
     <h1 className='title'>Nota</h1>
-    <span><button onClick={handlePrint}>Stampa </button></span>
+    <span><button onClick={print}>Stampa </button></span>
     <span><button onClick={createCate}>Aggiungi Prodotto</button></span>
     
     <div ref={componentRef} className="foglioA4" style={{paddingLeft:"50px", paddingRight:"50px", paddingTop:"20px"}}>
@@ -212,7 +256,7 @@ const handleDelete = async (id) => {
     </div>
 {/***********tabella aggiunta prodotto************************************************** */}
   <div className='row' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
-    <div className='col-1' style={{padding:"0px"}}>Quantità</div>
+    <div className='col-1' style={{padding:"0px"}}>Qt</div>
     <div className='col-6' style={{padding:"0px"}}>Prodotto</div>
     <div className='col-2' style={{padding:"0px"}}>Prezzo Uni</div>
     <div className='col-2' style={{padding:"0px"}}>Prezzo Totale</div>
@@ -232,6 +276,7 @@ const handleDelete = async (id) => {
       handleEdit={handleEdit}
       displayMsg={displayMsg}
       nomeCli={nomeCli}
+      flagStampa={flagStampa}
     />
      )}
      </>
@@ -239,7 +284,37 @@ const handleDelete = async (id) => {
     </div>
   ))}
   </div>
-<h6>Prezzo Totale del Totale: {sumTot}</h6>
+
+  <div className='row'>
+    <div className='col' style={{textAlign:"left", padding:"0px"}}>
+    <form onSubmit={handleEditNumCart}>
+     Numero Cartoni:  <input
+       style={{textAlign:"center", padding: "0px", width:"50px"}}
+        type="text"
+        value={NumCart}
+        className="inpTab"
+        onChange={(event) => {
+          setNumCart(event.target.value);}}
+      />
+      <button hidden type='submit' onClick={handleEditNumCart}>Aggiorna</button>
+    </form>
+       </div>
+
+    <div className='col' style={{textAlign:"right", padding:"0px"}}>
+    <h6>Totale: {sumTot} €</h6>
+    <form onSubmit={handleEditDebitoRes}>
+    <h6>Debito Residuo:     <input value={debitoRes} style={{textAlign:"center", padding: "0px", width:"50px"}} 
+      onChange={(event) => {
+      setDebitoRes(event.target.value);}}
+    />  €</h6>
+    <button hidden type='submit' onClick={handleEditDebitoRes}>Aggiorna</button>
+    </form>
+    <h6>Debito Totale: {debitoTot} €</h6>
+    <button onClick={handleConferma}>Conferma</button>
+    </div>
+
+  </div>
+
     </div>
 
 

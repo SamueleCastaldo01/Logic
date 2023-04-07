@@ -67,6 +67,7 @@ body {
 .inpDat {
   text-align: left;
   padding-top: 8px;
+  cursor: pointer;
 }
 
 .inputSearch .MuiOutlinedInput-root {
@@ -76,7 +77,7 @@ body {
   width: 300px;
   height: 60px;
   margin-top: 50px;
-  margin-right: 1100px;
+  margin-right: 500px;
 }
 
 .totAsc {
@@ -124,6 +125,9 @@ width: 792px;
 
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap");
 
+.buttonClose,
+.butRemProd,
+.butAddProd,
 .buttonApply {
   background-color: #32cd32;
   border: none;
@@ -135,33 +139,15 @@ width: 792px;
   font-size: 17px;
   border-radius: 6px;
   user-select: none;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 .butAddProd{
   margin-top: 15px;
   background-color: #2db92d;
-  border: none;
-  color: black;
-  padding: 6px 17px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 17px;
-  border-radius: 6px;
-  user-select: none;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 .butRemProd{
   background-color: #ff3838;
-  border: none;
   color: white;
-  padding: 6px 14px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 17px;
-  border-radius: 6px;
-  user-select: none;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 .butAddProd:hover{
   background-color: #29a829;
@@ -171,15 +157,8 @@ width: 792px;
 }
 .buttonClose {
   background-color: #dc3545;
-  border: none;
   color: white;
   padding: 6px 14px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 17px;
-  border-radius: 6px;
-  user-select: none;
 }
 
 .divClose{
@@ -191,7 +170,7 @@ width: 792px;
 }
 
 .divDat {
-  max-width: 1000px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 10px 20px;
   margin-top: 10px;
@@ -203,6 +182,11 @@ width: 792px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
+.formCli,
+.formAC,
+.formScort,
+.formAddNot,
+.formSC,
 .formSD {
   max-width: 500px;
   height: 187px;
@@ -217,71 +201,23 @@ width: 792px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 .formSC {
-  max-width: 500px;
   height: 374px;
-  margin: 0 auto;
-  padding: 0px 0px;
   margin-top: 20px;
-  border-width: 2px;
-  background-color: #efefef;
-  border-color: #f8dcb5; 
-  border-style: solid;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 .formAddNot {
-  max-width: 500px;
   height: 183px;
-  margin: 0 auto;
-  padding: 0px 0px;
   margin-top: 20px;
-  border-width: 2px;
-  background-color: #efefef;
-  border-color: #f8dcb5; 
-  border-style: solid;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 .formScort{
-  max-width: 500px;
-  height: 444px;
-  margin: 0 auto;
-  padding: 0px 0px;
-  margin-top: 50px;
-  border-width: 3px;
-  background-color: #efefef;
-  border-color: #f8dcb5; 
-  border-style: solid;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  height: 507px;
 }
 
 .formAC {
-  max-width: 500px;
   height: 300px;
-  margin: 0 auto;
-  padding: 0px 0px;
-  margin-top: 50px;
-  border-width: 3px;
-  background-color: #efefef;
-  border-color: #f8dcb5; 
-  border-style: solid;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .formCli {
-  max-width: 500px;
   height: 253px;
-  margin: 0 auto;
-  padding: 0px 0px;
-  margin-top: 50px;
-  border-width: 3px;
-  background-color: #efefef;
-  border-color: #f8dcb5; 
-  border-style: solid;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .coltext {
@@ -310,8 +246,9 @@ width: 792px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-.todo_container {
-  width: 1200px;
+.todo_container,
+.todo_containerCli,
+.todo_containerScorta {
   padding-left: 10px;
   padding-top: 10px;
   padding-bottom: 30px;
@@ -322,22 +259,18 @@ width: 792px;
   border-style: solid;
   border-radius: 10px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.todo_container {
+  width: 1200px;
 }
 
 .todo_containerCli {
   width: 1400px;
-  padding-left: 10px;
-  padding-top: 10px;
-  padding-bottom: 30px;
-  margin: 0 auto;
-  border-width: 3px;
-  background-color: #efefef;
-  border-color: #f8dcb5; 
-  border-style: solid;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
-
+.todo_containerScorta{
+  width: 800px;
+}
 .popup {
   position: fixed;
   top: 0;
@@ -398,6 +331,7 @@ width: 792px;
   margin-right: 10px;
 }
 .button-edit {
+  padding-top: 10px;
   color: #56cfff;
   margin-right: 10px;
 }
@@ -470,19 +404,11 @@ button:focus {
   .navb{
     width: 102.8%;
   }
-  .formSD {
-    width: 85%;
-  }
-  .formCli {
-    width: 85%;
-  }
-  .formScort{
-    width:85%
-  }
+  .formAC,
+  .formScort,
+  .formCli,
+  .formSD,
   .formSC {
-    width: 85%;
-  }
-  .formAC {
     width: 85%;
   }
   .inp {
@@ -502,19 +428,11 @@ button:focus {
   .navb{
     width: 103.1%;
   }
+  .formAC,
+  .formScort,
+  .formCli,
+  .formSD,
   .formSC {
-    width: 85%;
-  }
-  .formSD {
-    width: 85%;
-  }
-  .formCli {
-    width: 85%;
-  }
-  .formScort{
-    width:85%
-  }
-  .formAC {
     width: 85%;
   }
   .inp {

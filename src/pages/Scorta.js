@@ -34,6 +34,7 @@ function Scorta() {
   const [nomeP, setNomeP] = React.useState("");
   const [quantita, setQuantita] = React.useState("");
   const [image, setImage] = React.useState("");
+  const [prezzoIndi, setPrezzoIndi] = React.useState("");
   const [nota, setNota] = React.useState("");
 
   const [imageSer, setImageSer] = React.useState(localStorage.getItem("imageProd"));
@@ -47,6 +48,8 @@ function Scorta() {
   const [open, setOpen] = React.useState(false); //serve per lo speedDial
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const [FlagStampa, setFlagStampa] = useState(false);
 
   const [popupActiveSearch, setPopupActiveSearch] = useState(false);  
 
@@ -126,27 +129,33 @@ function Scorta() {
  //stampa
  const handlePrint = useReactToPrint({
   content: () => componentRef.current,
-  documentTitle: 'emp-data'
+  documentTitle: 'emp-data',
+  onAfterPrint: () => setFlagStampa(false)
 })
 
+const print = async () => {
+  setFlagStampa(true);
+  setTimeout(function(){
+    handlePrint();
+  },1);
+}
+ //******************************************************************************* */
+  //speed
   function handleSpeedCronologia() {
     setPopupActiveCrono(true)
     setPopupActiveScorta(false)
     setOpen(false)
-    console.log({open})
   } 
 
   function handleSpeedScorta() {
     setPopupActiveScorta(true)
     setPopupActiveCrono(false)
     setOpen(false)
-    console.log({open})
   }
 
   function handleSpeedAddProd() {
     setPopupActive(true)
     setOpen(false)
-    console.log({open})
   }
  //******************************************************************************* */
  function handleInputChangeBrand(event, value) {
@@ -159,25 +168,53 @@ function handlePopUp(image, nota) {
   setPopupActiveSearch(true);
 }
  //******************************************************************************* */
-  const handleSubmit = async (e) => {   //creazione cliente
+ const handleProdClien = async () => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
+  console.log("ciaaao");
+  const q = query(collection(db, "clin"));  //prendo tutti i clienti
+  const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (doc) => {
+      await addDoc(collection(db, "prodottoClin"), {
+        author: { name: doc.data().nomeC, id: doc.id },
+        nomeP: nomeP,
+        prezzoUnitario: prezzoIndi
+      })
+      });
+ } 
+ /**    Funzione per eliminare tutti i campi di una tabella del database
+ const provaEli = async () => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
+  console.log("ciaaao");
+  const q = query(collection(db, "prodottoClin"));  //prendo tutti i clienti
+  const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (hi) => {
+      await deleteDoc(doc(db, "prodottoClin", hi.id));
+      });
+ }  */
+  
+ const handleSubmit = async (e) => {   //creazione cliente
     e.preventDefault();
     if(!nomeP) {            
       notifyErrorProd();
       toast.clearWaitingQueue(); 
       return 
     }
+    if(!prezzoIndi) {            
+      setPrezzoIndi("0");
+    }
       await addDoc(collection(db, "prodotto"), {
         nomeP,
         quantita,
         brand,
         nota,
+        prezzoIndi,
         image,
       });
+      handleProdClien();
       setNomeP("");
       setTipologia("");
       setBrand("");
       setQuantita("");
       setImage("");
+      setPrezzoIndi("");
       setNota("");
   };
  //******************************************************************************************************** */
@@ -254,7 +291,7 @@ function handlePopUp(image, nota) {
   const actions = [     //speedDial
     { icon: <InventoryIcon />, name: 'Scorta', action:handleSpeedScorta },
     { icon: <RestoreIcon />, name: 'Cronologia', action: handleSpeedCronologia },
-    { icon: <PrintIcon />, name: 'Stampa', action: handlePrint},
+    { icon: <PrintIcon />, name: 'Stampa', action: print},
     { icon: <AddIcon />, name: 'Aggiungi Prodotto', action: handleSpeedAddProd },
   ];
 //******************************************************************************************************************************** */
@@ -293,13 +330,13 @@ function handlePopUp(image, nota) {
         </div>
       </div> }
   {/***************************************************************************************************************************************/}
-    <h1 className='title mt-3'>Scorta</h1>
+    <h1 className='title mt-3'>Magazzino</h1>
     {!matches &&
       <div>
+        <span><button onClick={handleSpeedAddProd}>Aggiungi Prodotto </button></span>
         <span><button onClick={handleSpeedScorta}>Scorta </button></span>
         <span><button onClick={handleSpeedCronologia}>Cronologia </button></span>
-        <span><button onClick={handlePrint}>Stampa </button></span>
-        <span><button onClick={handleSpeedAddProd}>Aggiungi Prodotto </button></span>
+        <span><button onClick={print}>Stampa </button></span>
       </div>
     }
     {sup ===true && (
@@ -314,6 +351,12 @@ function handlePopUp(image, nota) {
       <div className="input_container">
       <TextField className='inp mt-2' id="filled-basic" label="Nome Prodotto" variant="outlined" autoComplete='off' value={nomeP} 
         onChange={(e) => setNomeP(e.target.value)}/>
+      <TextField className='inp mt-2' type="number" id="filled-basic" label="Prezzo" variant="outlined" autoComplete='off' value={prezzoIndi} 
+        onChange={(e) => setPrezzoIndi(e.target.value)}
+        InputProps={{
+            startAdornment: <InputAdornment position="start">€</InputAdornment>,
+          }}
+        />
       <Autocomplete
       className='mt-2'
         value={brand}
@@ -342,7 +385,7 @@ function handlePopUp(image, nota) {
 {/** tabella per visualizzare *****************************************************************************************************************/}
 {popupActiveScorta &&
 <>
-<TextField
+    <TextField
       inputRef={inputRef}
       className="inputSearch "
       onChange={event => {setSearchTerm(event.target.value)}}
@@ -357,17 +400,17 @@ function handlePopUp(image, nota) {
                 }}
        variant="outlined"/>
 
-<div ref={componentRef} className='todo_containerCli '>
+<div ref={componentRef} className='todo_containerScorta '>
 <div className='row'>
 
-<div className='col-3' >
+<div className='col-4' >
 <p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Prodotto</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Quantità</p>
+<p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Qt</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Aggiungi</p>
+<p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Agg</p>
 </div>
 </div>
 
@@ -390,6 +433,7 @@ function handlePopUp(image, nota) {
       handleRemQuant= {handleRemQuant}
       handlePopUp={handlePopUp}
       displayMsg={displayMsg}
+      FlagStampa={FlagStampa}
     />
      )}
     </div>

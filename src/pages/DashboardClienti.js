@@ -27,7 +27,7 @@ function DashClienti({ clientId, nomeCli }) {
   const [nomeP, setNomeP] = React.useState("");
   const [prezzoUnitario, setPrezzoUnitario] = React.useState("");
 
-  const [popupActiveScorta, setPopupActiveScorta] = useState(true);  
+  const [flagTabellaProdotti, setFlagTabellaProdotti] = useState(false);  
 
   const matches = useMediaQuery('(max-width:600px)');  //media query true se è uno smartphone
   const [popupActive, setPopupActive] = useState(false); 
@@ -150,6 +150,8 @@ function DashClienti({ clientId, nomeCli }) {
         {!matches &&
       <div>
         <span><button onClick={handleSpeedAddProd}>Aggiungi Prodotto </button></span>
+        <span><button onClick={() => { setFlagTabellaProdotti(!flagTabellaProdotti) }}>Tabella Prodotti </button></span>
+        <span><button >Debito </button></span>
       </div>
     }
 
@@ -186,8 +188,8 @@ function DashClienti({ clientId, nomeCli }) {
   } 
     </>
     )}
-{/** tabella per visualizzare *****************************************************************************************************************/}
-{popupActiveScorta &&
+{/** tabella prodotti *****************************************************************************************************************/}
+{flagTabellaProdotti &&
 <>
 
 <div className='todo_containerCli mt-5 '>
@@ -204,7 +206,7 @@ function DashClienti({ clientId, nomeCli }) {
 <div className="scroll">
   {todos.map((todo) => (
     <div key={todo.id}>
-    {todo.author.id  === clientId &&  (
+    {todo.author.name  === nomeCli &&  (
       <>
     { ta === true &&(
     <TodoProdClin

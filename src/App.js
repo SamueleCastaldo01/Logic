@@ -57,6 +57,10 @@ function App() {
   const [notaNomeC, setNotaNomeC] = useState(localStorage.getItem("NotaNomeC")); //Prende la data di quel id
   const [notaDataV, setNotaDataV] = useState(localStorage.getItem("NotaDataV"));
   const [notaDataC, setNotaDataC] = useState(localStorage.getItem("NotaDataC"));
+  const [numCartoni, setNumCartoni] = useState(localStorage.getItem("NumCartNota"));
+  const [sommaTotale, setSommaTotale] = useState(localStorage.getItem("sommaTotNota"));
+  const [debitoRes, setDebitoRes] = useState(localStorage.getItem("debitRes"));
+  const [debitoTot, setDebitoTot] = useState(localStorage.getItem("debitTot"));
 
 
   const BottomNavigationAction = styled(MuiBottomNavigationAction)(`
@@ -101,17 +105,25 @@ function App() {
     setDataOrdConf(data);
   };
 
-  const getNotadHandler = (id, cont, nome, datav, datac) => {
+  const getNotadHandler = (id, cont, nome, datav, datac, numCart, sommaTot, debiResi, debiTot ) => {
     localStorage.setItem("NotaId", id); 
     localStorage.setItem("NotaCon", cont); //save the value locally
     localStorage.setItem("NotaNomeC", nome); 
     localStorage.setItem("NotaDataV", datav); 
     localStorage.setItem("NotaDataC", datac); 
+    localStorage.setItem("NumCartNota", numCart); 
+    localStorage.setItem("sommaTotNota", sommaTot); 
+    localStorage.setItem("debitRes", debiResi); 
+    localStorage.setItem("debitTot", debiTot); 
     setNotaId(id);
     setNotaCont(cont);
     setNotaNomeC(nome);
     setNotaDataV(datav);
     setNotaDataC(datac);
+    setNumCartoni(numCart);
+    setSommaTotale(sommaTot);
+    setDebitoRes(debiResi);
+    setDebitoTot(debiTot);
   };
   //______________________________________________________________________________________________________________
     //signOut
@@ -176,7 +188,7 @@ function App() {
     </Route>
 
     <Route element={<PrivateNota notaId={notaId}/>}>
-    <Route path="/nota" element={<Nota notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC}/>} />
+    <Route path="/nota" element={<Nota notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot}/>} />
     </Route>
 
   </Route>

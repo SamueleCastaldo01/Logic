@@ -10,7 +10,7 @@ import { padding } from "@mui/system";
 
 export const AutoCompProd = [];
 
-export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg, getCliId}) {
+export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, displayMsg, getCliId}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -19,16 +19,16 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
 
 
   const [newNomeC, setNomeC] = React.useState(todo.nomeC);
-  const [newIndirizzo, setIndirizzo] = React.useState(todo.indirizzo);
-  const [newIndirizzoLink, setIndirizzoLink] = React.useState(todo.indirizzoLink);
-  const [newPartIva, setPartIva] = React.useState(todo.partitaIva);
-  const [newCellulare, setCellulare] = React.useState(todo.cellulare);
+  const [d1, setD1] = React.useState(todo.deb1);
+  const [d2, setD2] = React.useState(todo.deb2);
+  const [d3, setd3] = React.useState(todo.deb3);
+  const [d4, setd4] = React.useState(todo.deb4);
 
   let navigate = useNavigate();
 
   const handleSubm = (e) => {
     e.preventDefault();
-    handleEdit(todo, newNomeC, newPartIva, newCellulare)
+    handleEditDeb(todo, newNomeC, d1, d2, d3, d4)
   };
 //*************************************************************** */
   const auto = async () => {
@@ -52,22 +52,40 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
       setNomeC(e.target.value);
     }
   };
-  const handleChangeIva = (e) => {
+  const handleChangeD1 = (e) => {
     e.preventDefault();
     if (todo.complete === true) {
-      setPartIva(todo.partitaIva);
+      setD1(todo.deb1);
     } else {
-      todo.partitaIva = "";
-      setPartIva(e.target.value);
+      todo.deb1 = "";
+      setD1(e.target.value);
     }
   };
-  const handleChangeCell = (e) => {
+  const handleChangeD2 = (e) => {
     e.preventDefault();
     if (todo.complete === true) {
-      setCellulare(todo.cellulare);
+      setD2(todo.deb2);
     } else {
-      todo.cellulare = "";
-      setCellulare(e.target.value);
+      todo.deb2 = "";
+      setD2(e.target.value);
+    }
+  };
+  const handleChangeD3 = (e) => {
+    e.preventDefault();
+    if (todo.complete === true) {
+      setd3(todo.deb3);
+    } else {
+      todo.deb3 = "";
+      setd3(e.target.value);
+    }
+  };
+  const handleChangeD4 = (e) => {
+    e.preventDefault();
+    if (todo.complete === true) {
+      setd4(todo.deb4);
+    } else {
+      todo.deb4 = "";
+      setd4(e.target.value);
     }
   };
 //INTERFACCIA ***************************************************************************************************************
@@ -78,7 +96,7 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
 <form  onSubmit={handleSubm}>
 <hr style={{margin: "0"}}/>
     <div className="row ">
-{/********************************************************************************************* */}
+{/*****************NOME**************************************************************************** */}
     <div className="col-2" >
     <h5
       style={{ textDecoration: todo.completed && "line-through"  }}
@@ -93,75 +111,64 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
         >{ newNomeC}</h5>
 
     </div>
-{/********************************************************************************************* */}
-    <div className="col-4" style={{padding: "0px"}}>
-    <p className="inpTab" ><a
-      style={{ textDecoration: todo.completed && "line-through", textAlign: "center"}}
-        href={ newIndirizzoLink }
-        target="_blank"
-        className="linkTab"
-        >{ newIndirizzo }</a> </p>
-    </div>
 
-{/***************************************************************************************************** */}
+{/*********************D1******************************************************************************** */}
 <div className="col-1" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through" }}
         type="text"
-        value={todo.partitaIva === "" ? newPartIva : todo.partitaIva}
+        value={todo.deb1 === "" ? d1 : todo.deb1}
         className="inpTab"
-        onChange={handleChangeIva}
+        onChange={handleChangeD1}
       />
-    )}
-    {gui ===true && ( 
-    <h4
-      style={{ textDecoration: todo.completed && "line-through" }}
-        type="text"
-        className="inpTab"
-        >{ newPartIva}</h4>
     )}
     </div>
 
-{/***************************************************************************************************** */}
+{/***********************D2****************************************************************************** */}
 <div className="col-1" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through" }}
         type="text"
-        value={todo.cellulare === "" ? newCellulare : todo.cellulare}
+        value={todo.deb2 === "" ? d2 : todo.deb2}
         className="inpTab"
-        onChange={handleChangeCell}
+        onChange={handleChangeD2}
       />
     )}
-    {gui ===true && ( 
-    <h4
+    </div>
+{/*******************D3********************************************************************************** */}
+<div className="col-1" style={{padding: "0px"}}>
+    {sup ===true && ( 
+    <input
       style={{ textDecoration: todo.completed && "line-through" }}
         type="text"
+        value={todo.deb3 === "" ? d3 : todo.deb3}
         className="inpTab"
-        >{ newCellulare}</h4>
+        onChange={handleChangeD3}
+      />
     )}
     </div>
-{/***************************************************************************************************** */}
-
+{/*******************D4********************************************************************************** */}
+<div className="col-1" style={{padding: "0px"}}>
+    {sup ===true && ( 
+    <input
+      style={{ textDecoration: todo.completed && "line-through" }}
+        type="text"
+        value={todo.deb4 === "" ? d4 : todo.deb4}
+        className="inpTab"
+        onChange={handleChangeD4}
+      />
+    )}
+    </div>
+{/********************BUTTON********************************************************************************* */}
       <div className="col">
       <button
           className="button-edit"
-          onClick={() => handleEdit(todo, newNomeC, newPartIva, newCellulare)}
+          onClick={() => handleEditDeb(todo, newNomeC, d1, d2, d3, d4)}
         >
           <EditIcon id="i" />
         </button>
-        {sup ===true && (   
-        <button type="reset" className="button-delete"                          
-          onClick={() => {
-                localStorage.setItem("IDscal", todo.id);
-                localStorage.setItem("NomeCliProd", todo.nomeC);
-                    displayMsg();
-                    toast.clearWaitingQueue(); 
-                            }}>
-          <DeleteIcon id="i" />
-        </button>
-        )}
       </div>
 
     </div>

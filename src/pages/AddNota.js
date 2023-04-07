@@ -28,6 +28,7 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId }) {
     const [todos, setTodos] = React.useState([]);
     const [nomeC, setNomeC] = React.useState("");
     const [cont, setCont] = React.useState(1);
+    const [debitoRes, setDebitoRes] = React.useState("");
   
     
     const [popupActive, setPopupActive] = useState(true);  
@@ -85,6 +86,18 @@ const contEffect = async () => {
               await updateDoc(doc(db, "addNota", hi.id), { cont: cn=cn+1});
               });
       };
+ //_________________________________________________________________________________________________________________   
+      const handleDebitoRes = async () => {   //funzione che viene richiamata quando si crea la nota
+        var debRes=0;
+        console.log("ciaohihi")
+        const q = query(collection(db, "debito"), where("nomeC", "==", nomeC));  //dobbiamo prendere d1, tramite nome del cliente
+        const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+            debRes=+doc.data().deb1 ;
+            });
+            localStorage.setItem("DebCli", debRes)
+            setDebitoRes(debRes);
+      }
 
     //_________________________________________________________________________________________________________________
      //_________________________________________________________________________________________________________________
@@ -149,6 +162,7 @@ const contEffect = async () => {
   /******************************************************************************* */
   const createCate = async (e) => {
     e.preventDefault(); 
+    handleDebitoRes();
     var bol= true
     //verifica che non ci sia lo stesso nome del cliente
     const q = query(collection(db, "addNota"), where("nomeC", "==", nomeC), where("data", "==", dataOrdConf));
@@ -171,6 +185,10 @@ const contEffect = async () => {
       cont,
       nomeC,
       data: dataOrdConf,
+      NumCartoni:"",
+      sommaTotale:0,
+      debitoTotale:0,
+      debitoRes: localStorage.getItem("DebCli")
     });
     setNomeC("");
     setClear();
@@ -284,7 +302,7 @@ const contEffect = async () => {
         <button
                 className="button-edit"
                 onClick={() => {
-                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf)
+                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale)
                 navigate("/nota");
                 auto(todo.nomeC);
                 AutoProdCli.length = 0

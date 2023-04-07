@@ -21,6 +21,7 @@ import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
 import PrintIcon from '@mui/icons-material/Print';
 import AddIcon from '@mui/icons-material/Add';
+import { StayPrimaryLandscape } from '@mui/icons-material';
 
 
 
@@ -36,6 +37,7 @@ function Scalet({ scalId, dataScal, dateEli }) {
   const [sumQ, setSumQ] =React.useState("");
 
   const [popupActive, setPopupActive] = useState(true);  
+  const [flagStampa, setFlagStampa] = useState(false); 
 
   const componentRef = useRef();
   
@@ -91,13 +93,21 @@ const SomAsc = async () => {
     localStorage.removeItem("scalId");
     return () => unsub();
   }, []);
-    //_________________________________________________________________________________________________________________
+
 //****************************************************************************************** */
  //stampa
  const handlePrint = useReactToPrint({
   content: () => componentRef.current,
-  documentTitle: 'emp-data'
+  documentTitle: 'emp-data',
+  onAfterPrint: () => setFlagStampa(false)
 })
+
+const print = async () => {
+  setFlagStampa(true);
+  setTimeout(function(){
+    handlePrint();
+  },1);
+}
 
 function HandleSpeedAddScalClien() {
   setPopupActive(true);
@@ -166,7 +176,7 @@ const createCate = async (e) => {
   };
   //**************************************************************************** */
   const actions = [
-    { icon: <PrintIcon />, name: 'Stampa', action: handlePrint},
+    { icon: <PrintIcon />, name: 'Stampa', action: print},
     { icon: <AddIcon />, name: 'Aggiungi Cliente', action: HandleSpeedAddScalClien },
   ];
 //**************************************************************************** */
@@ -197,8 +207,8 @@ const createCate = async (e) => {
 
         {!matches &&
       <div>
-        <span><button onClick={handlePrint}>Stampa </button></span>
-        <span><button onClick={HandleSpeedAddScalClien}>Aggiungi Prodotto </button></span>
+        <span><button onClick={print}>Stampa </button></span>
+        <span><button onClick={HandleSpeedAddScalClien}>Aggiungi Cliente </button></span>
       </div>
     }
  {/************************INSERIMENTO CLIENTE********************************************************************/}       
@@ -289,6 +299,7 @@ const createCate = async (e) => {
             toggleComplete={toggleComplete}
             handleDelete={handleDelete}
             handleEdit={handleEdit}
+            flagStampa= {flagStampa}
           />
            )}
           </div>

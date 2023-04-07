@@ -9,11 +9,10 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import Autocomplete from '@mui/material/Autocomplete';
 import { TextField } from "@mui/material";
 import { AutoProdCli } from "../pages/AddNota";
-import { padding } from "@mui/system";
 
 export const AutoCompProd = [];
 
-export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, nomeCli}) {
+export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, nomeCli, flagStampa}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -31,7 +30,7 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
   const handleInputChange = async (event, value) => {  //funzione per l'anagrafica del cliente
     setNewProdotto(value);
     const collectionRef = collection(db, "prodottoClin");
-    //aggiorna il contatore di tutti i dati di addNota della stessa data
+    //trova il prezzo unitario del prodotto
     const q = query(collectionRef, where("author.name", "==", nomeCli), where("nomeP", "==", value) );
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach(async (hi) => {
@@ -91,10 +90,10 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
 <hr style={{margin: "0"}}/>
     <div className="row " style={{ borderBottom:"solid",  borderWidth: "2px" }}>
 {/**************************QUANTITA'******************************************************************* */}
-    <div className="col-1" style={{padding:"0px"}}>    
+    <div className="col-1" style={{padding:"0px", }}>    
     {sup ===true && ( 
     <input
-      style={{ textDecoration: todo.completed && "line-through" }}
+      style={{ textDecoration: todo.completed && "line-through", textAlign:"center" }}
         type="text"
         value={todo.qtProdotto === "" ? newQtProdotto : todo.qtProdotto}
         className="inpTab"
@@ -112,7 +111,7 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
       options={AutoProdCli}
       onInputChange={handleInputChange}
       componentsProps={{ popper: { style: { width: 'fit-content' } } }}
-      renderInput={(params) => <TextField {...params}  />}
+      renderInput={(params) => <TextField {...params}  size="small"/>}
     />
     )}
 
@@ -120,24 +119,27 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
 
 {/************************Prezzo Uni***************************************************************************** */}
 <div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px" }}>
+
     {sup ===true && ( 
-    <input
-      
+      <span style={{ padding: "0px", marginLeft:"5px" }}>€&nbsp;
+      <input
+       style={{textAlign:"left", padding: "0px", width:"95px"}}
         type="text"
         value={newPrezzoUni}
         className="inpTab"
         onChange={handleChangePrezzoUni}
-      />
+      /> </span>
+
     )}
     </div>
 {/***************************Prezzo Tot************************************************************************** */}
 <div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px", marginBottom:"0px"}}>
     {sup ===true && ( 
-        <h4
-      style={{marginTop:"-5px", marginBottom:"0px"  }}
+        <h4 
+      style={{marginTop:"-5px", marginBottom:"0px", textAlign:"center"  }}
         type="text"
         className="inpTab"
-        >{ todo.prezzoTotProd }</h4>
+        >{ todo.prezzoTotProd } €</h4>
     )}
     </div>
 {/***************************************************************************************************** */}
@@ -147,7 +149,7 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
           onClick={() => handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot)}
         >
         </button>
-        {sup ===true && (   
+        {sup ===true && flagStampa==false && (   
         <button type="button" className="button-delete" style={{padding: "0px"}}                          
           onClick={() => {
                 localStorage.setItem("IDNOTa", todo.id);

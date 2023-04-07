@@ -7,22 +7,16 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import { supa, guid, tutti } from '../components/utenti';
 
 
-export default function TodoScorta({ todo, toggleComplete, handleDelete, handleEdit, handleAddQuant, handleRemQuant, handlePopUp, displayMsg}) {
+export default function TodoScorta({ todo, toggleComplete, handleDelete, handleEdit, handleAddQuant, handleRemQuant, handlePopUp, displayMsg, FlagStampa}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
-
-
-  const [newStanza, setStanza] = React.useState("");
-  const [newTipologia, setTipologia] = React.useState(todo.tipologia);
-  const [newBrand, setBrand] = React.useState(todo.brand);
   const [newNomeP, setNomeP] = React.useState(todo.nomeP);
   const [newQuantita, setQuantita] = React.useState(todo.quantita);
   const [aggiungi, setAggiungi] = React.useState("");
-  const [flagCrono, setFlagCrono] = React.useState(false);
 
   const handleSubm = (e) => {
     e.preventDefault();
@@ -48,8 +42,8 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
 
     <form  onSubmit={handleSubm}>
     <div className="row ">
-{/******************************************************************************* */}
-    <div className="col-3" >
+{/*********************PRODOTTO********************************************************** */}
+    <div className="col-4" >
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through" }}
@@ -67,7 +61,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
         >{ newNomeP}</h4>
     )}
     </div>
-{/******************************************************************************* */}
+{/********************QUANTITA'*********************************************************** */}
 
 <div className="col-1" style={{padding: "0px"}}>
     {ta ===true && ( 
@@ -78,7 +72,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
       >{todo.quantita === "" ? newQuantita : todo.quantita}</h4>
     )}
     </div>
-{/*********************************************************************************** */}
+{/**********************AGGIUNGI************************************************************* */}
 
 <div className="col-1" style={{padding: "0px"}}>
     {sup ===true && ( 
@@ -91,8 +85,9 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
       />
     )}
     </div>
-{/*********************************************************************************** */}
-    <div className="col-2">
+{/***************************BUTTON******************************************************** */}
+    { FlagStampa==false &&
+    <div className="col-3" style={{padding:"0px"}}>
       <button 
       className="butAddProd me-2"
       type="button"
@@ -101,9 +96,10 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
       className="butRemProd"
       type="button"
       onClick={() =>{ {localStorage.setItem("flagCron", false); handleRemQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>Rimuovi</button>
-    </div>
+    </div> }
 
-    <div className="col-2">
+{FlagStampa==false &&
+    <div className="col-3" style={{padding:"0px"}}>
     {gui ===true && (
     <button
           className="button-complete"
@@ -112,21 +108,22 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
           <CheckCircleIcon id="i" />
         </button>
         )}
+
         <button
           className="button-edit"
           type="button"
-          onClick={() =>{ { handleEdit(todo, newNomeP, newQuantita, aggiungi); setAggiungi("") }}}
-        >
+          onClick={() =>{ { handleEdit(todo, newNomeP, newQuantita, aggiungi); setAggiungi("") }}}>
           <EditIcon id="i" />
-        </button>
+        </button> 
+
         <button
           className="button-edit"
           type="button"
-          onClick={() =>{ { handlePopUp(todo.image, todo.nota); }}}
-        >
+          onClick={() =>{ { handlePopUp(todo.image, todo.nota); }}}>
           <SearchIcon id="i" />
-        </button>
-        {sup ===true && (   
+        </button> 
+
+        {sup ===true && FlagStampa==false && (   
         <button className="button-delete" type="button"  
               onClick={() => {
                     localStorage.setItem("IdProd", todo.id);
@@ -137,6 +134,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
         </button>
         )}
     </div>
+  }
     </div>
     </form>
 

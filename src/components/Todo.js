@@ -5,7 +5,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { supa, guid, tutti } from '../components/utenti';
 
 
-export default function Todo({ todo, toggleComplete, handleDelete, handleEdit,}) {
+export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, flagStampa}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -81,7 +81,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit,})
 
     <form  onSubmit={handleSubm}>
     <div className="row ">
-
+{/********************CLIENTE*********************************************************** */}
     <div className="col-2" >
     {sup ===true && ( 
     <input
@@ -100,7 +100,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit,})
         >{ newNomeC}</h4>
     )}
     </div>
-{/******************************************************************************* */}
+{/******************DEBITO************************************************************* */}
 
 <div className="col-1" style={{padding: "0px"}}>
     {sup ===true && ( 
@@ -120,7 +120,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit,})
       >{newDebito}€</h4>
     )}
     </div>
-{/*********************************************************************************** */}
+{/***********************ASC************************************************************ */}
 <div className="col-1" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
@@ -139,7 +139,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit,})
       >{ newNumAsc}</h4>
     )}
     </div>
-{/*********************************************************************************** */}
+{/************************QUOTA*********************************************************** */}
 <div className="col-1" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
@@ -158,7 +158,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit,})
       >{ newQuota}€</h4>
     )}
     </div>
-{/*********************************************************************************** */}
+{/********************NOTE*************************************************************** */}
     <div className="col" style={{padding: "0px"}}> 
     <textarea
         style={{textAlign: "left", fontSize: "18px"}}
@@ -168,8 +168,10 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit,})
         onChange={handleChangeNT}
       />
     </div>
-{/*********************************************************************************** */}
+{/*************************BUTTON********************************************************** */}
     <div className="col">
+      {flagStampa==false &&
+      <>
     {gui ===true && (
     <button
           className="button-complete"
@@ -189,6 +191,8 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit,})
           <DeleteIcon id="i" />
         </button>
         )}
+        </>
+        }
     </div>
     </div>
     </form>

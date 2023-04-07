@@ -180,6 +180,36 @@ export function notifyUpdateProd () {
         });
 }
 //_____________________________________________________________________________________
+export function notifyUpdateDebRes () {
+    toast.success("Debito Residuo aggiornato", {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        transition: Slide,
+        progress: undefined,
+        theme: "dark",
+        className: "rounded-4"
+        });
+}
+//_____________________________________________________________________________________
+export function notifyUpdateNota () {
+    toast.success("Nota Aggiornata", {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        transition: Slide,
+        progress: undefined,
+        theme: "dark",
+        className: "rounded-4"
+        });
+}
+//_____________________________________________________________________________________
 export function notifyErrorImage () {
     toast.error("Please insert and upload the image", {
         position: "top-center",
