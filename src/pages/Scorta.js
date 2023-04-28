@@ -8,7 +8,7 @@ import moment from 'moment';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
-import { notifyErrorProd, notifyUpdateProd, notifyErrorNumNegativo } from '../components/Notify';
+import { notifyErrorProd, notifyUpdateProd, notifyErrorNumNegativo, notifyErrorProdList, notifyErrorPrezzoProd } from '../components/Notify';
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import TodoScorta from '../components/TodoScorta';
@@ -23,6 +23,10 @@ import RestoreIcon from '@mui/icons-material/Restore';
 import PrintIcon from '@mui/icons-material/Print';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import AddIcon from '@mui/icons-material/Add';
+import Sidebar from '../Sidebar';
+import Navbar from '../Navbar';
+import MiniDrawer from '../components/MiniDrawer';
+import Box from '@mui/material/Box';
 
 function Scorta() {
 
@@ -35,6 +39,8 @@ function Scorta() {
   const [quantita, setQuantita] = React.useState("");
   const [image, setImage] = React.useState("");
   const [prezzoIndi, setPrezzoIndi] = React.useState("");
+  const [sottoScorta, setSottoScorta] = React.useState("");
+  const [quantitaOrdinabile, setquantitaOrdinabile] = React.useState("");
   const [nota, setNota] = React.useState("");
 
   const [imageSer, setImageSer] = React.useState(localStorage.getItem("imageProd"));
@@ -50,6 +56,7 @@ function Scorta() {
   const handleClose = () => setOpen(false);
 
   const [FlagStampa, setFlagStampa] = useState(false);
+  const [flagDelete, setFlagDelete] = useState(false); 
 
   const [popupActiveSearch, setPopupActiveSearch] = useState(false);  
 
@@ -68,15 +75,16 @@ function Scorta() {
    //_________________________________________________________________________________________________________________
      //messaggio di conferma per cancellare la trupla
      const Msg = () => (
-      <div>
-        Sicuro di voler eliminare &nbsp;
+      <div style={{fontSize: "16px"}}>
+        <p style={{marginBottom: "0px"}}>Sicuro di voler eliminare</p>
+        <p style={{marginBottom: "0px"}}>(perderai tutti i dati)</p>
         <button className='buttonApply ms-4 mt-2 me-1 rounded-4' onClick={Remove}>Si</button>
         <button className='buttonClose mt-2 rounded-4'>No</button>
       </div>
     )
 
       const Remove = () => {
-          handleDelete(localStorage.getItem("IdProd") );
+          handleDelete(localStorage.getItem("IdProd"),  localStorage.getItem("NomeProd"));
           toast.clearWaitingQueue(); 
                }
 
@@ -151,6 +159,7 @@ const print = async () => {
     setPopupActiveScorta(true)
     setPopupActiveCrono(false)
     setOpen(false)
+    console.log(localStorage.getItem("profilePic"))
   }
 
   function handleSpeedAddProd() {
@@ -191,24 +200,41 @@ function handlePopUp(image, nota) {
  }  */
   
  const handleSubmit = async (e) => {   //creazione cliente
+    var bol= true
     e.preventDefault();
     if(!nomeP) {            
       notifyErrorProd();
       toast.clearWaitingQueue(); 
-      return 
+      return
     }
     if(!prezzoIndi) {            
-      setPrezzoIndi("0");
+      notifyErrorPrezzoProd();
+      return
     }
+    // verifica che il prodotto sia univoco
+    const q = query(collection(db, "prodotto"), where("nomeP", "==", nomeP));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+    if (doc.data().nomeP == nomeP) {
+        notifyErrorProdList()
+         toast.clearWaitingQueue(); 
+        bol=false
+    }
+    });
+
+    if(bol == true) {
       await addDoc(collection(db, "prodotto"), {
         nomeP,
         quantita,
         brand,
         nota,
+        sottoScorta,
         prezzoIndi,
         image,
+        quantitaOrdinabile,
       });
       handleProdClien();
+      }
       setNomeP("");
       setTipologia("");
       setBrand("");
@@ -216,6 +242,9 @@ function handlePopUp(image, nota) {
       setImage("");
       setPrezzoIndi("");
       setNota("");
+      setSottoScorta("");
+      setquantitaOrdinabile("");
+
   };
  //******************************************************************************************************** */
   const handleCronologia = async (todo, ag, somma, flag) => {   //creazione cliente
@@ -245,8 +274,8 @@ function handlePopUp(image, nota) {
 
   };
 //****************************************************************************************** */
-  const handleEdit = async ( todo, nome, quant) => {
-    await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, quantita:quant});
+  const handleEdit = async ( todo, nome, SotSco, quaOrd) => {
+    await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd});
     notifyUpdateProd();
     toast.clearWaitingQueue(); 
   };
@@ -284,7 +313,16 @@ function handlePopUp(image, nota) {
   };
 
 //**************************************************************************** */
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, nomeProd) => {
+    console.log({nomeProd})
+        // se si elimina il prodotto dalla scorta, questo prodotto viene eliminato per tutti i clienti
+        const q = query(collection(db, "prodottoClin"), where("nomeP", "==", nomeProd));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (hi) => {
+          await deleteDoc(doc(db, "prodottoClin", hi.id));  
+        });
+
+
     await deleteDoc(doc(db, "prodotto", id));
   };
 //**************************************************************************** */
@@ -299,6 +337,7 @@ function handlePopUp(image, nota) {
 //********************************************************************************************************************************* */
     return ( 
     <>  
+   
           <SpeedDial
         ariaLabel="SpeedDial basic example"
         hidden={!matches}
@@ -315,28 +354,15 @@ function handlePopUp(image, nota) {
           />
         ))}
       </SpeedDial>
-    <div className='wrapper'>
-    <div><ToastContainer limit={1} /></div>
 
-  {/***************************************************************************************************************************************/}
-    {/* POPUP VISUALIZZA RICERCA */}
-          {popupActiveSearch && <div className="popup">
-        <div className="popup-inner bg-dark rounded-4">
-        <div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setPopupActiveSearch(false); }}>
-              <CloseIcon id="i" />
-              </button> </div>
-            <img className='mt-1 rounded-3' src={imageSer} style={{height: 185, width: 185}}/>
-            <h2> {notaSer} </h2>
-        </div>
-      </div> }
-  {/***************************************************************************************************************************************/}
-    <h1 className='title mt-3'>Magazzino</h1>
+      <h1 className='title mt-3'>Magazzino</h1>
     {!matches &&
       <div>
         <span><button onClick={handleSpeedAddProd}>Aggiungi Prodotto </button></span>
         <span><button onClick={handleSpeedScorta}>Scorta </button></span>
         <span><button onClick={handleSpeedCronologia}>Cronologia </button></span>
         <span><button onClick={print}>Stampa </button></span>
+        <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
       </div>
     }
     {sup ===true && (
@@ -367,11 +393,10 @@ function handlePopUp(image, nota) {
       />
       <TextField className='inp mt-2' type="number" id="filled-basic" label="Quantità" variant="outlined" autoComplete='off' value={quantita} 
         onChange={(e) => setQuantita(e.target.value)}/>
-      <TextField className='inp mt-2' id="filled-basic" type="url" label="Link image" variant="outlined" autoComplete='off' value={image} 
-        onChange={(e) => setImage(e.target.value)}/>
-      <TextField className='inp mt-2' id="filled-basic" label="Dove si trova" variant="outlined" autoComplete='off' value={nota} 
-        onChange={(e) => setNota(e.target.value)}/>
-
+      <TextField className='inp mt-2' type="number" id="filled-basic" label="Sotto Scorta" variant="outlined" autoComplete='off' value={sottoScorta} 
+        onChange={(e) => setSottoScorta(e.target.value)}/>
+      <TextField className='inp mt-2' type="number" id="filled-basic" label="Quantità ordinabile" variant="outlined" autoComplete='off' value={quantitaOrdinabile} 
+        onChange={(e) => setquantitaOrdinabile(e.target.value)}/>
       </div>
       <div className="btn_container">
       <Button  type='submit' variant="outlined" >Aggiungi Prodotto </Button>
@@ -382,7 +407,7 @@ function handlePopUp(image, nota) {
     </>
     )}
 
-{/** tabella per visualizzare *****************************************************************************************************************/}
+{/** tabella per anagrafica cli *****************************************************************************************************************/}
 {popupActiveScorta &&
 <>
     <TextField
@@ -401,16 +426,25 @@ function handlePopUp(image, nota) {
        variant="outlined"/>
 
 <div ref={componentRef} className='todo_containerScorta '>
-<div className='row'>
+<div className='row'> 
+<p className='colTextTitle'> Magazzino</p>
+</div>
 
+<div className='row'>
 <div className='col-4' >
-<p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Prodotto</p>
+<p className='coltext'>Prodotto</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Qt</p>
+<p className='coltext'>Qt</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Agg</p>
+<p className='coltext'>Ss</p>
+</div>
+<div className='col-1' style={{padding: "0px"}}>
+<p className='coltext'>Qo</p>
+</div>
+<div className='col-1' style={{padding: "0px"}}>
+<p className='coltext'>Agg</p>
 </div>
 </div>
 
@@ -434,6 +468,7 @@ function handlePopUp(image, nota) {
       handlePopUp={handlePopUp}
       displayMsg={displayMsg}
       FlagStampa={FlagStampa}
+      flagDelete= {flagDelete}
     />
      )}
     </div>
@@ -448,33 +483,54 @@ function handlePopUp(image, nota) {
 {/* tabella cronologia*******************************************************************************************************************/}
 {popupActiveCrono &&
   <div className='todo_containerCli mt-3'>
+  <div className='row'> 
+<p className='colTextTitle'> Cronologia</p>
+</div>
   <div className='row' style={{padding: "0px"}}>
-      <div className='col-2'><p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>DataModifica</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext' style={{textAlign: "left", fontSize: "20px"}}>Prodotto</p> </div>
-      <div className='col-2' style={{padding: "0px"}}><p className='coltext' style={{textAlign: "left", fontSize: "20px"}}>Autore</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext' style={{textAlign: "left", fontSize: "20px"}}>ValoreIni</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext' style={{textAlign: "left", fontSize: "20px"}}>Modifica</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext' style={{textAlign: "left", fontSize: "20px"}}>ValoreFin</p></div>
+      <div className='col-3'><p className='coltext' >DataModifica</p></div>
+      <div className='col-3' style={{padding: "0px"}}><p className='coltext' >Prodotto</p> </div>
+      <div className='col-2' style={{padding: "0px"}}><p className='coltext'>Autore</p></div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>ValoreIni</p></div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Modifica</p></div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>ValoreFin</p></div>
     </div>
   {crono.map((col) => (
     <div key={col.id}>
     <hr style={{margin: "0"}}/>
     <div className='row' style={{padding: "0px"}}>
-      <div className='col-2'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='inpTab'>{col.nomeP} </p> </div>
-      <div className='col-2' style={{padding: "0px"}}><p className='inpTab'>{col.autore}</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='inpTab'>{col.quantIni}</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='inpTab'>{col.quantAgg}</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='inpTab'>{col.quantFin}</p></div>
+      <div className='col-3 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
+      <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeP} </p> </div>
+      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.autore}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantIni}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantAgg}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantFin}</p></div>
     </div>
     </div>
     ))}
   </div>
 }
+
+
+          
+    <div><ToastContainer limit={1} /></div>
+
+  {/***************************************************************************************************************************************/}
+    {/* POPUP VISUALIZZA RICERCA */}
+          {popupActiveSearch && <div className="popup">
+        <div className="popup-inner bg-dark rounded-4">
+        <div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setPopupActiveSearch(false); }}>
+              <CloseIcon id="i" />
+              </button> </div>
+            <img className='mt-1 rounded-3' src={imageSer} style={{height: 185, width: 185}}/>
+            <h2> {notaSer} </h2>
+        </div>
+      </div> }
+  {/***************************************************************************************************************************************/}
+
+
+    
 {/*******************************************************************************************************************/}
 
-
-    </div>
     </>
       )
 }

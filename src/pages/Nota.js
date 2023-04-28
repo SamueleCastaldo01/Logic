@@ -1,32 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp} from 'firebase/firestore';
 import { useRef } from 'react';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
+import BeenhereIcon from '@mui/icons-material/Beenhere';
 import TodoNota from '../components/TodoNota';
-import { getCountFromServer } from 'firebase/firestore';
-import { TextField } from '@mui/material';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
-import { useNavigate } from "react-router-dom";
-import Todo from '../components/Todo';
-import Button from '@mui/material/Button';
-import CloseIcon from '@mui/icons-material/Close';
 import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
-import Autocomplete from '@mui/material/Autocomplete';
-import InputAdornment from '@mui/material/InputAdornment';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
-import SpeedDial from '@mui/material/SpeedDial';
-import SpeedDialIcon from '@mui/material/SpeedDialIcon';
-import SpeedDialAction from '@mui/material/SpeedDialAction';
-import PrintIcon from '@mui/icons-material/Print';
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from '@mui/icons-material/Add';
-import { AutoProdCli } from "../pages/AddNota";
 
 
-function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNota, debit, debTo }) {
+function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNota, debit, debTo, indirizzo, tel, iva, completa }) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -38,16 +23,22 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
     const [partitaIvaC, setPartitaIvaC] = React.useState("");
     const [cellulareC, setCellulareC] = React.useState("");
     const [prodottoC, setProdottoC] = React.useState("");
+    const [t1, setT1] = React.useState("");   //tinte, che dentro una trupla ci possono essere massimo 5
+    const [t2, setT2] = React.useState("");
+    const [t3, setT3] = React.useState("");
+    const [t4, setT4] = React.useState("");
+    const [t5, setT5] = React.useState("");
+    const [nomTin, setnomTin] = React.useState("");
 
+
+    var FlagT=false;   //flag per le tinte, viene salvato nel database serve per far riconoscere ogni singola trupla
     const [flagStampa, setFlagStampa] = React.useState(false);  //quando è falso si vedono le icone,
-    const [prova, setProva] = React.useState("");
     const [NumCart, setNumCart] = React.useState(numCart);
+    const [Completa, setCompleta] = useState(completa);
    
     const [sumTot, setSumTot] =React.useState("");
     const [debitoTot, setDebTot] = React.useState(debTo);
     const [debitoRes, setDebitoRes] = React.useState(debit);
-
-
 
     const [qtProdotto, setQtProdotto] = React.useState("1");
     const [prezzoUniProd, setprezzoUniProd] = React.useState("");
@@ -57,8 +48,9 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
    //_________________________________________________________________________________________________________________
      //confirmation notification to remove the collection
      const Msg = () => (
-      <div>
-        Sicuro di voler eliminare &nbsp;
+      <div style={{fontSize: "16px"}}>
+        <p style={{marginBottom: "0px"}}>Sicuro di voler eliminare</p>
+        <p style={{marginBottom: "0px"}}>(perderai tutti i dati)</p>
         <button className='buttonApply ms-4 mt-2 me-1 rounded-4' onClick={Remove}>Si</button>
         <button className='buttonClose mt-2 rounded-4'>No</button>
       </div>
@@ -94,6 +86,7 @@ const SomAsc = async () => {
       setSumTot(sommaTot);
       await updateDoc(doc(db, "addNota", notaId), { sommaTotale:sommaTot});  //aggiorna la somma totale nell'add nota
 }
+
 //********************************************************************************** */
     const cliEffect = async () => {  //funzione per l'anagrafica del cliente
       const collectionRef = collection(db, "clin");
@@ -105,7 +98,6 @@ const SomAsc = async () => {
           setPartitaIvaC(hi.data().partitaIva);
           setCellulareC(hi.data().cellulare);
         });
-        
     }
 //********************************************************************************** */
   
@@ -124,29 +116,46 @@ const SomAsc = async () => {
         localStorage.removeItem("NotaId");
         return () => unsub();
       }, []);
-
 //********************************************************************************** */
-const createCate = async (e) => {
-  e.preventDefault(); 
+const createCate = async () => {
+
   await addDoc(collection(db, "Nota"), {
     dataC: dataNotaC,
     nomeC: nomeCli,
     qtProdotto,
     prodottoC,
+    t1,
+    t2,
+    t3,
+    t4,
+    t5,
+    nomTin,
+    flagTinte: FlagT,
     prezzoUniProd,
     prezzoTotProd,
     createdAt: serverTimestamp(),
   });
   setQtProdotto("1");
   setProdottoC("");
+  setnomTin("");
   setprezzoTotProd("");
   setprezzoUniProd("");
   SomAsc();
 };
 //_________________________________________________________________________________________________________________
-const handleEdit = async ( todo, qt, prod, prezU, prezT) => {
-  var preT= qt*prezU;
-  await updateDoc(doc(db, "Nota", todo.id), { qtProdotto: qt, prodottoC:prod, prezzoUniProd:prezU, prezzoTotProd:preT});
+const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5, nomTinte) => {
+  var conTinte=0;
+  if(tt1) {conTinte=conTinte+1}
+  if(tt2) {conTinte=conTinte+1}
+  if(tt3) {conTinte=conTinte+1}
+  if(tt4) {conTinte=conTinte+1}
+  if(tt5) {conTinte=conTinte+1}
+  if(!nomTinte){ 
+    nomTinte="bho"
+  conTinte=1 }
+  var preT= (conTinte*qt)*prezU;
+  await updateDoc(doc(db, "Nota", todo.id), 
+  { qtProdotto: qt, prodottoC:prod, prezzoUniProd:prezU, prezzoTotProd:preT, t1:tt1, t2:tt2, t3:tt3, t4:tt4, t5:tt5, nomeTinte:nomTinte});
   SomAsc();
   notifyUpdateProd();
   toast.clearWaitingQueue(); 
@@ -159,6 +168,10 @@ const handleEditNumCart = async (e) => {
   toast.clearWaitingQueue(); 
 };
 
+const handleEditComp = async (e) => {
+  await updateDoc(doc(db, "addNota", notaId), { completa: localStorage.getItem("completa")});
+};
+
 const handleEditDebitoRes = async (e) => {
   e.preventDefault();
   await updateDoc(doc(db, "addNota", notaId), { debitoRes:debitoRes});
@@ -166,8 +179,7 @@ const handleEditDebitoRes = async (e) => {
   toast.clearWaitingQueue(); 
 };
 
-const handleConferma = async (e) => {
-  e.preventDefault();
+const handleConferma = async () => {
   var debTot= +sumTot+(+debitoRes);
   setDebTot(debTot);
   await updateDoc(doc(db, "addNota", notaId), { debitoTotale:debTot});  //aggiorna la somma totale nell'add nota
@@ -177,8 +189,7 @@ const handleConferma = async (e) => {
       querySnapshot.forEach(async (hi) => {
       await updateDoc(doc(db, "debito", hi.id), { deb1:debTot});  //aggiorna deb1 nel database del debito
       });
-  notifyUpdateNota();
-  toast.clearWaitingQueue(); 
+      toast.clearWaitingQueue(); 
 };
 //_________________________________________________________________________________________________________________
 const handleDelete = async (id) => {
@@ -207,12 +218,39 @@ const print = async () => {
 //************************************************************** */
     return (  
         <>
-    <div className="container wrapper" >
+
     <div><ToastContainer limit={1} /></div>
-    <h1 className='title'>Nota</h1>
+    <h1 className='title mt-3'>Nota</h1>
+
     <span><button onClick={print}>Stampa </button></span>
-    <span><button onClick={createCate}>Aggiungi Prodotto</button></span>
-    
+
+      {Completa==0 && 
+      <>
+      <span><button onClick={() => {
+       FlagT=false
+       console.log({FlagT})
+        createCate()
+      }}>Aggiungi Prodotto</button></span>
+    <span><button onClick={() => {
+      FlagT=true
+      console.log({FlagT})
+      createCate()
+    }}>Aggiungi Tinte</button></span>
+      </>}
+
+    <div>
+    {Completa==0 ? 
+      <button type="button" className="button-delete" style={{padding: "0px", float: "left"}}>
+        <BeenhereIcon sx={{ fontSize: 40 }}/>
+        </button> :
+        <button type="button" className="button-complete" style={{padding: "0px", float: "left"}}>
+        <BeenhereIcon sx={{ fontSize: 40 }}/>
+        </button>
+        }
+
+    </div>
+
+
     <div ref={componentRef} className="foglioA4" style={{paddingLeft:"50px", paddingRight:"50px", paddingTop:"20px"}}>
     <div className='row rigaNota' >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
@@ -228,8 +266,8 @@ const print = async () => {
         </div>
 
         <div className='col'  style={{textAlign:"left", padding:"0px", marginLeft:"5px"}}>
-        <h3  style={{marginBottom:"-5px", fontSize:"24.5px"}}><b>DOCUMENTO DI TRASPORTO</b></h3>
-        <h4 style={{marginBottom:"9px"}}><b>(D.d.t.)</b></h4>
+        <h3  style={{marginBottom:"-5px", fontSize:"22.5px"}}><b>DOCUMENTO DI TRASPORTO</b></h3>
+        <h4 style={{marginBottom:"9px"}}><b>(D.d.t.)</b> <span style={{fontSize:"0.4em", marginRight:"10px"}}>&emsp;&ensp; D.P.R. 472 del 14-08-1996-D.P.R 696 del 21.12.1996 </span></h4>
         <h4 style={{marginBottom:"9px"}}> <b>N.</b> <span style={{marginRight:"10px"}}>{cont}</span> <span style={{fontSize:"13px"}}><b>del</b></span> {moment(dataNota.toDate()).format("L")} </h4>
 
     <div class="form-check form-check-inline"  style={{padding:"0px", fontSize:"13px"}}>a mezzo: &nbsp; &nbsp;
@@ -243,10 +281,10 @@ const print = async () => {
     <div className='col colNotaSini'style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
     <h6 style={{fontSize:"9px"}}>DESTINATARIO: Ditta, Codice Fiscale, Partita IVA</h6>
       <div className='row'>
-      <h5 style={{marginBottom:"0px", marginTop:"0px"}}>{nomeCli} </h5>
-        <h5 className='sinistraNota'>{indirizzoC}</h5>
-        <h5 className='sinistraNota'>Tel {cellulareC}</h5>
-        <h5 className='sinistraNota'  style={{marginBottom:"5px"}}>Cod.Fisc. e Partita IVA n.{partitaIvaC}</h5>
+      <h5 style={{marginBottom:"0px", marginTop:"0px"}}> {nomeCli} </h5>
+        <h5 className='sinistraNota'>{indirizzo}</h5>
+        <h5 className='sinistraNota'>Tel {tel}</h5>
+        <h5 className='sinistraNota'  style={{marginBottom:"5px"}}>Cod.Fisc. e Partita IVA n.{iva}</h5>
       </div>
     </div>
 
@@ -277,6 +315,7 @@ const print = async () => {
       displayMsg={displayMsg}
       nomeCli={nomeCli}
       flagStampa={flagStampa}
+      Completa={Completa}
     />
      )}
      </>
@@ -310,13 +349,16 @@ const print = async () => {
     <button hidden type='submit' onClick={handleEditDebitoRes}>Aggiorna</button>
     </form>
     <h6>Debito Totale: {debitoTot} €</h6>
-    <button onClick={handleConferma}>Conferma</button>
+    {flagStampa == false && <>
+  {Completa==0 ?  <button onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1);  handleEditComp();  handleConferma()}}>Conferma</button> :
+    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleEditComp(); }}>Annulla Conferma</button>
+     }
+  </>}
+
+    
     </div>
 
   </div>
-
-    </div>
-
 
     </div>
     </>

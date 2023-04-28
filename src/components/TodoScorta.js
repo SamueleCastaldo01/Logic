@@ -5,9 +5,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from '@mui/icons-material/Search';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { supa, guid, tutti } from '../components/utenti';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 
-export default function TodoScorta({ todo, toggleComplete, handleDelete, handleEdit, handleAddQuant, handleRemQuant, handlePopUp, displayMsg, FlagStampa}) {
+export default function TodoScorta({ todo, toggleComplete, handleDelete, handleEdit, handleAddQuant, handleRemQuant, handlePopUp, displayMsg, FlagStampa, flagDelete}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -16,11 +17,14 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
 
   const [newNomeP, setNomeP] = React.useState(todo.nomeP);
   const [newQuantita, setQuantita] = React.useState(todo.quantita);
+  const [newSottoScorta, setNewSottoScorta] = React.useState(todo.sottoScorta);
+  const [newQuantitaOrdinabile, setnewQuantitaOrdinabile] = React.useState(todo.quantitaOrdinabile);
   const [aggiungi, setAggiungi] = React.useState("");
 
   const handleSubm = (e) => {
     e.preventDefault();
-    handleEdit(todo, newNomeP, newQuantita);
+    handleEdit(todo, newNomeP, newSottoScorta, newQuantitaOrdinabile);
+    setAggiungi("");
   };
 
   const handleChange = (e) => {
@@ -30,6 +34,26 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     } else {
       todo.nomeP = "";
       setNomeP(e.target.value);
+    }
+  };
+
+  const handleChangeSs = (e) => {
+    e.preventDefault();
+    if (todo.complete === true) {
+      setNewSottoScorta(todo.sottoScorta);
+    } else {
+      todo.sottoScorta = "";
+      setNewSottoScorta(e.target.value);
+    }
+  };
+
+  const handleChangeQo = (e) => {
+    e.preventDefault();
+    if (todo.complete === true) {
+      setnewQuantitaOrdinabile(todo.quantitaOrdinabile);
+    } else {
+      todo.quantitaOrdinabile = "";
+      setnewQuantitaOrdinabile(e.target.value);
     }
   };
 //********************************************************************************** */
@@ -43,13 +67,13 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     <form  onSubmit={handleSubm}>
     <div className="row ">
 {/*********************PRODOTTO********************************************************** */}
-    <div className="col-4" >
+    <div className="col-4 diviCol" >
     {sup ===true && ( 
     <input
-      style={{ textDecoration: todo.completed && "line-through" }}
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
         value={todo.nomeP === "" ? newNomeP : todo.nomeP}
-        className="inpTab"
+        className="inpNumb"
         onChange={handleChange}
       />
     )}
@@ -63,7 +87,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     </div>
 {/********************QUANTITA'*********************************************************** */}
 
-<div className="col-1" style={{padding: "0px"}}>
+<div className="col-1 diviCol" style={{padding: "0px"}}>
     {ta ===true && ( 
     <h4
       style={{ textDecoration: todo.completed && "line-through" }}
@@ -72,61 +96,82 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
       >{todo.quantita === "" ? newQuantita : todo.quantita}</h4>
     )}
     </div>
-{/**********************AGGIUNGI************************************************************* */}
-
-<div className="col-1" style={{padding: "0px"}}>
-    {sup ===true && ( 
+  {/********************SOTTOSCORTA'*********************************************************** */}
+<div className="col-1 diviCol" style={{padding: "0px"}}>
+{sup ===true && ( 
     <input
-      style={{ textDecoration: todo.completed && "line-through" }}
-        type="number" min="1"
-        value={aggiungi}
-        onChange={(event) => {setAggiungi(event.target.value);}}
-        className="inpTab"
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
+        type="text"
+        value={todo.sottoScorta === "" ? newSottoScorta : todo.sottoScorta}
+        className="inpNumb"
+        onChange={handleChangeSs}
       />
     )}
     </div>
+  {/********************QUANTITA ORDINABILE'*********************************************************** */}
+  <div className="col-1 diviCol" style={{padding: "0px"}}>
+{sup ===true && ( 
+    <input
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
+        type="text"
+        value={todo.quantitaOrdinabile === "" ? newQuantitaOrdinabile : todo.quantitaOrdinabile}
+        className="inpNumb"
+        onChange={handleChangeQo}
+      />
+    )}
+    </div>
+{/**********************AGGIUNGI************************************************************* */}
+
+<div className="col-1 diviCol" style={{padding: "0px"}}>
+    {sup ===true && ( 
+    <input
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
+        type="number" min="1"
+        value={aggiungi}
+        onChange={(event) => {setAggiungi(event.target.value);}}
+        className="inpNumb"
+      />
+    )}
+</div>
 {/***************************BUTTON******************************************************** */}
     { FlagStampa==false &&
-    <div className="col-3" style={{padding:"0px"}}>
+    <div className="col-2 diviCol" style={{padding:"0px"}}>
       <button 
       className="butAddProd me-2"
       type="button"
-      onClick={() =>{ { localStorage.setItem("flagCron", true); handleAddQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>Aggiungi</button>
+      onClick={() =>{ { localStorage.setItem("flagCron", true); handleAddQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>Agg</button>
       <button
       className="butRemProd"
       type="button"
-      onClick={() =>{ {localStorage.setItem("flagCron", false); handleRemQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>Rimuovi</button>
+      onClick={() =>{ {localStorage.setItem("flagCron", false); handleRemQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>Rim</button>
     </div> }
 
-{FlagStampa==false &&
-    <div className="col-3" style={{padding:"0px"}}>
-    {gui ===true && (
     <button
-          className="button-complete"
-          onClick={() => toggleComplete(todo)}
-        >
-          <CheckCircleIcon id="i" />
-        </button>
-        )}
-
-        <button
+        hidden
           className="button-edit"
-          type="button"
-          onClick={() =>{ { handleEdit(todo, newNomeP, newQuantita, aggiungi); setAggiungi("") }}}>
+          type="submit">
           <EditIcon id="i" />
-        </button> 
+    </button> 
+{/***************************BUTTON del******************************************************** */}
+{ flagDelete &&
+  <>
+{ FlagStampa==false &&
+    <div className="col-2 diviCol" style={{padding:"0px", marginTop:"-8px"}}>
 
+{ /*
         <button
           className="button-edit"
           type="button"
           onClick={() =>{ { handlePopUp(todo.image, todo.nota); }}}>
           <SearchIcon id="i" />
         </button> 
-
+     */ }
+        
         {sup ===true && FlagStampa==false && (   
         <button className="button-delete" type="button"  
               onClick={() => {
                     localStorage.setItem("IdProd", todo.id);
+                    localStorage.setItem("NomeProd", todo.nomeP);
                     displayMsg();
                     toast.clearWaitingQueue(); 
                             }}>
@@ -134,6 +179,8 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
         </button>
         )}
     </div>
+  }
+  </>
   }
     </div>
     </form>

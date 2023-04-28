@@ -11,7 +11,7 @@ import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
 import { notifyErrorCli, notifyUpdateCli, notifyErrorCliEm } from '../components/Notify';
 import Autocomplete from '@mui/material/Autocomplete';
-import { AutoComp1 } from './OrdineCliData';
+import { AutoComp2 } from './OrdineForniData';
 import { supa, guid, tutti } from '../components/utenti';
 import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
@@ -22,18 +22,17 @@ import AddIcon from '@mui/icons-material/Add';
 import DescriptionIcon from '@mui/icons-material/Description';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
-export const AutoProdCli = [];
+export const AutoProdForn = [];
 
-function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId }) {
+function AddNotaForni({ ordId, dataOrd, dataOrdConf, getNotaForniId }) {
  
     const [todos, setTodos] = React.useState([]);
-    const [nomeC, setNomeC] = React.useState("");
+    const [todosNota, setTodosNota] = React.useState([]);
+
+    const [nomeF, setnomeF] = React.useState("");
     const [cont, setCont] = React.useState(1);
     const [flagDelete, setFlagDelete] = useState(false); 
-    const [debitoRes, setDebitoRes] = React.useState("");
-    const [indirizzo, setIndirizzo] = React.useState("");
-    const [telefono, setTelefono] = React.useState("");
-
+  
     const [popupActive, setPopupActive] = useState(true);  
   
     //permessi utente
@@ -41,31 +40,30 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId }) {
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
   
-    const scalCollectionRef = collection(db, "addNota"); 
+
     const matches = useMediaQuery('(max-width:600px)');  //media query true se è uno smartphone
   
     let navigate = useNavigate();
   
     function handleInputChange(event, value) {
-      setNomeC(value)
+      setnomeF(value)
     }
 
 //_________________________________________________________________________________________________________________
-    const auto = async (nomeCli) => {
-      const q = query(collection(db, "prodottoClin"), where("author.name", "==", nomeCli));
+    const auto = async (nomeFli) => {
+      const q = query(collection(db, "prodottoForn"), where("author.name", "==", nomeFli));
       const querySnapshot = await  getDocs(q);
       querySnapshot.forEach((doc) => {
       console.log(doc.id, " => ", doc.data().nomeP);
 
-      let car = { label: doc.data().nomeP,
-                  prezzoUni: doc.data().prezzoUnitario }
-      AutoProdCli.push(car);
+      let car = { label: doc.data().nomeP }
+      AutoProdForn.push(car);
       });
       }
 //_________________________________________________________________________________________________________________
 const contEffect = async () => {
     console.log({dataOrdConf})
-    const coll = collection(db, "addNota");
+    const coll = collection(db, "addNotaForni");
     const q = query(coll, where("data", "==", dataOrdConf));
     const snapshot = await getCountFromServer(q);
     console.log('count: ', snapshot.data().count);
@@ -81,44 +79,23 @@ const contEffect = async () => {
   
     const contUpdate = async ( dat) => { //si attiva quando viene eliminato un cliente
         var cn=0;
-            const collectionRef = collection(db, "addNota");
-              //aggiorna il contatore di tutti i dati di addNota della stessa data
+            const collectionRef = collection(db, "addNotaForni");
+              //aggiorna il contatore di tutti i dati di addNotaForni della stessa data
               const q = query(collectionRef, where("data", "==", dat));
               const querySnapshot = await getDocs(q);
               querySnapshot.forEach(async (hi) => {
-              await updateDoc(doc(db, "addNota", hi.id), { cont: cn=cn+1});
+              await updateDoc(doc(db, "addNotaForni", hi.id), { cont: cn=cn+1});
               });
       };
  //_________________________________________________________________________________________________________________   
       const handleDebitoRes = async () => {   //funzione che viene richiamata quando si crea la nota
         var debRes=0;
-        console.log("ciaohihi")
-        const q = query(collection(db, "debito"), where("nomeC", "==", nomeC));  //dobbiamo prendere d1, tramite nome del cliente
+        const q = query(collection(db, "debito"), where("nomeF", "==", nomeF));  //dobbiamo prendere d1, tramite nome del cliente
         const querySnapshot = await getDocs(q);
           querySnapshot.forEach((doc) => {
             debRes=+doc.data().deb1 ;
             });
             localStorage.setItem("DebCli", debRes)
-            setDebitoRes(debRes);
-      }
-
-      const handleIndiTel = async () => {
-        var indiri;
-        var telefo;
-        var iva;
-        const p = query(collection(db, "clin"), where("nomeC", "==", nomeC));  //dobbiamo prendere l'indirizzo e il tel, tramite nome del cliente
-        const querySnapshotp = await getDocs(p);
-        querySnapshotp.forEach((doc) => {
-          indiri= doc.data().indirizzo;
-          telefo= doc.data().cellulare;
-          iva = doc.data().partitaIva;
-          });
-          localStorage.setItem("indiri", indiri);
-          localStorage.setItem("telefo", telefo);
-          localStorage.setItem("iva", iva);
-          console.log(localStorage.getItem("indiri"))
-          setIndirizzo(indiri);
-          setTelefono(telefo);
       }
 
     //_________________________________________________________________________________________________________________
@@ -135,7 +112,7 @@ const contEffect = async () => {
   
         const Remove = () => {
             contUpdate(localStorage.getItem("OrdData"))
-            handleDelete(localStorage.getItem("OrdId"), localStorage.getItem("OrdNomeC"), localStorage.getItem("OrdData"));
+            handleDelete(localStorage.getItem("OrdFornId"), localStorage.getItem("OrdnomeF"), localStorage.getItem("OrdData"));
             toast.clearWaitingQueue(); 
                  }
   
@@ -154,14 +131,13 @@ const contEffect = async () => {
           })}
   
     const setClear = () => {
-        setNomeC("");
+        setnomeF("");
         toast.dismiss();
         toast.clearWaitingQueue();}
   
-  //********************************************************************************** */
-  
+  //********************************************************************************** */  
     React.useEffect(() => {
-      const collectionRef = collection(db, "addNota");
+      const collectionRef = collection(db, "addNotaForni");
       const q = query(collectionRef, orderBy("cont"));
   
       const unsub = onSnapshot(q, (querySnapshot) => {
@@ -172,79 +148,130 @@ const contEffect = async () => {
         setTodos(todosArray);
       });
       contEffect();
-      localStorage.removeItem("OrdId");
+      localStorage.removeItem("OrdFornId");
       return () => unsub();
     }, []);
-      //_________________________________________________________________________________________________________________
+
+
+    React.useEffect(() => {
+      const collectionRef = collection(db, "prodottoForn");
+      const q = query(collectionRef);
+  
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        let todosArray = [];
+        querySnapshot.forEach((doc) => {
+          todosArray.push({ ...doc.data(), id: doc.id });
+        });
+        setTodosNota(todosArray);
+      });
+      contEffect();
+      return () => unsub();
+    }, []);
   //****************************************************************************************** */
+  const elimDb = async () => {
+    const q = query(collection(db, "notaForni"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (hi) => {
+  // doc.data() is never undefined for query doc snapshots
+    console.log(hi.id, " => ", hi.data().nomeF, hi.data().dataScal);
+    await deleteDoc(doc(db, "notaForni", hi.id)); 
+    }); 
+   } 
+
+
+  const cliEffect = async () => {  //funzione per l'anagrafica del cliente
+    const collectionRef = collection(db, "prodotto");
+      //aggiorna il contatore di tutti i dati di addNota della stessa data
+      console.log("sono entrato 1")
+
+        //un ciclo dentro un altro ciclo
+    todosNota.map( async (todo) => {    //ciclo for sui prodotti del fornitore
+        if(todo.author.name == nomeF ) { //vado a prendere solo i prodotti dei quel fornitore che sto andando a inserire
+          console.log("entrato 2 nell if");
+          const q = query(collectionRef, where("nomeP", "==", todo.nomeP));  // va a prendere lo stesso prodotto, vado a prendere i dati di quel prodotto
+          const querySnapshot = await getDocs(q);
+
+          querySnapshot.forEach(async (hi) => {   //questo è il ciclo for della query, dove vado nella scorta
+
+            console.log("entrato nel ciclo della query");
+            if (hi.data().quantita < hi.data().sottoScorta) {  //se la quantità è minore della sottoscorta allora aggiunte il prodotto alla lista
+              console.log("sono entrato nel if della query");
+              await addDoc(collection(db, "notaForni"), {
+                nomeF,
+                data: dataOrdConf,
+                nomeP: todo.nomeP,
+                quantita: hi.data().quantitaOrdinabile,
+                createdAt: serverTimestamp(),
+              });
+              
+            }
+
+          });
+        }
+    })
+  }
+//****************************************************************************************** */
+
    //stampa
   
   function HandleSpeedAddScalClien() {
     setPopupActive(true);
   }
   /******************************************************************************* */
-  const createCate = async (e) => {
+  const createCate = async (e) => {   //crezione nota nomefornitore, cont e data
     e.preventDefault(); 
     handleDebitoRes();
-    handleIndiTel();
     var bol= true
     //verifica che non ci sia lo stesso nome del cliente
-    const q = query(collection(db, "addNota"), where("nomeC", "==", nomeC), where("data", "==", dataOrdConf));
+    const q = query(collection(db, "addNotaForni"), where("nomeF", "==", nomeF), where("data", "==", dataOrdConf));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-    if (doc.data().nomeC == nomeC) {
+    if (doc.data().nomeF == nomeF) {
         notifyErrorCli()
         toast.clearWaitingQueue(); 
         bol=false
     }
     });
-    if(!nomeC) {
+    if(!nomeF) {
       notifyErrorCliEm();
       toast.clearWaitingQueue(); 
       return
     }
     if(bol == true) {
     handleContAdd();
-    await addDoc(collection(db, "addNota"), {
+    await addDoc(collection(db, "addNotaForni"), {
       cont,
-      nomeC,
-      completa : "0",
-      data: dataOrdConf,
-      NumCartoni:"",
-      sommaTotale:0,
-      debitoTotale:0,
-      debitoRes: localStorage.getItem("DebCli"),
-      indirizzo: localStorage.getItem("indiri"),
-      tel: localStorage.getItem("telefo"),
-      partitaIva: localStorage.getItem("iva")
+      nomeF,
+      data: dataOrdConf
     });
-    setNomeC("");
+    cliEffect();
+    setnomeF("");
     setClear();
     }
   };
 
   //****************************************************************************************** */
     const handleEdit = async (todo, nome, numA, not, deb, quot) => {
-      await updateDoc(doc(db, "addNota", todo.id), { nomeC: nome, numAsc:numA, note:not, debito:deb, quota:quot});
+      await updateDoc(doc(db, "addNotaForni", todo.id), { nomeF: nome, numAsc:numA, note:not, debito:deb, quota:quot});
       notifyUpdateCli();
       toast.clearWaitingQueue(); 
     };
     const toggleComplete = async (todo) => {
-      await updateDoc(doc(db, "addNota", todo.id), { completed: !todo.completed });
+      await updateDoc(doc(db, "addNotaForni", todo.id), { completed: !todo.completed });
     };
 
     //_____________________________________________________________________________________
-    const handleDelete = async (id, nomeCli, DataC) => {
+    const handleDelete = async (id, nomeFli, DataC) => {
       handleContRem();
 
-      const colDoc = doc(db, "addNota", id); 
-    //elimina tutti i dati di nota di quel cliente con la stessa data
-      const q = query(collection(db, "Nota"), where("dataC", "==", DataC), where("nomeC", "==", nomeCli));
+      const colDoc = doc(db, "addNotaForni", id); 
+    //elimina tutti i dati di notaForni di quel cliente con la stessa data
+      const q = query(collection(db, "notaForni"), where("data", "==", DataC), where("nomeF", "==", nomeFli));
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach(async (hi) => {
-      await deleteDoc(doc(db, "Nota", hi.id)); 
+      await deleteDoc(doc(db, "notaForni", hi.id)); 
       });
-      //infine elimina la data di AddNota
+      //infine elimina la data di addNotaForni
       await deleteDoc(colDoc); 
     };
     //**************************************************************************** */
@@ -273,13 +300,14 @@ const contEffect = async () => {
           ))}
         </SpeedDial>
         <div><ToastContainer limit={1} /></div>
-          <h1 className='title mt-3'>Ordine Clienti</h1>
+          <h1 className='title mt-3'>Ordine Fornitori</h1>
           <h3 style={{fontSize: "20px"}}>{moment(dataOrd.toDate()).format("L")}</h3>
   
           {!matches &&
         <div>
-          <span><button onClick={HandleSpeedAddScalClien}>Aggiungi Cliente </button></span>
+          <span><button onClick={HandleSpeedAddScalClien}>Aggiungi Fornitore </button></span>
           <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
+          {/**<span><button onClick={() => {elimDb()}}>Prova</button></span> */} 
         </div>
       }
    {/************************INSERIMENTO CLIENTE********************************************************************/}       
@@ -294,14 +322,14 @@ const contEffect = async () => {
                 </button> </div>
         <div className="input_container">
         <Autocomplete
-      value={nomeC}
-      options={AutoComp1}
+      value={nomeF}
+      options={AutoComp2}
       onInputChange={handleInputChange}
       componentsProps={{ popper: { style: { width: 'fit-content' } } }}
-      renderInput={(params) => <TextField {...params} label="Cliente" />}
+      renderInput={(params) => <TextField {...params} label="Fornitore" />}
     />
             <div className="btn_container">
-            <Button className='mt-3' type='submit' variant="outlined">Aggiungi Cliente</Button>
+            <Button className='mt-3' type='submit' variant="outlined">Aggiungi Fornitore</Button>
             </div>
   
         </div>
@@ -312,87 +340,24 @@ const contEffect = async () => {
       )}
   
   {/**************tabella********************************************************************************************************/}
-      <div className='row'>
-  {/***********Note non completate********************************************************************************** */}
-        <div className='col'>
-  <div  className='todo_containerOrdCli mt-5'>
-        <div className='row'> 
-        <p className='colTextTitle'> Ordine Clienti</p>
-        <p className='textOrdRed'> Note non Completate</p>
-        </div>
-        <div className='row'>
-        <div className='col-1' >
-        <p className='coltext'>N</p>
-        </div>
-        <div className='col-8' >
-        <p className='coltext'>Cliente</p>
-        </div>
-        
-      </div>
-      <hr style={{margin: "0"}}/>
-       {todos.map((todo) => (
-          <div key={todo.id}>
-          {todo.data  === dataOrdConf && todo.completa === "0" &&  (
-      <>
-    <div className='row'>
-        <div className='col-1 diviCol'>
-            <p className="inpTab" style={{textAlign: "left"}}>{todo.cont}</p>
-        </div>
-         <div className='col-8 diviCol' 
-          onClick={() => {
-                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa)
-                navigate("/nota");
-                auto(todo.nomeC);
-                AutoProdCli.length = 0
-                         }}>
-             <p className="inpTab"  style={{textAlign: "left"}}>{todo.nomeC}</p>
-        </div>
-        <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}>  
-                        <NavigateNextIcon/>          
-        </div>
-          {flagDelete &&
-        <div className="col diviCol" style={{padding:"0px", marginTop:"-8px"}}>    
-            <button
-                className="button-delete"
-                onClick={() => {
-                localStorage.setItem("OrdId", todo.id);
-                localStorage.setItem("OrdNomeC", todo.nomeC);
-                localStorage.setItem("OrdData", todo.data);
-                displayMsg();
-                 toast.clearWaitingQueue(); 
-                         }}>
-                <DeleteIcon id="i" />
-            </button>            
-        </div>
-      }
-    </div>
-    <hr style={{margin: "0"}}/>
-             </>
-                  )}
-          </div>
-        ))} 
-        </div>
-        </div>
-        <div className='col'> 
-        {/***********Note completate********************************************************************************** */}
+      
         <div  className='todo_containerOrdCli mt-5'>
         <div className='row'> 
-        <p className='colTextTitle'> Ordine Clienti</p>
-        <p className='textOrd'> Note Completate</p>
+        <p className='colTextTitle'> Ordine Fornitore</p>
         </div>
         <div className='row'>
         <div className='col-1' >
         <p className='coltext'>N</p>
         </div>
         <div className='col-8' >
-        <p className='coltext'>Cliente</p>
+        <p className='coltext'>Fornitore</p>
         </div>
         
       </div>
       <hr style={{margin: "0"}}/>
        {todos.map((todo) => (
           <div key={todo.id}>
-          {todo.data  === dataOrdConf && todo.completa === "1" &&  (
+          {todo.data  === dataOrdConf &&  (
       <>
     <div className='row'>
         <div className='col-1 diviCol'>
@@ -400,12 +365,12 @@ const contEffect = async () => {
         </div>
          <div className='col-8 diviCol' 
           onClick={() => {
-                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa)
-                navigate("/nota");
-                auto(todo.nomeC);
-                AutoProdCli.length = 0
+                getNotaForniId(todo.id, todo.nomeF, dataOrd, dataOrdConf)
+                navigate("/notaforni");
+                auto(todo.nomeF);
+                AutoProdForn.length = 0
                          }}>
-             <p className="inpTab"  style={{textAlign: "left"}}>{todo.nomeC}</p>
+             <p className="inpTab"  style={{textAlign: "left"}}>{todo.nomeF}</p>
         </div>
         <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}>  
                         <NavigateNextIcon/>          
@@ -415,8 +380,8 @@ const contEffect = async () => {
             <button
                 className="button-delete"
                 onClick={() => {
-                localStorage.setItem("OrdId", todo.id);
-                localStorage.setItem("OrdNomeC", todo.nomeC);
+                localStorage.setItem("OrdFornId", todo.id);
+                localStorage.setItem("OrdnomeF", todo.nomeF);
                 localStorage.setItem("OrdData", todo.data);
                 displayMsg();
                  toast.clearWaitingQueue(); 
@@ -430,11 +395,13 @@ const contEffect = async () => {
              </>
                   )}
           </div>
-        ))} 
+        ))}
+
+  
+          
         </div>
-        </div>
-      </div>
+  
       </>
         )
   }
-export default AddNota;
+export default AddNotaForni;

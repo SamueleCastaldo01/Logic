@@ -4,7 +4,7 @@ import moment from 'moment';
 import { TextField } from '@mui/material';
 import { auth, db } from "../firebase-config";
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { AutoCompProd } from '../components/TodoClient';
+import { AutoCompScorta } from './AddFornitori';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { notifyError } from '../components/Notify';
@@ -19,13 +19,12 @@ import { AutoComp } from './ScaletData';
 import { supa } from '../components/utenti';
 import { guid } from '../components/utenti';
 import { tutti } from '../components/utenti';
-import TodoProdClin from '../components/TodoProdClin';
+import TodoProdForn from '../components/todoProdForn';
 
-function DashClienti({ clientId, nomeCli }) {
+function DashFornitori({ fornId, nomeForn }) {
 
   const [todos, setTodos] = React.useState([]);
   const [nomeP, setNomeP] = React.useState("");
-  const [prezzoUnitario, setPrezzoUnitario] = React.useState("");
 
   const [flagTabellaProdotti, setFlagTabellaProdotti] = useState(false);  
 
@@ -58,7 +57,7 @@ function DashClienti({ clientId, nomeCli }) {
     )
 
       const Remove = () => {
-          handleDelete(localStorage.getItem("IdProdClin") );
+          handleDelete(localStorage.getItem("IdProdFor") );
           toast.clearWaitingQueue(); 
                }
 
@@ -77,7 +76,7 @@ function DashClienti({ clientId, nomeCli }) {
         })}
 //********************************************************************************** */
   React.useEffect(() => {
-    const collectionRef = collection(db, "prodottoClin");
+    const collectionRef = collection(db, "prodottoForn");
     const q = query(collectionRef, orderBy("nomeP"));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
@@ -93,12 +92,11 @@ function DashClienti({ clientId, nomeCli }) {
     //**************************************************************************** */
     const handleDelete = async (id) => {
       console.log("bhooooo")
-      console.log(localStorage.getItem("IdProdClin"))
-      await deleteDoc(doc(db, "prodottoClin", id));
+      await deleteDoc(doc(db, "prodottoForn", id));
     };
     //****************************************************************************************** */
     const handleEdit = async ( todo, nome, prezUni) => {
-      await updateDoc(doc(db, "prodottoClin", todo.id), { nomeP: nome, prezzoUnitario:prezUni});
+      await updateDoc(doc(db, "prodottoForn", todo.id), { nomeP: nome, prezzoUnitario:prezUni});
       notifyUpdateProd();
       toast.clearWaitingQueue(); 
     };
@@ -111,12 +109,8 @@ function DashClienti({ clientId, nomeCli }) {
     toast.clearWaitingQueue(); 
     return 
   }
-  if(!prezzoUnitario) {            
-    notifyErrorPrezzoUni();
-    toast.clearWaitingQueue(); 
-    return 
-  }
-  const q = query(collection(db, "prodottoClin"), where("nomeP", "==", nomeP), where("author.id", "==" , clientId));
+            //serve per non far inserire due volte lo stesso prodotto
+  const q = query(collection(db, "prodottoForn"), where("nomeP", "==", nomeP), where("author.id", "==" , fornId));
   const querySnapshot = await getDocs(q);
   querySnapshot.forEach((doc) => {
 // doc.data() is never undefined for query doc snapshots
@@ -128,13 +122,11 @@ function DashClienti({ clientId, nomeCli }) {
   }
   });
   if(bol == true) {
-    await addDoc(collection(db, "prodottoClin"), {
+    await addDoc(collection(db, "prodottoForn"), {
       nomeP,
-      prezzoUnitario,
-      author: { name: nomeCli, id: clientId }
+      author: { name: nomeForn, id: fornId }
     });
     setNomeP("");
-    setPrezzoUnitario("");
   }
 };
 //*************************************************************************** */
@@ -143,16 +135,14 @@ function DashClienti({ clientId, nomeCli }) {
 
       return ( 
       <>  
-
       <div><ToastContainer limit={1} /></div>
-        <h1 className='title mt-3'> Dashboard Clienti</h1>
-        <h2 className='mt-4'>Nome Cliente: {nomeCli} </h2>
+        <h1 className='title mt-3'> Dashboard Fornitori</h1>
+        <h2 className='mt-4'>Nome Fornitore: {nomeForn} </h2>
 
         {!matches &&
       <div>
         <span><button onClick={handleSpeedAddProd}>Aggiungi Prodotto </button></span>
         <span><button onClick={() => { setFlagTabellaProdotti(!flagTabellaProdotti) }}>Tabella Prodotti </button></span>
-        <span><button >Debito </button></span>
       </div>
     }
 
@@ -168,21 +158,14 @@ function DashClienti({ clientId, nomeCli }) {
       <div className="input_container">
       <Autocomplete
       value={nomeP}
-      options={AutoCompProd}
+      options={AutoCompScorta}
       onInputChange={handleInputChange}
       componentsProps={{ popper: { style: { width: 'fit-content' } } }}
       renderInput={(params) => <TextField {...params} label="Prodotto" />}
     />
-      <TextField className='inp mt-2' type="number" id="filled-basic" label="Prezzo Unitario" variant="outlined" autoComplete='off' value={prezzoUnitario} 
-        onChange={(e) => setPrezzoUnitario(e.target.value)}
-        InputProps={{
-            startAdornment: <InputAdornment position="start">€</InputAdornment>,
-          }}
-        />
-
       </div>
       <div className="btn_container">
-      <Button  type='submit' variant="outlined" >Aggiungi Prodotto del Cliente </Button>
+      <Button  type='submit' variant="outlined" >Aggiungi Prodotto del Fornitore </Button>
       </div>
     </form>
     </div>
@@ -196,21 +179,18 @@ function DashClienti({ clientId, nomeCli }) {
 <div className='todo_containerProdCli mt-5 '>
 <div className='row'>
 
-<div className='col-7' >
+<div className='col-9' >
 <p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Prodotto</p>
-</div>
-<div className='col-3' style={{padding: "0px"}}>
-<p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>PrezzoUni</p>
 </div>
 </div>
 
 <div className="scroll">
   {todos.map((todo) => (
     <div key={todo.id}>
-    {todo.author.name  === nomeCli &&  (
+    {todo.author.name  === nomeForn &&  (
       <>
     { ta === true &&(
-    <TodoProdClin
+    <TodoProdForn
       key={todo.id}
       todo={todo}
       handleEdit={handleEdit}
@@ -226,9 +206,7 @@ function DashClienti({ clientId, nomeCli }) {
   </div>
   </>
 }
-
       </>
         )
   }
-  export default DashClienti;
-  
+  export default DashFornitori;

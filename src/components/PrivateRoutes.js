@@ -21,15 +21,33 @@ export function PrivateOrd({ordId}) {
     );
 }
 
+export function PrivateOrdForn({ordFornId}) {
+    return (
+        ordFornId ? <Outlet/> : <Navigate to="/ordinefornitoridata"/>
+    );
+}
+
 export function PrivateNota({notaId}) {
     return (
         notaId ? <Outlet/> : <Navigate to="/ordineclientidata"/>
     );
 }
 
+export function PrivateNotaForni({notaFornId}) {
+    return (
+        notaFornId ? <Outlet/> : <Navigate to="/ordinefornitoridata"/>
+    );
+}
+
 export function PrivateDashCli({clientId}) {
     return (
         clientId ? <Outlet/> : <Navigate to="/listaclienti"/>
+    );
+}
+
+export function PrivateDashForn({fornId}) {
+    return (
+        fornId ? <Outlet/> : <Navigate to="/listafornitori"/>
     );
 }
 

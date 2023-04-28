@@ -4,10 +4,21 @@ body {
   text-align: center;
 }
 
+:root {
+  --light: #eee;
+  --sabbia: #f8dcb5;
+  --darker: #262336;
+  --blue: #61DAFB;
+  --green: #2AC900;
+  --greenHo: #39A675;
+  --red: #FD2B38;
+}
+
 .title {
   text-align: center;
   color: #cab497;
   font-weight: bold;
+  font-size: 32px;
 }
 
 .linq {
@@ -30,6 +41,8 @@ body {
   overflow-y: scroll;
   overflow-x: hidden;
   perspective: 20px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 .autocomp {
@@ -63,11 +76,91 @@ body {
   width: 455px;
   text-align: left;
 }
-
+.divDat {
+  max-width: 800px;
+  height: 50px;
+  margin: 0 auto;
+  padding: 10px 20px;
+  margin-top: 10px;
+  background-color: #efefef;
+  border-width: 2px;
+  border-color: #f8dcb5; 
+  border-style: solid;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
 .inpDat {
+  font-size: 20px;
   text-align: left;
-  padding-top: 8px;
   cursor: pointer;
+}
+
+.diviCol {
+  height: 40px;
+}
+
+.inpNumb{
+  width: 100%;
+  cursor: pointer;
+  color: black;
+  text-align: left;
+  height: 40px;
+  width: 100%;
+  padding-left: 0px;
+  outline: none;
+  font-size: 14px;
+  font-family: "Poppins", sans-serif;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-weight: 500;
+}
+
+.inpTabNota,
+.inpTab {
+  width: 100%;
+  cursor: pointer;
+  color: black;
+  text-align: left;
+  height: 40px;
+  width: 100%;
+  padding-left: 0px;
+  padding-top: 5px;
+  outline: none;
+  font-size: 14px;
+  font-family: "Poppins", sans-serif;
+  margin-top: 5px;
+  margin-bottom: 0px;
+  font-weight: 500;
+}
+
+.inpTabNota{
+  font-size: 16px;
+  margin-top: 0px;
+  padding-top: 10px;
+}
+
+.divTinte {
+  text-align: left;
+  padding: 0px;
+  margin-left: 5px;
+  font-size: 16px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+}
+
+.inpTinte {
+  width: 100%;
+  color: black;
+  text-align: left;
+  height: 40px;
+  width: 100%;
+  border: 2px solid var(--red);
+  border-radius: 4px;
+  padding: 15px 5px;
+  font-size: 16px;
+  font-family: "Poppins", sans-serif;
+  border-right-style: solid;
+  border-width: 1px;
 }
 
 .inputSearch .MuiOutlinedInput-root {
@@ -98,7 +191,7 @@ width: 792px;
 
 .colNotaSini{
   border-right-style: solid;
-  border-width: 1px
+  border-width: 1px;
 }
 
 .rigaNota{
@@ -129,34 +222,34 @@ width: 792px;
 .butRemProd,
 .butAddProd,
 .buttonApply {
-  background-color: #32cd32;
+  background-color: var(--green);
   border: none;
   color: black;
   padding: 6px 17px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 17px;
+  font-size: 14px;
   border-radius: 6px;
   user-select: none;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 .butAddProd{
-  margin-top: 15px;
-  background-color: #2db92d;
+  margin-top: 3px;
+  background-color:  var(--green);
 }
 .butRemProd{
-  background-color: #ff3838;
+  background-color: var(--red);
   color: white;
 }
 .butAddProd:hover{
-  background-color: #29a829;
+  background-color: var(--greenHo);
 }
 .butRemProd:hover{
   background-color: #fb0604;
 }
 .buttonClose {
-  background-color: #dc3545;
+  background-color: var(--red);
   color: white;
   padding: 6px 14px;
 }
@@ -169,19 +262,7 @@ width: 792px;
   padding-bottom: 45px;
 }
 
-.divDat {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 10px 20px;
-  margin-top: 10px;
-  background-color: #efefef;
-  border-width: 2px;
-  border-color: #f8dcb5; 
-  border-style: solid;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
+.formForni,
 .formCli,
 .formAC,
 .formScort,
@@ -209,7 +290,7 @@ width: 792px;
   margin-top: 20px;
 }
 .formScort{
-  height: 507px;
+  height: 505px;
 }
 
 .formAC {
@@ -219,11 +300,34 @@ width: 792px;
 .formCli {
   height: 253px;
 }
-
-.coltext {
-  color: #cab497;
+.formSD {
+  height: 370px;
 }
 
+.textOrdRed,
+.textOrd,
+.coltext,
+.colTextTitle{
+  margin-bottom: 0px;
+  font-weight: bold;
+  text-align: left;
+  font-size: 20px;
+  color: #cab497;
+}
+.coltext {
+  
+  font-size: 14px;
+}
+.textOrd{
+  margin-bottom: 12px;
+  font-size: 14px;
+  color:var(--green)
+}
+.textOrdRed{
+  margin-bottom: 12px;
+  font-size: 14px;
+  color:var(--red)
+}
 .input_container {
   margin-bottom: 20px;
   padding: 0px 20px;
@@ -246,19 +350,21 @@ width: 792px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
+.todo_containerProdCli,
+.todo_containerOrdCli,
+.todo_containerFor,
 .todo_container,
 .todo_containerCli,
 .todo_containerScorta {
   padding-left: 10px;
   padding-top: 10px;
+  padding-right: 10px;
   padding-bottom: 30px;
   margin: 0 auto;
   border-width: 3px;
   background-color: #efefef;
-  border-color: #f8dcb5; 
-  border-style: solid;
   border-radius: 10px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
 
 .todo_container {
@@ -266,11 +372,21 @@ width: 792px;
 }
 
 .todo_containerCli {
-  width: 1400px;
+  width: 1000px;
 }
 .todo_containerScorta{
   width: 800px;
 }
+.todo_containerFor{
+  width: 500px;
+}
+.todo_containerOrdCli{
+  width: 400px;
+}
+.todo_containerProdCli{
+  width: 500px;
+}
+
 .popup {
   position: fixed;
   top: 0;
@@ -304,16 +420,17 @@ width: 792px;
   color: white;
   
   margin-left: 50px;
-  background-color: rgb(255, 122, 98);
+  background-color: var(--red);
   border: none;
   outline: none;
   border-radius: 0px 10px 0px 0px;
 }
 
 .button-close:hover {
-  background-color: #f0725b;
+  background-color: var(--red);
 }
 
+.button-navBar,
 .button-complete,
 .button-delete,
 .button-edit {
@@ -327,7 +444,7 @@ width: 792px;
   font-size: 35px;
 }
 .button-complete {
-  color: #95faa3;
+  color: var(--green);
   margin-right: 10px;
 }
 .button-edit {
@@ -339,6 +456,11 @@ width: 792px;
   padding-top: 10px;
   padding-bottom: 10px;
   color: rgb(255, 122, 98);
+}
+.button-navBar {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  color: white;
 }
 @media screen and (max-width: 667px) {
   .task_container {
@@ -364,28 +486,6 @@ button:focus {
   font-size: 16px;
   font-family: "Poppins", sans-serif;
   font-weight: 500;
-}
-
-.inpTab {
-  width: 100%;
-  cursor: pointer;
-  color: black;
-  text-align: left;
-  height: 40px;
-  width: 100%;
-  padding: 15px 5px;
-  outline: none;
-  font-size: 16px;
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-}
-
-.wrapper {
-  font-family: "Times New Roman";
-  width: 100%;
-  height: 90vh;
-  overflow: auto;
-  perspective: 20px;
 }
 
 .navb{
@@ -443,3 +543,5 @@ button:focus {
     margin: 0 auto;
   }
 }
+
+

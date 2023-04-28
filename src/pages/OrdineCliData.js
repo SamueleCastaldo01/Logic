@@ -6,18 +6,33 @@ import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { notifyError, notifyErrorDat } from '../components/Notify';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import Button from '@mui/material/Button';
 import 'moment/locale/it'
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from '@mui/icons-material/Close';
 import { supa, guid, tutti } from '../components/utenti';
+import MiniDrawer from '../components/MiniDrawer';
+import Box from '@mui/material/Box';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 export const AutoComp1 = [];
 
 
 function OrdineCliData({ getOrdId }) {
     const[colle, setColle] = useState([]); 
-    const colleCollectionRef = collection(db, "ordDat"); 
+    const colleCollectionRef = collection(db, "ordDat");
+
+
+    const timeElapsed = Date.now();  //prende la data attuale in millisecondi
+    const today = new Date(timeElapsed);    //converte
+    const [day, setday] = React.useState("");
+    const [flagDelete, setFlagDelete] = useState(false); 
 
     const [popupActive, setPopupActive] = useState(true);  
 
@@ -51,6 +66,14 @@ function OrdineCliData({ getOrdId }) {
       }
       });
       }
+  //_________________________________________________________________________________________________________________
+         const handleChangeDataSelect = (event) => {
+          setday(event.target.value);      //prende il valore del select
+          var ok= event.target.value
+          console.log({ok})
+          today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo
+           localStorage.setItem("bho1", today.getTime())
+        };
 
    //_________________________________________________________________________________________________________________
     const setClear = () => {
@@ -60,8 +83,9 @@ function OrdineCliData({ getOrdId }) {
    //_________________________________________________________________________________________________________________
      //confirmation notification to remove the collection
     const Msg = () => (
-      <div>
-        Sicuro di voler eliminare &nbsp;
+      <div style={{fontSize: "16px"}}>
+        <p style={{marginBottom: "0px"}}>Sicuro di voler eliminare</p>
+        <p style={{marginBottom: "0px"}}>(perderai tutti i dati)</p>
         <button className='buttonApply ms-4 mt-2 me-1 rounded-4' onClick={Remove}>Si</button>
         <button className='buttonClose mt-2 rounded-4'>No</button>
       </div>
@@ -89,7 +113,7 @@ function OrdineCliData({ getOrdId }) {
     //********************************************************************************** */
   React.useEffect(() => {
     const collectionRef = collection(db, "ordDat");
-    const q = query(collectionRef, orderBy("nome"));
+    const q = query(collectionRef, orderBy("nome", "desc"));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
@@ -103,34 +127,39 @@ function OrdineCliData({ getOrdId }) {
   }, []);
   //_________________________________________________________________________________________________________________
 
-    const deleteCol = async (id, dat) => { 
+    const deleteCol = async (id, dat) => { //cancella tutto dalla data fino ai prodotti che fanno parte della lista
         const colDoc = doc(db, "ordDat", id); 
-         
-      //elimina tutti i dati di addNota della stessa data
         const q = query(collection(db, "addNota"), where("data", "==", dat));
         const querySnapshot = await getDocs(q);
+
         querySnapshot.forEach(async (hi) => {
-        console.log(hi.id, " => ", hi.data().nomeC, hi.data().data);
-        await deleteDoc(doc(db, "addNota", hi.id)); 
+          const p = query(collection(db, "Nota"), where("dataC", "==", dat), where("nomeC", "==", hi.data().nomeC));
+          const querySnapshotp = await getDocs(p);
+          querySnapshotp.forEach(async (hip) => {
+            await deleteDoc(doc(db, "Nota", hip.id));  //1 elimina tutti i prodotti nella lista
+          })
+
+        await deleteDoc(doc(db, "addNota", hi.id));  //2 elimina tutti i dati di addNota della stessa data
         });
-        //infine elimina la data
-        await deleteDoc(colDoc); 
+        
+        await deleteDoc(colDoc); //3 infine elimina la data
     }
   //_________________________________________________________________________________________________________________
   const createCol = async (e) => {    
     e.preventDefault();  
+    var formattedDate = moment(nome).format('DD-MM-YYYY');
     var bol= true
     if(!nome) {            
       notifyError();
       toast.clearWaitingQueue(); 
       return
     }
-    const q = query(collection(db, "ordDat"), where("data", "==", nome));
+    const q = query(collection(db, "ordDat"), where("data", "==", formattedDate));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
   // doc.data() is never undefined for query doc snapshots
     console.log(doc.id, " => ", doc.data().data);
-    if (doc.data().data == nome) {
+    if (doc.data().data == formattedDate) {
          notifyErrorDat()
          toast.clearWaitingQueue(); 
         bol=false
@@ -138,8 +167,9 @@ function OrdineCliData({ getOrdId }) {
     });
     if(bol == true) {
     await addDoc(colleCollectionRef, {
-      data: nome,
-      nome: Timestamp.fromDate(new Date(nome)),
+      data: formattedDate,
+      dataMilli: nome.getTime(),
+      nome,
     });
     setClear();
     }
@@ -150,8 +180,9 @@ function OrdineCliData({ getOrdId }) {
 //          INTERFACE                                             /
 //************************************************************** */
     return ( 
-    <> <div className='wrapper'>
+    <> 
     <h1 className='title mt-3'> Ordine Clienti</h1>
+    <button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button>
 {/** inserimento Data *************************************************************/}
 {sup ===true && (
         <>    
@@ -163,8 +194,7 @@ function OrdineCliData({ getOrdId }) {
               </button>   
       </div>
       <div className="input_container">
-      <TextField type="date" className='inp' id="filled-basic" label="" variant="outlined" value={nome} 
-          onChange={(e) => setData(e.target.value)}/>
+      <Calendar onChange={setData} value={nome} />
       </div>
       <div className="btn_container">
       <Button type='submit' variant="outlined">Aggiungi la data</Button>
@@ -178,13 +208,13 @@ function OrdineCliData({ getOrdId }) {
   }
   </>
     )}
+{/*************************************************************************************************** */}
 
             <div className="container">
               <div><ToastContainer limit={1} /></div>
 
               <div className="row">
                 <div className="col"> <h3></h3></div>
-
                 <div className="col">
 
                 </div>
@@ -194,22 +224,49 @@ function OrdineCliData({ getOrdId }) {
                 </div>
               </div>
 
+          <div className='todo_containerScorta' style={{width: "400px"}}>
+              <div className='row'>
+                      <div className='col colTextTitle'>
+                       Ordine Clienti
+                      </div>
+                      <div className='col'>
+                        <FormControl >
+                        <InputLabel id="demo-simple-select-label"></InputLabel>
+                        <Select sx={{height:39, marginLeft:-1, width: 200}}
+                         labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        defaultValue={8}
+                        onChange={handleChangeDataSelect}>
+                        <MenuItem value={8}>Ultimi 7 giorni</MenuItem>
+                        <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
+                        <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
+                        <MenuItem value={366}>Ultimi 365 giorni</MenuItem>
+                        </Select>
+                        </FormControl>
+                        </div>
+                    </div>
+
                 {colle.map((col) => (
                   <div key={col.id}>
+                  {col.dataMilli >= localStorage.getItem("bho1") && 
                     <>
-                    <div className="divDat" > 
+                    <div className="diviCol" > 
                       <div className="row">
 
                         <div className="col-9">
-                        <h3 className='inpDat' onClick={() => {
+                        <h3 className='inpTab' onClick={() => {
                             getOrdId(col.id, col.nome, col.data)
                             navigate("/addnota");
                             auto();
                             AutoComp1.length = 0
                             }}>{ moment(col.nome.toDate()).format("L") } &nbsp; { moment(col.nome.toDate()).format('dddd') }</h3>
                         </div>
+                        <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}>  
+                        <NavigateNextIcon/>          
+                        </div>
 
-                        <div className="col">    
+                        { flagDelete &&
+                        <div className="col" style={{padding:"0px", marginTop:"-8px"}}>    
                         <button
                          className="button-delete"
                          onClick={() => {
@@ -221,15 +278,17 @@ function OrdineCliData({ getOrdId }) {
                           <DeleteIcon id="i" />
                         </button>            
                         </div>
-
+                        }
                       </div>
                     </div>
-                  </>
+                    <hr style={{margin: "0"}}/>
 
+                  </>
+                  }
                   </div>
                   ))}
+              </div>
             </div>
-           </div>
            </>
       )
 }

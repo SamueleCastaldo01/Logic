@@ -16,21 +16,21 @@ import { tutti } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
 import TodoDebiCli from '../components/TodoDebiCli';
+import DeleteIcon from "@mui/icons-material/Delete";
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import MiniDrawer from '../components/MiniDrawer';
 import Box from '@mui/material/Box';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAygsHvhG251qZ7-N9oR8A-q1ls9yhNkOQ';
+export const AutoCompScorta = [];
 
-function AddCliente( {getCliId} ) {
+function AddFornitori( {getFornId} ) {
 
   const [todos, setTodos] = React.useState([]);
-  const [todosDebi, setTodosDebi] = React.useState([]);
 
-  const [indirizzo, setIndirizzo] = React.useState("");
   const [indirizzoLink, setIndirizzoLink] = React.useState("");
-  const [nomeC, setNomeC] = React.useState("");
-  const [partitaIva, setPartitaIva] = React.useState("");
-  const [cellulare, setCellulare] = React.useState("");
+  const [nomeF, setnomeF] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [flagDelete, setFlagDelete] = useState(false); 
 
   const [deb1, setDeb1] = React.useState("");
   const [deb2, setDeb2] = React.useState("");
@@ -39,8 +39,7 @@ function AddCliente( {getCliId} ) {
 
   const [popupActive, setPopupActive] = useState(false);
   const [flagAnaCli, setFlagAnaCli] = useState(true);   
-  const [flagDebiCli, setFlagDebiCli] = useState(false);
-  const [flagDelete, setFlagDelete] = useState(false);  
+  const [flagDebiCli, setFlagDebiCli] = useState(false);  
 
   //permessi utente
   let sup= supa.includes(localStorage.getItem("uid"))
@@ -60,7 +59,7 @@ function AddCliente( {getCliId} ) {
     )
 
       const Remove = () => {
-          handleDelete(localStorage.getItem("IDscal"), localStorage.getItem("NomeCliProd") );
+          handleDelete(localStorage.getItem("IDForn") );
           toast.clearWaitingQueue(); 
                }
 
@@ -79,10 +78,21 @@ function AddCliente( {getCliId} ) {
         })}
 
 //********************************************************************************** */
+
+const auto = async () => {
+  const q = query(collection(db, "prodotto"));
+  const querySnapshot = await  getDocs(q);
+  querySnapshot.forEach((doc) => {
+    console.log(doc.data().nomeP)
+  let car = { label: doc.data().nomeP }
+  AutoCompScorta.push(car);
+  });
+  }
+//********************************************************************************** */
       //Anagrafiche
 React.useEffect(() => {
-    const collectionRef = collection(db, "clin");
-    const q = query(collectionRef, orderBy("nomeC"));
+    const collectionRef = collection(db, "fornitore");
+    const q = query(collectionRef, orderBy("nomeF"));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
@@ -90,21 +100,6 @@ React.useEffect(() => {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
       setTodos(todosArray);
-    });
-    return () => unsub();
-
-  }, []);
-            //debito
-  React.useEffect(() => {
-    const collectionRef = collection(db, "debito");
-    const q = query(collectionRef, orderBy("nomeC"));
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
-      });
-      setTodosDebi(todosArray);
     });
     return () => unsub();
 
@@ -130,7 +125,7 @@ React.useEffect(() => {
     querySnapshot.forEach(async (doc) => {
       console.log(doc.id, " => ", doc.data().nomeP, doc.data().prezzoIndi);
       await addDoc(collection(db, "prodottoClin"), {
-        author: { name: nomeC, id: "bho" },
+        author: { name: nomeF, id: "bho" },
         nomeP: doc.data().nomeP,
         prezzoUnitario: doc.data().prezzoIndi
       })
@@ -140,77 +135,59 @@ React.useEffect(() => {
  const handleSubmit = async (e, id) => {   //creazione cliente
     e.preventDefault();
     var bol= true
-    if(!nomeC) {            
+    if(!nomeF) {            
       notifyErrorCliEm();
       toast.clearWaitingQueue(); 
       return 
-    }
-    const q = query(collection(db, "clin"), where("nomeC", "==", nomeC));
+    }   //serve per non fa inserire due volte lo stesso fornitore, serve per renderlo univoco
+    const q = query(collection(db, "fornitore"), where("nomeF", "==", nomeF));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
   // doc.data() is never undefined for query doc snapshots
-    console.log(doc.id, " => ", doc.data().nomeC);
-    if (doc.data().nomeC == nomeC) {
+    console.log(doc.id, " => ", doc.data().nomeF);
+    if (doc.data().nomeF == nomeF) {    //se ha trovato lo stesso nome all'interno del database bol è falso
         notifyErrorCliList()
          toast.clearWaitingQueue(); 
         bol=false
     }
     });
-    if(bol == true) {
+    if(bol == true) {   //bol deve essere vero per poter creare un nuovo utente
       handleProdClien();
-      await addDoc(collection(db, "clin"), {
-        nomeC,
-        indirizzo,
-        indirizzoLink: "https://www.google.com/maps/search/?api=1&query="+indirizzo,
-        partitaIva,
-        cellulare,
+      await addDoc(collection(db, "fornitore"), {
+        nomeF,
+        email,
       });
-      await addDoc(collection(db, "debito"), {   //quando si crea il cliente viene creata anche la trupla debito del cliente
-        nomeC,
-        deb1,
-        deb2,
-        deb3,
-        deb4,
-      });
-      setNomeC("");
-      setIndirizzo("");
-      setIndirizzoLink("");
-      setPartitaIva("");
-      setCellulare("");
+      setnomeF("");
+      setEmail("");
     }
   };
 //****************************************************************************************** */
   const handleEdit = async ( todo, nome, iv, cel) => {
-    await updateDoc(doc(db, "clin", todo.id), { nomeC: nome, partitaIva:iv, cellulare:cel});
+    await updateDoc(doc(db, "fornitore", todo.id), { nomeF: nome, partitaIva:iv, cellulare:cel});
     notifyUpdateCli();
     toast.clearWaitingQueue(); 
   };
 
   const handleEditDeb = async ( todo, nome, dd1, dd2, dd3, dd4) => {
     console.log("entrato")
-    await updateDoc(doc(db, "debito", todo.id), { nomeC:nome, deb1:dd1, deb2:dd2, deb3:dd3, deb4:dd4});
+    await updateDoc(doc(db, "debito", todo.id), { nomeF:nome, deb1:dd1, deb2:dd2, deb3:dd3, deb4:dd4});
     notifyUpdateCli();
     toast.clearWaitingQueue(); 
   };
  //****************************************************************************************** */ 
 
-  const handleDelete = async (id, nomeCli) => {
-    const colDoc = doc(db, "clin", id); 
+  const handleDelete = async (id) => {
+    const colDoc = doc(db, "fornitore", id); 
      
   //elimina tutti i dati di prodottoClin con lo stesso nome del Cliente     elimina tutti gli articoli di quel cliente
-    const q = query(collection(db, "prodottoClin"), where("author.name", "==", localStorage.getItem("NomeCliProd")));
+/*  const q = query(collection(db, "prodottoClin"), where("author.name", "==", localStorage.getItem("nomeFliProd")));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach(async (hi) => {
   // doc.data() is never undefined for query doc snapshots
-    console.log(hi.id, " => ", hi.data().nomeC, hi.data().dataScal);
+    console.log(hi.id, " => ", hi.data().nomeF, hi.data().dataScal);
     await deleteDoc(doc(db, "prodottoClin", hi.id)); 
-    });
-  //elimina la trupla debito, che ha lo stesso nome del cliente che è stato eliminato
-    const p = query(collection(db, "debito"), where("nomeC", "==", nomeCli));
-    const querySnapshotP = await getDocs(p);
-    querySnapshotP.forEach(async (hi) => {
-    await deleteDoc(doc(db, "debito", hi.id));    //elimina il documento che ha lo stesso nome
-    });
+    });   */
+
     //infine elimina la data
     await deleteDoc(colDoc); 
   };
@@ -220,11 +197,9 @@ React.useEffect(() => {
     return ( 
     <>  
     <div><ToastContainer limit={1} /></div>
-    <h1 className='title mt-3'> Lista Clienti</h1>
+    <h1 className='title mt-3'> Lista Fornitori</h1>
     <div>
-        <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Cliente </button></span>
-        <span><button onClick={handleButtonAna}>Anagrafiche Clienti</button></span>
-        <span><button onClick={handleButtonDebito}>Debito Clienti </button></span>
+        <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Fornitore</button></span>
         <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
       </div>
 
@@ -235,44 +210,18 @@ React.useEffect(() => {
 {/** inserimento cliente **************************************************************************/}
 {popupActive &&
       <div> 
-      <form className='formAC'>
+      <form onSubmit={handleSubmit} className='formForni'>
       <div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); }}>
               <CloseIcon id="i" />
               </button> </div>
       <div className="input_container">
-      <TextField className='inpCli mt-2 me-2' label="Nuovo Cliente" variant="outlined"  autoComplete='off' value={nomeC} 
-        onChange={(e) => setNomeC(e.target.value)}/>
-    <div className='mt-3' >
-          <Input
-          fullWidth
-          className='inpCli'
-            color="primary"
-            variant="outlined"
-            inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
-              <Autocomplete
-                apiKey={GOOGLE_MAPS_API_KEY}
-                {...props}
-                onPlaceSelected={(place) => {
-                  setIndirizzo(place.formatted_address)
-                  console.log(place);
-                  }}
-                options={{
-                types: ["address"],
-                componentRestrictions: { country: "it" },
-                }}
-                defaultValue={indirizzo}
-              />
-            )}
-          />
-        </div>
-      <TextField className='inpCli mt-2 ' type="number" label="Partita IVA" variant="outlined" autoComplete='off' value={partitaIva} 
-        onChange={(e) => setPartitaIva(e.target.value)}/>
-      <TextField className='inpCli mt-2 me-2' type="tel" label="Cellulare" variant="outlined" autoComplete='off' value={cellulare} 
-        onChange={(e) => setCellulare(e.target.value)}/>
-
+      <TextField className='inpCli mt-2 me-2' label="Nome Fornitore" variant="outlined"  autoComplete='off' value={nomeF} 
+        onChange={(e) => setnomeF(e.target.value)}/>
+      <TextField type="email" className='inpCli mt-2 me-2' label="email Fornitore" variant="outlined"  autoComplete='off' value={email} 
+        onChange={(e) => setEmail(e.target.value)}/>
       </div>
       <div className="btn_container">
-      <Button type='submit' onClick={handleSubmit}  variant="outlined" >Aggiungi</Button>
+      <Button type='submit'  variant="outlined" >Aggiungi</Button>
       </div>
     </form>
     </div>
@@ -281,95 +230,69 @@ React.useEffect(() => {
     )}
 
 
-{/********************tabella Anagrafiche************************************************************************/}
+{/********************tabella Anagrafiche fornitori************************************************************************/}
 {flagAnaCli &&
-<div className='todo_containerCli mt-5'>
+<div className='todo_containerFor mt-5'>
 <div className='row'> 
-<p className='colTextTitle'> Lista Clienti </p>
+<p className='colTextTitle'> Lista Fornitori</p>
 </div>
 <div className='row'>
-<div className='col-3' >
-<p className='coltext' >Cliente</p>
+<div className='col-4' >
+<p className='coltext' >Fornitore</p>
 </div>
-<div className='col-4' style={{padding: "0px"}}>
-<p className='coltext' >indirizzo</p>
-</div>
-<div className='col-2' style={{padding: "0px"}}>
-<p className='coltext' >Part. IVA</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' >Cellulare</p>
+<div className='col-6' >
+<p className='coltext' >Email</p>
 </div>
 </div>
-
+<hr style={{margin: "0"}}/>
 <div className="scroll">
   {todos.map((todo) => (
     <div key={todo.id}>
-    { ta === true &&(
-    <TodoClient
-      key={todo.id}
-      todo={todo}
-      handleDelete={handleDelete}
-      handleEdit={handleEdit}
-      displayMsg={displayMsg}
-      getCliId={getCliId}
-      flagDelete= {flagDelete}
-    />
-     )}
+    <div className='row'>
+        <div className='col-4 diviCol'>
+            <h4 className='inpTab'   onClick={() => {
+            getFornId(todo.id, todo.nomeF)
+            navigate("/dashfornitore");
+            auto();
+            AutoCompScorta.length = 0
+                            }}> {todo.nomeF} </h4>
+        </div>
+        <div className='col-5 diviCol'>
+          <h4 className='inpTab'> {todo.email}</h4>
+        </div>
+        <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}  onClick={() => {
+            getFornId(todo.id, todo.nomeF)
+            navigate("/dashfornitore");
+            auto();
+            AutoCompScorta.length = 0
+                            }}>  
+                        <NavigateNextIcon/>          
+        </div>
+        {flagDelete &&
+        <div className='col diviCol' style={{padding:"0px", marginTop:"-8px"}}>
+        <button type="reset" className="button-delete"                          
+          onClick={() => {
+                localStorage.setItem("IDForn", todo.id);
+                    displayMsg();
+                    toast.clearWaitingQueue(); 
+                            }}>
+          <DeleteIcon id="i" />
+        </button>
+        </div>
+          }
+    </div>
+        
+        <hr style={{margin: "0"}}/>
     </div>
   ))}
   </div>
-  <hr style={{margin: "0"}}/>
+
   </div>
   }
-{/********************tabella Debito************************************************************************/}
-{flagDebiCli &&
-<div className='todo_containerCli mt-5'>
-<div className='row'> 
-<p className='colTextTitle'> Lista Clienti </p>
-</div>
-<div className='row'>
 
-<div className='col-3' >
-<p className='coltext' >Cliente</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' >Debito1</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' >Debito2</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' >Debito3</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' >Debito4</p>
-</div>
-</div>
-
-<div className="scroll">
-  {todosDebi.map((todo) => (
-    <div key={todo.id}>
-    { ta === true &&(
-    <TodoDebiCli
-      key={todo.id}
-      todo={todo}
-      handleDelete={handleDelete}
-      handleEditDeb={handleEditDeb}
-      displayMsg={displayMsg}
-      getCliId={getCliId}
-    />
-     )}
-    </div>
-  ))}
-  </div>
-  <hr style={{margin: "0px", padding:"0px"}}/>
-  </div>
-  }
-   
     </>
       )
 }
-export default AddCliente;
+export default AddFornitori;
 
-//questo file sta combinato insieme a todoClient
+//questo file sta combinato insieme a 

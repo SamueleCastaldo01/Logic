@@ -97,7 +97,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
 <hr style={{margin: "0"}}/>
     <div className="row ">
 {/*****************NOME**************************************************************************** */}
-    <div className="col-2" >
+    <div className="col-3 diviCol"  >
     <h5
       style={{ textDecoration: todo.completed && "line-through"  }}
         type="text"
@@ -113,58 +113,59 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     </div>
 
 {/*********************D1******************************************************************************** */}
-<div className="col-1" style={{padding: "0px"}}>
+<div className="col-1 diviCol" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
-      style={{ textDecoration: todo.completed && "line-through" }}
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
         value={todo.deb1 === "" ? d1 : todo.deb1}
-        className="inpTab"
+        className="inpNumb"
         onChange={handleChangeD1}
       />
     )}
     </div>
 
 {/***********************D2****************************************************************************** */}
-<div className="col-1" style={{padding: "0px"}}>
+<div className="col-1 diviCol" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
-      style={{ textDecoration: todo.completed && "line-through" }}
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
         value={todo.deb2 === "" ? d2 : todo.deb2}
-        className="inpTab"
+        className="inpNumb"
         onChange={handleChangeD2}
       />
     )}
     </div>
 {/*******************D3********************************************************************************** */}
-<div className="col-1" style={{padding: "0px"}}>
+<div className="col-1 diviCol" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
-      style={{ textDecoration: todo.completed && "line-through" }}
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
         value={todo.deb3 === "" ? d3 : todo.deb3}
-        className="inpTab"
+        className="inpNumb"
         onChange={handleChangeD3}
       />
     )}
     </div>
 {/*******************D4********************************************************************************** */}
-<div className="col-1" style={{padding: "0px"}}>
+<div className="col-1 diviCol" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
-      style={{ textDecoration: todo.completed && "line-through" }}
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
         value={todo.deb4 === "" ? d4 : todo.deb4}
-        className="inpTab"
+        className="inpNumb"
         onChange={handleChangeD4}
       />
     )}
     </div>
 {/********************BUTTON********************************************************************************* */}
-      <div className="col">
+      <div className="col diviCol">
       <button
-          className="button-edit"
+      hidden
+          className="button-edit" 
           onClick={() => handleEditDeb(todo, newNomeC, d1, d2, d3, d4)}
         >
           <EditIcon id="i" />

@@ -75,6 +75,21 @@ export function notifyErrorPrezzoUni () {
         });
 }
 //________________________________________________________________________
+export function notifyErrorPrezzoProd () {
+    toast.error('Inserisci il prezzo', {
+        position: "top-center",
+        autoClose: false,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        transition: Slide,
+        theme: "dark",
+        className: "rounded-4"
+        });
+}
+//________________________________________________________________________
 export function notifyErrorDat () {
     toast.error('Questa data già è stata inserita', {
         position: "top-center",

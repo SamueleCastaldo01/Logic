@@ -200,7 +200,7 @@ const createCate = async (e) => {
         ))}
       </SpeedDial>
 
-    <div className="wrapper">
+
       <div><ToastContainer limit={1} /></div>
         <h1 className='title mt-3'>Scaletta</h1>
         <h3>{moment(dataScal.toDate()).format("L")}</h3>
@@ -263,24 +263,26 @@ const createCate = async (e) => {
     
 
       <div ref={componentRef} className='todo_container'>
+      <div className='row'> 
+      <p className='colTextTitle'> Scaletta</p>
+      </div>
       <div className='row'>
-
       <div className='col-2' >
-      <p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Cliente</p>
+      <p className='coltext'>Cliente</p>
       </div>
 
       <div className='col-1' style={{padding: "0px"}}>
-      <p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Debito</p>
+      <p className='coltext'>Debito</p>
       </div>
 
       <div className='col-1' style={{padding: "0px"}}>
-      <p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Asc</p>
+      <p className='coltext'>Asc</p>
       </div>
       <div className='col-1' style={{padding: "0px"}}>
-      <p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Quota</p>
+      <p className='coltext'>Quota</p>
       </div>
       <div className='col' style={{padding: "0px"}}>
-      <p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Note</p>
+      <p className='coltext'>Note</p>
       </div>
       <div className="col"></div>
     </div>
@@ -307,7 +309,7 @@ const createCate = async (e) => {
         </div>
         <hr style={{margin: "0"}}/>
       </div>
-    </div>
+
 
     </>
       )

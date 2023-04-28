@@ -7,7 +7,7 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import { supa, guid, tutti } from '../components/utenti';
 
 
-export default function TodoProdClin({ todo, toggleComplete, handleEdit, displayMsg}) {
+export default function TodoProdForn({ todo, toggleComplete, handleEdit, displayMsg}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -16,13 +16,11 @@ export default function TodoProdClin({ todo, toggleComplete, handleEdit, display
 
 
   const [newNomeP, setNomeP] = React.useState(todo.nomeP);
-  const [newPrezzoUni, setPrezzoUnitario] = React.useState(todo.prezzoUnitario);
-  const [flagCrono, setFlagCrono] = React.useState(false);
 
   const handleSubm = (e) => {
     e.preventDefault();
     console.log("heeey")
-    handleEdit(todo, newNomeP, newPrezzoUni);
+    handleEdit(todo, newNomeP);
   };
 
   const handleChange = (e) => {
@@ -34,15 +32,7 @@ export default function TodoProdClin({ todo, toggleComplete, handleEdit, display
       setNomeP(e.target.value);
     }
   };
-  const handleChangePU = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setNomeP(todo.prezzoUnitario);
-    } else {
-      todo.prezzoUnitario = "";
-      setPrezzoUnitario(e.target.value);
-    }
-  };
+
 //********************************************************************************** */
 //                              NICE
 //********************************************************************************** */
@@ -53,8 +43,8 @@ export default function TodoProdClin({ todo, toggleComplete, handleEdit, display
 
     <form  onSubmit={handleSubm}>
     <div className="row ">
-{/*******************Prodotto************************************************************ */}
-    <div className="col-7 diviCol" >
+{/*********************NomeProdotto********************************************************** */}
+    <div className="col-9 diviCol" >
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -72,34 +62,13 @@ export default function TodoProdClin({ todo, toggleComplete, handleEdit, display
         >{ newNomeP}</h4>
     )}
     </div>
-{/***********************Prezzo unitario******************************************************** */}
-
-<div className="col-3 diviCol" style={{padding: "0px"}}>
-{sup ===true && ( 
-    <input
-      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
-        type="text"
-        value={todo.prezzoUnitario === "" ? newPrezzoUni : todo.prezzoUnitario}
-        className="inpNumb"
-        onChange={handleChangePU}
-      />
-    )}
-    </div>
-{/*********************************************************************************** */}
+{/*******************Button**************************************************************** */}
 
     <div className="col-2 diviCol" style={{padding:"0px", marginTop:"-8px"}}>
-    {gui ===true && (
-    <button
-          className="button-complete"
-          onClick={() => toggleComplete(todo)}
-        >
-          <CheckCircleIcon id="i" />
-        </button>
-        )}
         <button
         hidden
           className="button-edit"
-          onClick={() =>{ { handleEdit(todo, newNomeP, newPrezzoUni); }}}
+          onClick={() =>{ { handleEdit(todo, newNomeP); }}}
         >
           <EditIcon id="i" />
         </button>
@@ -107,7 +76,7 @@ export default function TodoProdClin({ todo, toggleComplete, handleEdit, display
         {sup ===true && (   
         <button className="button-delete"
               onClick={() => {
-                    localStorage.setItem("IdProdClin", todo.id);
+                    localStorage.setItem("IdProdFor", todo.id);
                     displayMsg();
                     toast.clearWaitingQueue(); 
                             }}>

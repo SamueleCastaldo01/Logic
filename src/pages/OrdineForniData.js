@@ -1,42 +1,44 @@
 import React, { useEffect, useState } from 'react'
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, Timestamp, query, where, orderBy, getDocs, serverTimestamp} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, Timestamp, query, where, orderBy, getDocs} from 'firebase/firestore';
 import moment from 'moment/moment';
 import { TextField } from '@mui/material';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { notifyError, notifyErrorDat } from '../components/Notify';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import Button from '@mui/material/Button';
 import 'moment/locale/it'
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from '@mui/icons-material/Close';
 import { supa, guid, tutti } from '../components/utenti';
-import Box from '@mui/material/Box';
 import MiniDrawer from '../components/MiniDrawer';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import Box from '@mui/material/Box';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
-export const AutoComp = [];
+export const AutoComp2 = [];
 
 
-function ScaletData({ getColId }) {
+function OrdineForniData({ getOrdFornId }) {
     const[colle, setColle] = useState([]); 
-    const colleCollectionRef = collection(db, "scalDat"); 
-
-    const [popupActive, setPopupActive] = useState(true); 
-    const [flagDelete, setFlagDelete] = useState(false); 
+    const colleCollectionRef = collection(db, "ordFornDat");
 
 
-    const [nome, setData] = useState("");
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
     const today = new Date(timeElapsed);    //converte
     const [day, setday] = React.useState("");
-    const [titleNav, setTitleNav] = useState("Scaletta");
+    const [flagDelete, setFlagDelete] = useState(false); 
+
+    const [popupActive, setPopupActive] = useState(true);  
+
+    const [nome, setData] = useState("");
+
+
 
     moment.locale("it");
 
@@ -50,22 +52,28 @@ function ScaletData({ getColId }) {
 
 
     const auto = async () => {
-      const q = query(collection(db, "clin"));  //va a prendere tutti i clienti e li mette in questo array AutoComp
+      const q = query(collection(db, "fornitore"));
       const querySnapshot = await  getDocs(q);
       querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data().nomeC);
-      let car = { label: doc.data().nomeC }
-      AutoComp.push(car);
+      console.log(doc.id, " => ", doc.data().nomeF);
+
+      let car = { label: doc.data().nomeF }
+      AutoComp2.push(car);
+
+      for(var i=0; i<10; i++) {
+       console.log(AutoComp2[i])
+      }
       });
       }
-   //_________________________________________________________________________________________________________________
-      const handleChangeDataSelect = (event) => {
-        setday(event.target.value);      //prende il valore del select
-        var ok= event.target.value
-        console.log({ok})
-        today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo
-         localStorage.setItem("bho", today.getTime())
-      };
+  //_________________________________________________________________________________________________________________
+         const handleChangeDataSelect = (event) => {
+          setday(event.target.value);      //prende il valore del select
+          var ok= event.target.value
+          console.log({ok})
+          today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo
+           localStorage.setItem("bho1", today.getTime())
+        };
+
    //_________________________________________________________________________________________________________________
     const setClear = () => {
       setData("");
@@ -83,7 +91,7 @@ function ScaletData({ getColId }) {
     )
 
       const Remove = () => {
-          deleteCol(localStorage.getItem("scalId"), localStorage.getItem("dataEli") );
+          deleteCol(localStorage.getItem("ordId"), localStorage.getItem("ordFornDataEli") );
           toast.clearWaitingQueue(); 
                }
 
@@ -103,7 +111,7 @@ function ScaletData({ getColId }) {
 
     //********************************************************************************** */
   React.useEffect(() => {
-    const collectionRef = collection(db, "scalDat");
+    const collectionRef = collection(db, "ordFornDat");
     const q = query(collectionRef, orderBy("nome", "desc"));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
@@ -114,27 +122,30 @@ function ScaletData({ getColId }) {
       setColle(todosArray);
     });
     return () => unsub();
+
   }, []);
   //_________________________________________________________________________________________________________________
 
-    const deleteCol = async (id) => { 
-        const colDoc = doc(db, "scalDat", id); 
-        console.log(localStorage.getItem("scalDat"), "wewi");
-         
-      //elimina tutti i dati di scaletta della stessa data
-        const q = query(collection(db, "Scaletta"), where("dataScal", "==", localStorage.getItem("dataEli")));
+    const deleteCol = async (id, dat) => { 
+        const colDoc = doc(db, "ordFornDat", id); 
+
+      //elimina tutti i dati di addNota della stessa data
+        const q = query(collection(db, "addNotaForni"), where("data", "==", dat));
         const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (hi) => {
-      // doc.data() is never undefined for query doc snapshots
-        console.log(hi.id, " => ", hi.data().nomeC, hi.data().dataScal);
-        await deleteDoc(doc(db, "Scaletta", hi.id)); 
+        querySnapshot.forEach(async (hi) => {   //elimina la nota: quindi tutti i fornitori presenti
+          const p = query(collection(db, "notaForni"), where("data", "==", dat), where("nomeF", "==", hi.data().nomeF));
+          const querySnapshotp = await getDocs(p);
+          querySnapshotp.forEach(async (hip) => {  //1 elimina tutti i prodotti della lista
+            await deleteDoc(doc(db, "notaForni", hip.id)); 
+          })
+        await deleteDoc(doc(db, "addNotaForni", hi.id)); //2
         });
-        //infine elimina la data
-        await deleteDoc(colDoc); 
+        
+        await deleteDoc(colDoc); //3 infine elimina la data
     }
   //_________________________________________________________________________________________________________________
   const createCol = async (e) => {    
-    e.preventDefault(); 
+    e.preventDefault();  
     var formattedDate = moment(nome).format('DD-MM-YYYY');
     var bol= true
     if(!nome) {            
@@ -142,12 +153,11 @@ function ScaletData({ getColId }) {
       toast.clearWaitingQueue(); 
       return
     }
-    console.log({formattedDate})
-    const q = query(collection(db, "scalDat"), where("data", "==", formattedDate));
+    const q = query(collection(db, "ordFornDat"), where("data", "==", formattedDate));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
   // doc.data() is never undefined for query doc snapshots
-    console.log(doc.id, " => ", doc.data().data, formattedDate);
+    console.log(doc.id, " => ", doc.data().data);
     if (doc.data().data == formattedDate) {
          notifyErrorDat()
          toast.clearWaitingQueue(); 
@@ -157,9 +167,8 @@ function ScaletData({ getColId }) {
     if(bol == true) {
     await addDoc(colleCollectionRef, {
       data: formattedDate,
-      nome,
       dataMilli: nome.getTime(),
-      author: { name: auth.currentUser.displayName, id: auth.currentUser.uid }
+      nome,
     });
     setClear();
     }
@@ -167,16 +176,12 @@ function ScaletData({ getColId }) {
 
 //*************************************************************** */
 //************************************************************** */
-//          INTERFACCIA                                             /
+//          INTERFACE                                             /
 //************************************************************** */
     return ( 
     <> 
-
-
-    <h1 className='title mt-3'> Scaletta</h1>
-
+    <h1 className='title mt-3'> Ordine Fornitori</h1>
     <button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button>
-    
 {/** inserimento Data *************************************************************/}
 {sup ===true && (
         <>    
@@ -202,13 +207,13 @@ function ScaletData({ getColId }) {
   }
   </>
     )}
+{/*************************************************************************************************** */}
 
             <div className="container">
               <div><ToastContainer limit={1} /></div>
 
               <div className="row">
                 <div className="col"> <h3></h3></div>
-
                 <div className="col">
 
                 </div>
@@ -217,74 +222,73 @@ function ScaletData({ getColId }) {
           
                 </div>
               </div>
-{/***************************lista date******************************************* */}
-<div className='todo_containerScorta' style={{width: "400px"}}>
-<div className='row'>
-  <div className='col colTextTitle'>
-    Scaletta
-  </div>
-  <div className='col'>
-  <FormControl >
-        <InputLabel id="demo-simple-select-label"></InputLabel>
-        <Select sx={{height:39, marginLeft:-1, width: 200}}
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          defaultValue={8}
-          onChange={handleChangeDataSelect}
-        >
-          <MenuItem value={8}>Ultimi 7 giorni</MenuItem>
-          <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
-          <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
-          <MenuItem value={366}>Ultimi 365 giorni</MenuItem>
-        </Select>
-      </FormControl>
-  </div>
-</div>
+
+          <div className='todo_containerScorta' style={{width: "400px"}}>
+              <div className='row'>
+                      <div className='col colTextTitle'>
+                       Ordine Forn
+                      </div>
+                      <div className='col'>
+                        <FormControl >
+                        <InputLabel id="demo-simple-select-label"></InputLabel>
+                        <Select sx={{height:39, marginLeft:-1, width: 200}}
+                         labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        defaultValue={8}
+                        onChange={handleChangeDataSelect}>
+                        <MenuItem value={8}>Ultimi 7 giorni</MenuItem>
+                        <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
+                        <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
+                        <MenuItem value={366}>Ultimi 365 giorni</MenuItem>
+                        </Select>
+                        </FormControl>
+                        </div>
+                    </div>
 
                 {colle.map((col) => (
                   <div key={col.id}>
-                  {col.dataMilli >= localStorage.getItem("bho") && 
+                  {col.dataMilli >= localStorage.getItem("bho1") && 
                     <>
-                    <div className="diviCol"  > 
+                    <div className="diviCol" > 
                       <div className="row">
 
-                        <div className="col-9"  onClick={() => {
-                            getColId(col.id, col.nome, col.data)
-                            navigate("/scaletta");
+                        <div className="col-9">
+                        <h3 className='inpTab' onClick={() => {
+                            getOrdFornId(col.id, col.nome, col.data)
+                            navigate("/addnotaforn");
                             auto();
-                            AutoComp.length = 0
-                            }}>
-                        <h3 className='inpTab'>{ moment(col.nome.toDate()).format("L") } &nbsp; { moment(col.nome.toDate()).format('dddd') }</h3>
+                            AutoComp2.length = 0
+                            }}>{ moment(col.nome.toDate()).format("L") } &nbsp; { moment(col.nome.toDate()).format('dddd') }</h3>
                         </div>
                         <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}>  
                         <NavigateNextIcon/>          
                         </div>
+
                         { flagDelete &&
-                        <div className='col' style={{padding:"0px", marginTop:"-8px"}}>
-                         <button
+                        <div className="col" style={{padding:"0px", marginTop:"-8px"}}>    
+                        <button
                          className="button-delete"
                          onClick={() => {
-                            localStorage.setItem("dataEli", col.data);
-                            localStorage.setItem("scalId", col.id);
+                            localStorage.setItem("ordFornDataEli", col.data);
+                            localStorage.setItem("ordId", col.id);
                             displayMsg();
                             toast.clearWaitingQueue(); 
                             }}>
                           <DeleteIcon id="i" />
-                        </button>  
-                        </div>}
-
+                        </button>            
+                        </div>
+                        }
                       </div>
                     </div>
                     <hr style={{margin: "0"}}/>
+
                   </>
-                      }
+                  }
                   </div>
                   ))}
-
+              </div>
             </div>
-            </div>
-
            </>
       )
 }
-export default ScaletData;
+export default OrdineForniData;

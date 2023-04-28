@@ -7,10 +7,11 @@ import { supa, guid, tutti } from '../components/utenti';
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { padding } from "@mui/system";
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 export const AutoCompProd = [];
 
-export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg, getCliId}) {
+export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg, getCliId, flagDelete}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -78,8 +79,8 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
 <form  onSubmit={handleSubm}>
 <hr style={{margin: "0"}}/>
     <div className="row ">
-{/********************************************************************************************* */}
-    <div className="col-2" >
+{/*********************NomeC************************************************************************ */}
+    <div className="col-3 diviCol" >
     <h5
       style={{ textDecoration: todo.completed && "line-through"  }}
         type="text"
@@ -93,8 +94,8 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
         >{ newNomeC}</h5>
 
     </div>
-{/********************************************************************************************* */}
-    <div className="col-4" style={{padding: "0px"}}>
+{/********************Indirizzo************************************************************************* */}
+    <div className="col-4 diviCol" style={{padding: "0px"}}>
     <p className="inpTab" ><a
       style={{ textDecoration: todo.completed && "line-through", textAlign: "center"}}
         href={ newIndirizzoLink }
@@ -103,14 +104,15 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
         >{ newIndirizzo }</a> </p>
     </div>
 
-{/***************************************************************************************************** */}
-<div className="col-1" style={{padding: "0px"}}>
+{/************************partita Iva***************************************************************************** */}
+<div className="col-2 diviCol" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
-      style={{ textDecoration: todo.completed && "line-through" }}
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px"}}
         type="text"
+        className="inpNumb"
         value={todo.partitaIva === "" ? newPartIva : todo.partitaIva}
-        className="inpTab"
+
         onChange={handleChangeIva}
       />
     )}
@@ -118,19 +120,19 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
     <h4
       style={{ textDecoration: todo.completed && "line-through" }}
         type="text"
-        className="inpTab"
+        className="inpNumb"
         >{ newPartIva}</h4>
     )}
     </div>
 
-{/***************************************************************************************************** */}
-<div className="col-1" style={{padding: "0px"}}>
+{/*****************************cellulare************************************************************************ */}
+<div className="col-1 diviCol" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
-      style={{ textDecoration: todo.completed && "line-through" }}
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
         value={todo.cellulare === "" ? newCellulare : todo.cellulare}
-        className="inpTab"
+        className="inpNumb"
         onChange={handleChangeCell}
       />
     )}
@@ -142,15 +144,26 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
         >{ newCellulare}</h4>
     )}
     </div>
+    {/*****************************icona************************************************************************ */}
+    <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}
+     onClick={() => {
+            getCliId(todo.id, todo.nomeC)
+            navigate("/dashclienti");
+            auto();
+            AutoCompProd.length = 0
+                            }}>  
+                        <NavigateNextIcon/>          
+      </div>
 {/***************************************************************************************************** */}
-
-      <div className="col">
+      {flagDelete &&
+      <div className="col-1 diviCol" style={{padding:"0px", marginTop:"-8px"}}>
       <button
+      hidden
           className="button-edit"
           onClick={() => handleEdit(todo, newNomeC, newPartIva, newCellulare)}
         >
           <EditIcon id="i" />
-        </button>
+      </button>
         {sup ===true && (   
         <button type="reset" className="button-delete"                          
           onClick={() => {
@@ -163,7 +176,7 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
         </button>
         )}
       </div>
-
+        }
     </div>
 
 </form>
