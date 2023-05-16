@@ -211,8 +211,6 @@ function OrdineCliData({ getOrdId }) {
 {/*************************************************************************************************** */}
 
             <div className="container">
-              <div><ToastContainer limit={1} /></div>
-
               <div className="row">
                 <div className="col"> <h3></h3></div>
                 <div className="col">

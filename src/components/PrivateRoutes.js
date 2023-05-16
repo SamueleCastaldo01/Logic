@@ -9,9 +9,9 @@ export function PrivateRoutes ({isAuth})  {
 }
 
   
-export function PrivateCate({scalId}) {
+export function PrivateCate({dataScal}) {
     return (
-        scalId ? <Outlet/> : <Navigate to="/"/>
+        dataScal ? <Outlet/> : <Navigate to="/"/>
     );
 }
 
@@ -30,6 +30,12 @@ export function PrivateOrdForn({ordFornId}) {
 export function PrivateNota({notaId}) {
     return (
         notaId ? <Outlet/> : <Navigate to="/ordineclientidata"/>
+    );
+}
+
+export function PrivateAddClientiScalet({notaDat}) {
+    return (
+        notaDat ? <Outlet/> : <Navigate to="/ordineclientidata"/>
     );
 }
 

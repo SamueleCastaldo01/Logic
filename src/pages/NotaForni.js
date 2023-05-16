@@ -150,8 +150,6 @@ const print = async () => {
 //************************************************************** */
     return (  
         <>
-
-    <div><ToastContainer limit={1} /></div>
     <h1 className='title mt-3'>Nota Fornitore</h1>
     <span><button onClick={print}>Stampa </button></span>
       <span><button onClick={() => {

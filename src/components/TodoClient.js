@@ -95,7 +95,7 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
 
     </div>
 {/********************Indirizzo************************************************************************* */}
-    <div className="col-4 diviCol" style={{padding: "0px"}}>
+    <div className="col-5 diviCol" style={{padding: "0px"}}>
     <p className="inpTab" ><a
       style={{ textDecoration: todo.completed && "line-through", textAlign: "center"}}
         href={ newIndirizzoLink }
@@ -125,25 +125,6 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
     )}
     </div>
 
-{/*****************************cellulare************************************************************************ */}
-<div className="col-1 diviCol" style={{padding: "0px"}}>
-    {sup ===true && ( 
-    <input
-      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
-        type="text"
-        value={todo.cellulare === "" ? newCellulare : todo.cellulare}
-        className="inpNumb"
-        onChange={handleChangeCell}
-      />
-    )}
-    {gui ===true && ( 
-    <h4
-      style={{ textDecoration: todo.completed && "line-through" }}
-        type="text"
-        className="inpTab"
-        >{ newCellulare}</h4>
-    )}
-    </div>
     {/*****************************icona************************************************************************ */}
     <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}
      onClick={() => {

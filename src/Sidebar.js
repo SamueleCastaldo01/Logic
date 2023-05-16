@@ -1,120 +1,71 @@
-import React from "react";
-import { 
+import React from 'react';
+import {
   CDBSidebar,
   CDBSidebarContent,
   CDBSidebarFooter,
   CDBSidebarHeader,
   CDBSidebarMenu,
-  CDBSidebarSubMenu,
-  CDBIcon,
-  CDBSidebarMenuItem } from "cdbreact";
-import { NavLink } from "react-router-dom";
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import ContactPageIcon from '@mui/icons-material/ContactPage';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+  CDBSidebarMenuItem,
+} from 'cdbreact';
+import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
-
   return (
     <div
-      className={`app`}
-      style={{ display: "flex", height: "100%", overflow:"scroll initial"}}
+      style={{ display: 'flex', height: '100vh', overflow: 'scroll initial' }}
     >
-      <CDBSidebar
-        textColor="#fff"
-        backgroundColor="#333"
-      >
-        <CDBSidebarHeader
-          prefix={
-            <i className="fa fa-bars fa-large"></i>
-          }
-        >
-          <a href="/" className="text-decoration-none" style={{color:"inherit"}}>
-            Liguori Srl
+      <CDBSidebar textColor="#fff" backgroundColor="#333">
+        <CDBSidebarHeader prefix={<i className="fa fa-bars fa-large"></i>}>
+          <a
+            href="/"
+            className="text-decoration-none"
+            style={{ color: 'inherit' }}
+          >
+            Sidebar
           </a>
         </CDBSidebarHeader>
 
         <CDBSidebarContent className="sidebar-content">
           <CDBSidebarMenu>
-            <NavLink
-              exact
-              to="/"
-              activeClassName="activeClicked"
-            >
-              <CDBSidebarMenuItem
-                icon="sticky-note"
-              >
-               <FormatListBulletedIcon fontSize="medium" className="me-3" />
-                Scaletta
+            <NavLink exact to="/" activeClassName="activeClicked">
+              <CDBSidebarMenuItem icon="columns">Dashboard</CDBSidebarMenuItem>
+            </NavLink>
+            <NavLink exact to="/tables" activeClassName="activeClicked">
+              <CDBSidebarMenuItem icon="table">Tables</CDBSidebarMenuItem>
+            </NavLink>
+            <NavLink exact to="/profile" activeClassName="activeClicked">
+              <CDBSidebarMenuItem icon="user">Profile page</CDBSidebarMenuItem>
+            </NavLink>
+            <NavLink exact to="/analytics" activeClassName="activeClicked">
+              <CDBSidebarMenuItem icon="chart-line">
+                Analytics
               </CDBSidebarMenuItem>
             </NavLink>
             <NavLink
               exact
-              to="/listaclienti"
+              to="/hero404"
+              target="_blank"
               activeClassName="activeClicked"
             >
-              <CDBSidebarMenuItem>
-              <ContactPageIcon fontSize="medium" className="me-3" />
-                Clienti
+              <CDBSidebarMenuItem icon="exclamation-circle">
+                404 page
               </CDBSidebarMenuItem>
             </NavLink>
-            <NavLink
-              exact
-              to="/listafornitori"
-              activeClassName="activeClicked"
-            >
-              <CDBSidebarMenuItem
-                icon="user"
-              >
-                Fornitori
-              </CDBSidebarMenuItem>
-            </NavLink>
-            <NavLink
-              exact
-              to="/ordinefornitoridata"
-              activeClassName="activeClicked"
-            >
-              <CDBSidebarMenuItem icon="sticky-note">
-                Ordine Fornitori
-              </CDBSidebarMenuItem>
-            </NavLink>
-            <NavLink
-              exact
-              to="/scorta"
-              activeClassName="activeClicked"
-            >
-              <CDBSidebarMenuItem>
-              <InventoryIcon fontSize="medium" className="me-3" />
-                Magazzino
-              </CDBSidebarMenuItem>
-            </NavLink>
-            <NavLink
-              exact
-              to="/ordineclientidata"
-              activeClassName="activeClicked"
-            >
-              <CDBSidebarMenuItem icon="sticky-note">
-                Ordine Clienti
-              </CDBSidebarMenuItem>
-            </NavLink>
-          </CDBSidebarMenu>
-          <CDBSidebarMenu>
           </CDBSidebarMenu>
         </CDBSidebarContent>
 
-        <CDBSidebarFooter style={{ textAlign: "center" }}>
+        <CDBSidebarFooter style={{ textAlign: 'center' }}>
           <div
-            className="sidebar-btn-wrapper"
             style={{
-              padding: "20px 5px"
+              padding: '20px 5px',
             }}
           >
+            Sidebar Footer
           </div>
         </CDBSidebarFooter>
       </CDBSidebar>
     </div>
   );
-}
+};
 
 export default Sidebar;

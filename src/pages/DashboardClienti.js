@@ -143,8 +143,6 @@ function DashClienti({ clientId, nomeCli }) {
 
       return ( 
       <>  
-
-      <div><ToastContainer limit={1} /></div>
         <h1 className='title mt-3'> Dashboard Clienti</h1>
         <h2 className='mt-4'>Nome Cliente: {nomeCli} </h2>
 

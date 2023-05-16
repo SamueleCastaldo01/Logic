@@ -7,8 +7,11 @@ import BeenhereIcon from '@mui/icons-material/Beenhere';
 import TodoNota from '../components/TodoNota';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
+import { fontSize } from '@mui/system';
 
 
 function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNota, debit, debTo, indirizzo, tel, iva, completa }) {
@@ -75,9 +78,9 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
         className: "rounded-4"
         })}
 //_________________________________________________________________________________________________________________
-const SomAsc = async () => {
+const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
   var sommaTot=0;
-  const q = query(collection(db, "Nota"), where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC));
+  const q = query(collection(db, "Nota"), where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC));  //prende i prodotti di quel cliente di quella data
   const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       console.log(doc.id, "heeey", " => ", doc.data().nomeC, doc.data().dataC, doc.data().prezzoUniProd);
@@ -112,7 +115,7 @@ const SomAsc = async () => {
           setTodos(todosArray);
         });
         cliEffect();
-        SomAsc();
+        SommaTot();
         localStorage.removeItem("NotaId");
         return () => unsub();
       }, []);
@@ -140,33 +143,44 @@ const createCate = async () => {
   setnomTin("");
   setprezzoTotProd("");
   setprezzoUniProd("");
-  SomAsc();
+  SommaTot();
 };
 //_________________________________________________________________________________________________________________
 const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5, nomTinte) => {
-  var conTinte=0;
+  var conTinte=0;    //alogoritmo per le tinte
   if(tt1) {conTinte=conTinte+1}
   if(tt2) {conTinte=conTinte+1}
   if(tt3) {conTinte=conTinte+1}
   if(tt4) {conTinte=conTinte+1}
   if(tt5) {conTinte=conTinte+1}
   if(!nomTinte){ 
-    nomTinte="bho"
+    nomTinte=""
   conTinte=1 }
   var preT= (conTinte*qt)*prezU;
   await updateDoc(doc(db, "Nota", todo.id), 
   { qtProdotto: qt, prodottoC:prod, prezzoUniProd:prezU, prezzoTotProd:preT, t1:tt1, t2:tt2, t3:tt3, t4:tt4, t5:tt5, nomeTinte:nomTinte});
-  SomAsc();
-  notifyUpdateProd();
+  SommaTot();
   toast.clearWaitingQueue(); 
 };
 //_________________________________________________________________________________________________________________
-const handleEditNumCart = async (e) => {
+const handleAddNumCart = async (e) => {  //non funziona correttamente, quando si preme il pulsante per aggiungere
+  var nuCut
   e.preventDefault();
-  await updateDoc(doc(db, "addNota", notaId), { NumCartoni:NumCart});
-  notifyUpdateProd();
-  toast.clearWaitingQueue(); 
-};
+  setNumCart(+NumCart+1);
+  nuCut=+NumCart+1
+  await updateDoc(doc(db, "addNota", notaId), { NumCartoni: nuCut});
+}
+
+const handleRemoveNumCart = async (e) => {  //quando si preme il pulsante per rimuovere
+  var nuCut
+  e.preventDefault();
+  if(NumCart <= 0) {  //se il numero di cartoni è minore di 0 non fa nulla
+    return
+  }
+  setNumCart(+NumCart-1);
+  nuCut= +NumCart-1
+  await updateDoc(doc(db, "addNota", notaId), { NumCartoni:nuCut});
+}
 
 const handleEditComp = async (e) => {
   await updateDoc(doc(db, "addNota", notaId), { completa: localStorage.getItem("completa")});
@@ -196,7 +210,7 @@ const handleDelete = async (id) => {
   const colDoc = doc(db, "Nota", id); 
   //infine elimina la data
   await deleteDoc(colDoc); 
-  SomAsc();
+  SommaTot();
 };
 //_________________________________________________________________________________________________________________
   //stampa
@@ -218,8 +232,6 @@ const print = async () => {
 //************************************************************** */
     return (  
         <>
-
-    <div><ToastContainer limit={1} /></div>
     <h1 className='title mt-3'>Nota</h1>
 
     <span><button onClick={print}>Stampa </button></span>
@@ -228,12 +240,10 @@ const print = async () => {
       <>
       <span><button onClick={() => {
        FlagT=false
-       console.log({FlagT})
         createCate()
       }}>Aggiungi Prodotto</button></span>
     <span><button onClick={() => {
       FlagT=true
-      console.log({FlagT})
       createCate()
     }}>Aggiungi Tinte</button></span>
       </>}
@@ -326,17 +336,13 @@ const print = async () => {
 
   <div className='row'>
     <div className='col' style={{textAlign:"left", padding:"0px"}}>
-    <form onSubmit={handleEditNumCart}>
-     Numero Cartoni:  <input
-       style={{textAlign:"center", padding: "0px", width:"50px"}}
-        type="text"
-        value={NumCart}
-        className="inpTab"
-        onChange={(event) => {
-          setNumCart(event.target.value);}}
-      />
-      <button hidden type='submit' onClick={handleEditNumCart}>Aggiorna</button>
-    </form>
+    <h6 className='mt-2'>Numero Cartoni: <span> {NumCart} </span> 
+    {Completa == 0 && flagStampa ==false &&
+      <span>
+        <button className="button-complete" style={{padding: "0px"}} onClick={handleAddNumCart}> <AddCircleIcon sx={{ fontSize: 35 }}/> </button>
+        <button className="button-delete" style={{padding: "0px"}} onClick={handleRemoveNumCart}> <RemoveCircleIcon sx={{ fontSize: 35 }}/> </button>
+      </span> }
+    </h6> 
        </div>
 
     <div className='col' style={{textAlign:"right", padding:"0px"}}>

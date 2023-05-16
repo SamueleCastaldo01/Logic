@@ -26,6 +26,11 @@ import { useNavigate } from 'react-router-dom';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
+import Avatar from '@mui/material/Avatar';
+import {signOut} from "firebase/auth";
 
 const drawerWidth = 240;
 
@@ -94,10 +99,20 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-export default function MiniDrawer() {
+export default function MiniDrawer( {signUserOut} ) {
+  const [anchorEl, setAnchorEl] = React.useState(null);
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
+  const [auth, setAuth] = React.useState(localStorage.getItem("isAuth"))
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -124,9 +139,37 @@ export default function MiniDrawer() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             
           </Typography>
+      {auth && 
+          <div >
+            <Avatar alt="Remy Sharp" src={localStorage.getItem("profilePic")} onClick={handleMenu}/>
+              <Menu  sx={
+        { mt: "1px", "& .MuiMenu-paper": 
+        { backgroundColor: "#333",
+          color: "white" }, 
+        }
+        }
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem onClick={handleClose}>My account</MenuItem>
+                <MenuItem onClick={ () => {signUserOut(); handleClose();}}>LogOut</MenuItem>
+              </Menu>
+            </div>}
         </Toolbar>
       </AppBar>
       <Drawer variant="permanent" open={open} 

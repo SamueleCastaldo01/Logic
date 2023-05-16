@@ -135,7 +135,6 @@ function DashFornitori({ fornId, nomeForn }) {
 
       return ( 
       <>  
-      <div><ToastContainer limit={1} /></div>
         <h1 className='title mt-3'> Dashboard Fornitori</h1>
         <h2 className='mt-4'>Nome Fornitore: {nomeForn} </h2>
 

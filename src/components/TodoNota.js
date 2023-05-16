@@ -54,6 +54,7 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
 
   const handleSubm = (e) => {
     e.preventDefault();
+    console.log("sono entrato nel handle")
     handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte)
   };
 //******************************************************************** */
@@ -145,6 +146,7 @@ const handleChangeAge = (event) => {
       <span style={{padding:"0px"}}>
       <input
       style={{ textDecoration: todo.completed && "line-through", textAlign:"center", padding:"0px", width:"30px", marginTop:"0px" }}
+      onBlur={handleSubm}
         type="text"
         value={todo.qtProdotto === "" ? newQtProdotto : todo.qtProdotto}
         className="inpTab"
@@ -167,6 +169,7 @@ const handleChangeAge = (event) => {
       value={newProdotto}
       options={AutoProdCli}
       onInputChange={handleInputChange}
+      onBlur={handleSubm}
       componentsProps={{ popper: { style: { width: 'fit-content' } } }}
       renderInput={(params) => <TextField {...params}  size="small"/>}
     />
@@ -256,6 +259,7 @@ const handleChangeAge = (event) => {
       <input
        style={{textAlign:"left", padding: "0px", width:"95px", marginTop:"0px"}}
         type="text"
+        onBlur={handleSubm}
         value={newPrezzoUni}
         className="inpTab"
         onChange={handleChangePrezzoUni}

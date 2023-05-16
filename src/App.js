@@ -1,10 +1,4 @@
 import React from 'react';
-import BottomNavigation from '@mui/material/BottomNavigation';
-import ContactPageIcon from '@mui/icons-material/ContactPage';
-import InfoTwoToneIcon from '@mui/icons-material/InfoTwoTone';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Paper from '@mui/material/Paper';
 import HomeIcon from '@mui/icons-material/Home';
@@ -15,6 +9,7 @@ import {signOut} from "firebase/auth";
 import './App.css';
 import Page_per from './pages/Page_per';
 import Login from "./pages/Login";
+import { ToastContainer, toast, Slide } from 'react-toastify';
 import ScaletData from './pages/ScaletData';
 import Scalet from './pages/Scalet';
 import AddCliente from './pages/AddCliente';
@@ -22,6 +17,7 @@ import AddFornitori from './pages/AddFornitori';
 import OrdineCliData from './pages/OrdineCliData'
 import OrdineForniData from './pages/OrdineForniData';
 import AddNota from './pages/AddNota';
+import AddClienteScalet from './pages/AddClienteScalet';
 import AddNotaForni from './pages/AddNotaForn';
 import Nota from './pages/Nota';
 import NotaForni from './pages/NotaForni';
@@ -29,11 +25,13 @@ import DashClienti from './pages/DashboardClienti';
 import DashFornitori from './pages/DashboardFornitori';
 import Scorta from './pages/Scorta';
 import { BrowserRouter as Router, Routes, Route, Link} from "react-router-dom";
-import {PrivateRoutes, PrivateCate, PrivatePerm, PrivateDashCli, PrivateOrd, PrivateOrdForn, PrivateNota, PrivateNotaForni, PrivateDashForn} from './components/PrivateRoutes';
+import {PrivateRoutes, PrivateCate, PrivatePerm, PrivateDashCli, PrivateOrd, PrivateOrdForn, PrivateNota, PrivateNotaForni, PrivateDashForn, PrivateAddClientiScalet} from './components/PrivateRoutes';
 import { styled } from "@mui/material/styles";
 import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
 import MiniDrawer from './components/MiniDrawer';
 import Box from '@mui/material/Box';
+import CheckConnection from './components/CheckConnection';
+import { Detector } from 'react-detect-offline';
 
 /*  elimina tutti i dati di una collezione
 const elimDb = async () => {
@@ -46,7 +44,12 @@ const elimDb = async () => {
   }); 
  }  
  */
-  
+
+ const polling = {
+  enabled: true,
+  interval: 500,
+  timeout: 10000
+};
 
 function App() {
   const [value, setValue] = React.useState(0);
@@ -92,6 +95,7 @@ function App() {
   const [notaFornDataV, setNotaFornDataV] = useState(localStorage.getItem("NotaFornDataV"));
   const [notaFornDataC, setNotaFornDataC] = useState(localStorage.getItem("notaFornDataC"));
 
+  const [notaDat, setNotaDat] = useState(localStorage.getItem("notaDat"));
 
   const BottomNavigationAction = styled(MuiBottomNavigationAction)(`
   color: #f6f6f6;
@@ -109,6 +113,10 @@ function App() {
       // ...
     }
   });
+
+  function refreshPage() {
+    window.location.reload(false);
+  }
 
   const getColIdHandler = (id, data, datEl) => {
     localStorage.setItem("scalId", id); //save the value locally
@@ -191,9 +199,21 @@ function App() {
     setNotaFornDataV(datav);
     setNotaFornDataC(datac);
   }
+
+  const getNotaDataScalHandler = (data) => {
+    localStorage.setItem("notaDat", data);
+    setNotaDat(data);
+  }
+
+  const getDataScalHandler = (data) => {
+    localStorage.setItem("dataScal", data);
+    console.log("ok entrato")
+    setDateEli(data);
+  }
   //______________________________________________________________________________________________________________
     //signOut
     const signUserOut = () => {
+      console.log("hui")
       signOut(auth).then(() => {
         localStorage.clear();
         setIsAuth(false);
@@ -206,13 +226,15 @@ function App() {
  <Router> 
  <Box sx={{ display: 'flex' }}> 
 
-  <MiniDrawer/>
+  <MiniDrawer signUserOut={signUserOut}/>
 
-    <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+    <Box component="main" sx={{ flexGrow: 1, p: 3, textAlign: "center" }}>
+    <div><ToastContainer limit={1} /></div>
 
-    <div className='wrapper'>
+<div style={{marginTop: "50px"}}>
 
-  <Routes>
+
+      <Routes>
   <Route element={<PrivateRoutes isAuth={isAuth}/>}>
   <Route element={<PrivatePerm/>}>
     <Route path="/listaclienti" element={<AddCliente getCliId={getCliIdHandler}/>} />
@@ -230,12 +252,16 @@ function App() {
     <Route path="/dashfornitore" element={<DashFornitori fornId={fornId} nomeForn={nomeForn}/>} />
     </Route>
 
-    <Route element={<PrivateCate scalId={scalId}/>}>
-      <Route path="/scaletta" element={<Scalet scalId={scalId} dataScal={dataScal} dateEli={dateEli}/>} />
+    <Route element={<PrivateCate dataScal={dataScal}/>}>
+      <Route path="/scaletta" element={<Scalet  dateEli={dateEli}/>} />
+    </Route>
+
+    <Route element={<PrivateAddClientiScalet notaDat={notaDat}/>}>
+      <Route path="/addclientescaletta" element={<AddClienteScalet notaDat={notaDat} getDataScal={getDataScalHandler}/>} />
     </Route>
 
     <Route element={<PrivateOrd ordId={ordId}/>}>
-      <Route path="/addnota" element={<AddNota ordId={ordId} dataOrd={dataOrd} dataOrdConf={dataOrdConf} getNotaId={getNotadHandler}/>} />
+      <Route path="/addnota" element={<AddNota ordId={ordId} dataOrd={dataOrd} dataOrdConf={dataOrdConf} getNotaId={getNotadHandler} getNotaDataScal={getNotaDataScalHandler}/>} />
     </Route>
 
     <Route element={<PrivateOrdForn ordFornId={ordFornId}/>}>
@@ -258,7 +284,7 @@ function App() {
   {isAuth ? <Route path="*" element={<Page_per /> }/> :
             <Route path="*" element={<Login setIsAuth={setIsAuth} />}/>    }
   </Routes>
-
+  
 {/**************************************************************************************
  {matches &&
   <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3} >
@@ -305,15 +331,15 @@ function App() {
       </Paper>
  }
   */}
-
-</div>
-      
+  </div>
+  
     </Box>
     </Box>
 
 
 
  </Router>
+
 
 </>
   );

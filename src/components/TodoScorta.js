@@ -72,6 +72,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
+        onBlur={handleSubm}
         value={todo.nomeP === "" ? newNomeP : todo.nomeP}
         className="inpNumb"
         onChange={handleChange}
@@ -92,6 +93,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     <h4
       style={{ textDecoration: todo.completed && "line-through" }}
         type="text"
+        onBlur={handleSubm}
         className="inpTab"
       >{todo.quantita === "" ? newQuantita : todo.quantita}</h4>
     )}
@@ -102,6 +104,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
+        onBlur={handleSubm}
         value={todo.sottoScorta === "" ? newSottoScorta : todo.sottoScorta}
         className="inpNumb"
         onChange={handleChangeSs}
@@ -114,6 +117,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
+        onBlur={handleSubm}
         value={todo.quantitaOrdinabile === "" ? newQuantitaOrdinabile : todo.quantitaOrdinabile}
         className="inpNumb"
         onChange={handleChangeQo}

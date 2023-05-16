@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, serverTimestamp, getCountFromServer, limit, where, getDocs} from 'firebase/firestore';
 import TextField from '@mui/material/TextField';
 import { Input } from '@mui/material';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -25,6 +25,7 @@ function AddCliente( {getCliId} ) {
 
   const [todos, setTodos] = React.useState([]);
   const [todosDebi, setTodosDebi] = React.useState([]);
+  const [crono, setCrono] = React.useState([]);
 
   const [indirizzo, setIndirizzo] = React.useState("");
   const [indirizzoLink, setIndirizzoLink] = React.useState("");
@@ -109,6 +110,21 @@ React.useEffect(() => {
     return () => unsub();
 
   }, []);
+                  //cronologia
+  React.useEffect(() => {
+    const collectionRef = collection(db, "cronologiaDeb");
+    const q = query(collectionRef, orderBy("createdAt", "desc"));
+
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let todosArray = [];
+      querySnapshot.forEach((doc) => {
+        todosArray.push({ ...doc.data(), id: doc.id });
+      });
+      setCrono(todosArray);
+    });
+    return () => unsub();
+
+  }, []);
  //******************************************************************************* */
   //speed
   function handleButtonDebito() {
@@ -182,17 +198,37 @@ React.useEffect(() => {
 //****************************************************************************************** */
   const handleEdit = async ( todo, nome, iv, cel) => {
     await updateDoc(doc(db, "clin", todo.id), { nomeC: nome, partitaIva:iv, cellulare:cel});
-    notifyUpdateCli();
     toast.clearWaitingQueue(); 
   };
 
   const handleEditDeb = async ( todo, nome, dd1, dd2, dd3, dd4) => {
-    console.log("entrato")
     await updateDoc(doc(db, "debito", todo.id), { nomeC:nome, deb1:dd1, deb2:dd2, deb3:dd3, deb4:dd4});
-    notifyUpdateCli();
+    if(todo.deb1 != dd1) {    //se il debito varia allora viene aggiunta la trupla, cronologiaDeb, altrimenti niente
+      handleCronologia(todo, dd1)
+    }
     toast.clearWaitingQueue(); 
   };
- //****************************************************************************************** */ 
+   //******************************************************************************************************** */
+   const handleCronologia = async (todo, dd1) => {   //aggiunta della trupla cronologiaDebito;
+    await addDoc(collection(db, "cronologiaDeb"), {
+      autore: auth.currentUser.displayName,
+      createdAt: serverTimestamp(),
+      nomeC: todo.nomeC,
+      deb1: dd1,     //debito nuovo
+      deb1v: todo.deb1,  //debito vecchio   (cosi possiamo vedere la differenza)
+    });
+    //rimuove in modo automatico una volta arrivata a 50 e cancella quello più vecchio
+    const coll = collection(db, "cronologiaDeb");  
+    const snapshot = await getCountFromServer(coll);  //va a verificare quante trupe ne sono
+    if(snapshot.data().count>50) {  //se supera i 50, deve eliminare la trupla più vecchia (quindi la prima dato che è già ordinata)
+      const q = query(collection(db, "cronologiaDeb"), orderBy("createdAt"), limit(1));  //prende solo la prima trupla
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async (hi) => {
+      await deleteDoc(doc(db, "cronologiaDeb", hi.id)); //elimina la trupla (quindi quella più vecchia)
+      });
+    }
+
+};
 
   const handleDelete = async (id, nomeCli) => {
     const colDoc = doc(db, "clin", id); 
@@ -214,17 +250,18 @@ React.useEffect(() => {
     //infine elimina la data
     await deleteDoc(colDoc); 
   };
+
 //**************************************************************************** */
 //                              NICE
 //********************************************************************************** */
     return ( 
     <>  
-    <div><ToastContainer limit={1} /></div>
     <h1 className='title mt-3'> Lista Clienti</h1>
     <div>
         <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Cliente </button></span>
         <span><button onClick={handleButtonAna}>Anagrafiche Clienti</button></span>
         <span><button onClick={handleButtonDebito}>Debito Clienti </button></span>
+        <span><button onClick={handleButtonDebito}>Cronologia Debito </button></span>
         <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
       </div>
 
@@ -291,14 +328,11 @@ React.useEffect(() => {
 <div className='col-3' >
 <p className='coltext' >Cliente</p>
 </div>
-<div className='col-4' style={{padding: "0px"}}>
+<div className='col-5' style={{padding: "0px"}}>
 <p className='coltext' >indirizzo</p>
 </div>
 <div className='col-2' style={{padding: "0px"}}>
 <p className='coltext' >Part. IVA</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' >Cellulare</p>
 </div>
 </div>
 

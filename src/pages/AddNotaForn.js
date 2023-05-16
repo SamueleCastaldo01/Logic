@@ -70,18 +70,19 @@ const contEffect = async () => {
     setCont(snapshot.data().count+1)
   }
 
-    function handleContAdd() {
+    function handleContAdd() {  // si attiva quando vado a creare un nuovo prodotto
         setCont(cont+1);
     }
-    function handleContRem() {
+    function handleContRem() {  // si attiva quando vado ad eliminare un prodotto
         setCont(cont-1);
     }
   
     const contUpdate = async ( dat) => { //si attiva quando viene eliminato un cliente
         var cn=0;
+        console.log("sono entrato")
             const collectionRef = collection(db, "addNotaForni");
               //aggiorna il contatore di tutti i dati di addNotaForni della stessa data
-              const q = query(collectionRef, where("data", "==", dat));
+              const q = query(collectionRef, where("data", "==", dat), orderBy("createdAt"));
               const querySnapshot = await getDocs(q);
               querySnapshot.forEach(async (hi) => {
               await updateDoc(doc(db, "addNotaForni", hi.id), { cont: cn=cn+1});
@@ -111,8 +112,8 @@ const contEffect = async () => {
       )
   
         const Remove = () => {
-            contUpdate(localStorage.getItem("OrdData"))
             handleDelete(localStorage.getItem("OrdFornId"), localStorage.getItem("OrdnomeF"), localStorage.getItem("OrdData"));
+            contUpdate(localStorage.getItem("OrdData"))
             toast.clearWaitingQueue(); 
                  }
   
@@ -242,6 +243,7 @@ const contEffect = async () => {
     await addDoc(collection(db, "addNotaForni"), {
       cont,
       nomeF,
+      createdAt: serverTimestamp(),
       data: dataOrdConf
     });
     cliEffect();
@@ -299,7 +301,6 @@ const contEffect = async () => {
             />
           ))}
         </SpeedDial>
-        <div><ToastContainer limit={1} /></div>
           <h1 className='title mt-3'>Ordine Fornitori</h1>
           <h3 style={{fontSize: "20px"}}>{moment(dataOrd.toDate()).format("L")}</h3>
   

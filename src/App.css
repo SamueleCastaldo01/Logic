@@ -37,7 +37,7 @@ body {
 .wrapper {
   font-family: "Times New Roman";
   text-align: center;
-  height: 90vh;
+  height: 100vh;
   overflow-y: scroll;
   overflow-x: hidden;
   perspective: 20px;
@@ -308,6 +308,7 @@ width: 792px;
 .textOrd,
 .coltext,
 .colTextTitle{
+  cursor: pointer;
   margin-bottom: 0px;
   font-weight: bold;
   text-align: left;
@@ -372,7 +373,7 @@ width: 792px;
 }
 
 .todo_containerCli {
-  width: 1000px;
+  width: 1200px;
 }
 .todo_containerScorta{
   width: 800px;

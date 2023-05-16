@@ -25,11 +25,12 @@ import { StayPrimaryLandscape } from '@mui/icons-material';
 
 
 
-function Scalet({ scalId, dataScal, dateEli }) {
+function Scalet({ dateEli }) {
 
   const [todos, setTodos] = React.useState([]);
   const [nomeC, setNomeC] = React.useState("");
   const [numAsc, setNumAsc] = React.useState("");
+  const [NumCartoni, setNumCartoni] = React.useState("");
   const [debito, setDebito] = React.useState("");
   const [quota, setQuota] = React.useState("");
 
@@ -115,7 +116,6 @@ function HandleSpeedAddScalClien() {
 /******************************************************************************* */
 const createCate = async (e) => {
   e.preventDefault(); 
-  console.log("heyyyy");
   var bol= true
   const q = query(collection(db, "Scaletta"), where("nomeC", "==", nomeC), where("dataScal", "==", dateEli));
   const querySnapshot = await getDocs(q);
@@ -146,7 +146,6 @@ const createCate = async (e) => {
     debito,
     quota,
     createdAt: serverTimestamp(),
-    scalId: scalId,
     dataScal: dateEli,
     note: "",
     completed: false,
@@ -161,10 +160,9 @@ const createCate = async (e) => {
 };
 
 //****************************************************************************************** */
-  const handleEdit = async (todo, nome, numA, not, deb, quot) => {
-    await updateDoc(doc(db, "Scaletta", todo.id), { nomeC: nome, numAsc:numA, note:not, debito:deb, quota:quot});
+  const handleEdit = async (todo, nome, numA, not, deb, quot, ncart) => {
+    await updateDoc(doc(db, "Scaletta", todo.id), { nomeC: nome, numAsc:numA, note:not, debito:deb, quota:quot, NumCartoni:ncart});
     SomAsc();
-    notifyUpdateCli();
     toast.clearWaitingQueue(); 
   };
   const toggleComplete = async (todo) => {
@@ -199,11 +197,8 @@ const createCate = async (e) => {
           />
         ))}
       </SpeedDial>
-
-
-      <div><ToastContainer limit={1} /></div>
         <h1 className='title mt-3'>Scaletta</h1>
-        <h3>{moment(dataScal.toDate()).format("L")}</h3>
+        <h3> {dateEli} </h3>
 
         {!matches &&
       <div>
@@ -274,9 +269,11 @@ const createCate = async (e) => {
       <div className='col-1' style={{padding: "0px"}}>
       <p className='coltext'>Debito</p>
       </div>
-
       <div className='col-1' style={{padding: "0px"}}>
       <p className='coltext'>Asc</p>
+      </div>
+      <div className='col-1' style={{padding: "0px"}}>
+      <p className='coltext'>NCart</p>
       </div>
       <div className='col-1' style={{padding: "0px"}}>
       <p className='coltext'>Quota</p>
@@ -293,7 +290,7 @@ const createCate = async (e) => {
 
         {todos.map((todo) => (
           <div key={todo.id}>
-          {todo.scalId === scalId && ta === true &&(
+          {todo.dataScal === dateEli && ta === true &&(
 
           <Todo
             key={todo.id}

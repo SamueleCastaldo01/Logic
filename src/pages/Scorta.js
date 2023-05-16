@@ -178,8 +178,7 @@ function handlePopUp(image, nota) {
 }
  //******************************************************************************* */
  const handleProdClien = async () => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
-  console.log("ciaaao");
-  const q = query(collection(db, "clin"));  //prendo tutti i clienti
+  const q = query(collection(db, "clin"));  //prendo tutti i clienti, va ad aggiungere i prodotti personalizzati, quando si aggiuge un nuovo prodotto
   const querySnapshot = await getDocs(q);
     querySnapshot.forEach(async (doc) => {
       await addDoc(collection(db, "prodottoClin"), {
@@ -247,10 +246,9 @@ function handlePopUp(image, nota) {
 
   };
  //******************************************************************************************************** */
-  const handleCronologia = async (todo, ag, somma, flag) => {   //creazione cliente
-    console.log({flag})
-    if (flag === "true") {console.log("ciao"); var quant= "+"+ag }
-    else {console.log("ciao2"); var quant= "-"+ag }
+  const handleCronologia = async (todo, ag, somma, flag) => {   //aggiunta della trupla cronologia
+    if (flag === "true") { var quant= "+"+ag }
+    else { var quant= "-"+ag }
       await addDoc(collection(db, "cronologia"), {
         autore: auth.currentUser.displayName,
         createdAt: serverTimestamp(),
@@ -259,16 +257,14 @@ function handlePopUp(image, nota) {
         quantAgg: quant,
         quantFin: somma,
       });
-      //remove automatico una volta arrivata a 100 cancella quello più vecchio
+      //rimuove in modo automatico una volta arrivata a 50 e cancella quello più vecchio
       const coll = collection(db, "cronologia");  
       const snapshot = await getCountFromServer(coll);  //va a verificare quante trupe ne sono
-      if(snapshot.data().count>50) {  //se supera i 50, deve eliminare la trupla più vecchia (quindi la prima dato che è già ordinato)
+      if(snapshot.data().count>50) {  //se supera i 50, deve eliminare la trupla più vecchia (quindi la prima dato che è già ordinata)
         const q = query(collection(db, "cronologia"), orderBy("createdAt"), limit(1));  //prende solo la prima trupla
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach(async (hi) => {
-          console.log(hi.id, " => ", hi.data().quantIni, hi.data().quantFin);
-      // doc.data() is never undefined for query doc snapshots
-        await deleteDoc(doc(db, "cronologia", hi.id)); 
+        await deleteDoc(doc(db, "cronologia", hi.id)); //elimina la trupla (quindi quella più vecchia)
         });
       }
 
@@ -276,7 +272,6 @@ function handlePopUp(image, nota) {
 //****************************************************************************************** */
   const handleEdit = async ( todo, nome, SotSco, quaOrd) => {
     await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd});
-    notifyUpdateProd();
     toast.clearWaitingQueue(); 
   };
 
@@ -509,10 +504,6 @@ function handlePopUp(image, nota) {
     ))}
   </div>
 }
-
-
-          
-    <div><ToastContainer limit={1} /></div>
 
   {/***************************************************************************************************************************************/}
     {/* POPUP VISUALIZZA RICERCA */}

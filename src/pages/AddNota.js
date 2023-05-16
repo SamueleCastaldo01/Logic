@@ -19,12 +19,12 @@ import SpeedDialAction from '@mui/material/SpeedDialAction';
 import PrintIcon from '@mui/icons-material/Print';
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from '@mui/icons-material/Add';
-import DescriptionIcon from '@mui/icons-material/Description';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 export const AutoProdCli = [];
+export const AutoDataScal = [];
 
-function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId }) {
+function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal }) {
  
     const [todos, setTodos] = React.useState([]);
     const [nomeC, setNomeC] = React.useState("");
@@ -51,7 +51,7 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId }) {
     }
 
 //_________________________________________________________________________________________________________________
-    const auto = async (nomeCli) => {
+    const auto = async (nomeCli) => {  //array
       const q = query(collection(db, "prodottoClin"), where("author.name", "==", nomeCli));
       const querySnapshot = await  getDocs(q);
       querySnapshot.forEach((doc) => {
@@ -62,28 +62,36 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId }) {
       AutoProdCli.push(car);
       });
       }
+
+      const autoData = async () => {
+        const q = query(collection(db, "scalDat")); // vado a prendere tutte le date di scaletta, questo devo cercare di mettere un limitatore, o potrebbe creare problemi in caso di parecchie date
+        const querySnapshot = await  getDocs(q);
+        querySnapshot.forEach((hi) => {  
+        let car = { label: hi.data().data }
+        AutoDataScal.push(car);
+        });
+        }
 //_________________________________________________________________________________________________________________
 const contEffect = async () => {
-    console.log({dataOrdConf})
     const coll = collection(db, "addNota");
-    const q = query(coll, where("data", "==", dataOrdConf));
+    const q = query(coll, where("data", "==", dataOrdConf), orderBy("createdAt"));
     const snapshot = await getCountFromServer(q);
     console.log('count: ', snapshot.data().count);
     setCont(snapshot.data().count+1)
   }
 
-    function handleContAdd() {
+    function handleContAdd() {  //si attiva durante la creazione della nota
         setCont(cont+1);
     }
-    function handleContRem() {
+    function handleContRem() {  // si attiva durante la cancellazione della nota
         setCont(cont-1);
     }
   
-    const contUpdate = async ( dat) => { //si attiva quando viene eliminato un cliente
+    const contUpdate = async ( dat) => { //si attiva quando viene eliminato un cliente Contatore, non funziona perfettamente
         var cn=0;
             const collectionRef = collection(db, "addNota");
-              //aggiorna il contatore di tutti i dati di addNota della stessa data
-              const q = query(collectionRef, where("data", "==", dat));
+              //aggiorna il contatore di tutti i dati di addNota della stessa data, in base all'ordine di creazione
+              const q = query(collectionRef, where("data", "==", dat), orderBy("createdAt"));
               const querySnapshot = await getDocs(q);
               querySnapshot.forEach(async (hi) => {
               await updateDoc(doc(db, "addNota", hi.id), { cont: cn=cn+1});
@@ -134,8 +142,8 @@ const contEffect = async () => {
       )
   
         const Remove = () => {
-            contUpdate(localStorage.getItem("OrdData"))
             handleDelete(localStorage.getItem("OrdId"), localStorage.getItem("OrdNomeC"), localStorage.getItem("OrdData"));
+            contUpdate(localStorage.getItem("OrdData"))
             toast.clearWaitingQueue(); 
                  }
   
@@ -213,6 +221,7 @@ const contEffect = async () => {
       NumCartoni:"",
       sommaTotale:0,
       debitoTotale:0,
+      createdAt: serverTimestamp(),
       debitoRes: localStorage.getItem("DebCli"),
       indirizzo: localStorage.getItem("indiri"),
       tel: localStorage.getItem("telefo"),
@@ -272,12 +281,17 @@ const contEffect = async () => {
             />
           ))}
         </SpeedDial>
-        <div><ToastContainer limit={1} /></div>
           <h1 className='title mt-3'>Ordine Clienti</h1>
           <h3 style={{fontSize: "20px"}}>{moment(dataOrd.toDate()).format("L")}</h3>
   
           {!matches &&
         <div>
+          <span><button onClick={ () => {
+              getNotaDataScal(dataOrdConf)
+                navigate("/addclientescaletta");
+                autoData();
+                AutoDataScal.length = 0
+          }}>Aggiungi cliente alla scaletta</button></span>
           <span><button onClick={HandleSpeedAddScalClien}>Aggiungi Cliente </button></span>
           <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
         </div>

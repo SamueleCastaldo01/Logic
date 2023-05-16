@@ -196,7 +196,6 @@ React.useEffect(() => {
 //********************************************************************************** */
     return ( 
     <>  
-    <div><ToastContainer limit={1} /></div>
     <h1 className='title mt-3'> Lista Fornitori</h1>
     <div>
         <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Fornitore</button></span>

@@ -30,6 +30,10 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     e.preventDefault();
     handleEditDeb(todo, newNomeC, d1, d2, d3, d4)
   };
+
+  const handleNiente = (e) => {
+    e.preventDefault();
+  }
 //*************************************************************** */
   const auto = async () => {
     const q = query(collection(db, "prodotto"));
@@ -93,7 +97,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
   return (
     <div className="prova">
 
-<form  onSubmit={handleSubm}>
+<form  onSubmit={handleNiente}>
 <hr style={{margin: "0"}}/>
     <div className="row ">
 {/*****************NOME**************************************************************************** */}
@@ -118,6 +122,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
+        onBlur={handleSubm}
         value={todo.deb1 === "" ? d1 : todo.deb1}
         className="inpNumb"
         onChange={handleChangeD1}
@@ -131,6 +136,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
+        onBlur={handleSubm}
         value={todo.deb2 === "" ? d2 : todo.deb2}
         className="inpNumb"
         onChange={handleChangeD2}
@@ -143,6 +149,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
+        onBlur={handleSubm}
         value={todo.deb3 === "" ? d3 : todo.deb3}
         className="inpNumb"
         onChange={handleChangeD3}
@@ -155,6 +162,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
+        onBlur={handleSubm}
         value={todo.deb4 === "" ? d4 : todo.deb4}
         className="inpNumb"
         onChange={handleChangeD4}
