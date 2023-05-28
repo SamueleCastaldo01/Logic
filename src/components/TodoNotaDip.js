@@ -17,7 +17,7 @@ import { fontSize } from "@mui/system";
 
 export const AutoCompProd = [];
 
-export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, nomeCli, flagStampa, Completa}) {
+export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, flagStampa, Completa}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -156,11 +156,11 @@ const handleChangeAge = (event) => {
     <div className="row " style={{ borderBottom:"solid",  borderWidth: "2px" }}>
 {/**************************QUANTITA'******************************************************************* */}
     <div className="col-1" style={{padding:"0px", }}>    
-    {sup ===true && Completa == 0 &&  ( 
+    {sup ===true && localStorage.getItem("completa") == 0 &&  ( 
       <>
       <span style={{padding:"0px"}}>
       <input
-      style={{ textDecoration: todo.completed && "line-through", textAlign:"center", padding:"0px", width:"60px", marginTop:"0px" }}
+      style={{ textDecoration: todo.completed && "line-through", textAlign:"center", padding:"0px", width:"30px", marginTop:"0px" }}
       onBlur={handleSubm}
         type="number"
         value={todo.qtProdotto === "" ? newQtProdotto : todo.qtProdotto}
@@ -171,7 +171,7 @@ const handleChangeAge = (event) => {
     </>
     )}
 
-    {sup ===true && Completa == 1 &&  ( 
+    {sup ===true && localStorage.getItem("completa") == 1 &&  ( 
       <h3 className="inpTabNota" style={{ textAlign:"center"}}> {todo.qtProdotto} </h3>
     )}
     </div>
@@ -270,38 +270,6 @@ const handleChangeAge = (event) => {
 
     )}
 
-    </div>
-
-{/************************Prezzo Uni***************************************************************************** */}
-<div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px" }}>
-
-    {sup ===true && Completa == 0 && ( 
-      <span style={{ padding: "0px", marginLeft:"5px" }}>€&nbsp;
-      <input
-       style={{textAlign:"left", padding: "0px", width:"95px", marginTop:"0px"}}
-        type="number" step="0.01"
-        onBlur={handlePrezzUniUpd}
-        value={newPrezzoUni}
-        className="inpTab"
-        onChange={handleChangePrezzoUni}
-      /> </span>
-    )}
-
-    {sup ===true && Completa == 1 &&( 
-      <>
-      <h3 className="inpTabNota" style={{ marginLeft: "20px"}}> {todo.prezzoUniProd} €</h3>
-      </>
-    )}
-    </div>
-{/***************************Prezzo Tot************************************************************************** */}
-<div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px", marginBottom:"0px"}}>
-    {sup ===true && ( 
-        <h4 
-      style={{textAlign:"center", fontSize:"16px", marginTop:"0px", paddingTop:"10px"  }}
-        type="text"
-        className="inpTab"
-        >{ todo.prezzoTotProd } €</h4>
-    )}
     </div>
 {/***************************************************************************************************** */}
       <div className="col-1" style={{padding: "0px"}}>

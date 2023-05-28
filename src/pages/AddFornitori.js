@@ -17,6 +17,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
 import TodoDebiCli from '../components/TodoDebiCli';
 import DeleteIcon from "@mui/icons-material/Delete";
+import SearchIcon from '@mui/icons-material/Search';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import MiniDrawer from '../components/MiniDrawer';
 import Box from '@mui/material/Box';
@@ -40,6 +41,9 @@ function AddFornitori( {getFornId} ) {
   const [popupActive, setPopupActive] = useState(false);
   const [flagAnaCli, setFlagAnaCli] = useState(true);   
   const [flagDebiCli, setFlagDebiCli] = useState(false);  
+
+  const [searchTerm, setSearchTerm] = useState("");  //search
+  const inputRef= useRef();
 
   //permessi utente
   let sup= supa.includes(localStorage.getItem("uid"))
@@ -233,7 +237,26 @@ React.useEffect(() => {
 {flagAnaCli &&
 <div className='todo_containerFor mt-5'>
 <div className='row'> 
+<div className='col-5'>
 <p className='colTextTitle'> Lista Fornitori</p>
+</div>
+<div className='col'>
+<TextField
+      inputRef={inputRef}
+      className="inputSearch"
+      onChange={event => {setSearchTerm(event.target.value)}}
+      type="text"
+      placeholder="Ricerca Prodotto"
+      InputProps={{
+      startAdornment: (
+      <InputAdornment position="start">
+      <SearchIcon color='secondary'/>
+      </InputAdornment>
+                ),
+                }}
+       variant="outlined"/>
+</div>
+
 </div>
 <div className='row'>
 <div className='col-4' >
@@ -245,7 +268,13 @@ React.useEffect(() => {
 </div>
 <hr style={{margin: "0"}}/>
 <div className="scroll">
-  {todos.map((todo) => (
+{todos.filter((val)=> {
+        if(searchTerm === ""){
+          return val
+      } else if (val.nomeF.toLowerCase().includes(searchTerm.toLowerCase()) ) {
+        return val
+                }
+            }).map((todo) => (
     <div key={todo.id}>
     <div className='row'>
         <div className='col-4 diviCol'>

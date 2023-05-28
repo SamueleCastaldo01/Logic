@@ -18,6 +18,8 @@ import OrdineCliData from './pages/OrdineCliData'
 import OrdineForniData from './pages/OrdineForniData';
 import AddNota from './pages/AddNota';
 import AddClienteScalet from './pages/AddClienteScalet';
+import NotaDipData from './pages/NotaDipData';
+import NotaDip from './pages/NotaDip';
 import AddNotaForni from './pages/AddNotaForn';
 import Nota from './pages/Nota';
 import NotaForni from './pages/NotaForni';
@@ -32,6 +34,8 @@ import MiniDrawer from './components/MiniDrawer';
 import Box from '@mui/material/Box';
 import CheckConnection from './components/CheckConnection';
 import { Detector } from 'react-detect-offline';
+import moment from 'moment/moment';
+import 'moment/locale/it'
 
 /*  elimina tutti i dati di una collezione
 const elimDb = async () => {
@@ -54,6 +58,13 @@ const elimDb = async () => {
 function App() {
   const [value, setValue] = React.useState(0);
   const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
+
+  const timeElapsed = Date.now();  //prende la data attuale in millisecondi
+  const today = new Date(timeElapsed);    //converte nel tipo data
+  var formattedDate = moment(today).format('DD/MM/YYYY');  //coverte nel formato richiesto
+  localStorage.setItem("today", formattedDate);
+  const [todayC, setTodayC] = useState(localStorage.getItem("today"));  //variabile che andiamo ad utilizzare
+
 
   const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
 
@@ -89,6 +100,11 @@ function App() {
   const [notaTel, setNotaTel] = useState(localStorage.getItem("notaTel"));
   const [notaIva, setNotaIva] = useState(localStorage.getItem("notaIva"));
   const [notaCompleta, setNotaCompleta] = useState(localStorage.getItem("notaCompleta"));
+
+  const [notaDipId, setNotaDipId] = useState(localStorage.getItem("notaDipId"));
+  const [notaDipCont, setNotaDipCont] = useState(localStorage.getItem("notaDipCon"));
+  const [notaDipNomeC, setNotaDipNomeC] = useState(localStorage.getItem("notaDipNomeC"));  
+  const [notaDipDataC, setNotaDipDataC] = useState(localStorage.getItem("notaDipDataC"));
 
   const [notaFornId, setNotaFornId] = useState(localStorage.getItem("NotaFornId")); 
   const [notaFornNomeF, setNotaFornNomeF] = useState(localStorage.getItem("notaFornNomeF")); 
@@ -189,6 +205,17 @@ function App() {
     setNotaCompleta(comp)
   };
 
+  const getNotaDipHandler = (id, cont, nome, datac) => {
+    localStorage.setItem("notaDipId", id);
+    localStorage.setItem("notaDipContC", cont);
+    localStorage.setItem("notaDipNomeC", nome);
+    localStorage.setItem("notaDipDataC", datac); 
+    setNotaDipId(id);
+    setNotaDipCont(cont);
+    setNotaDipNomeC(nome);
+    setNotaDipDataC(datac);
+  }
+
   const getNotafornHandler = (id, nome, datav, datac) => {
     localStorage.setItem("NotaFornId", id);
     localStorage.setItem("notaFornNomeF", nome);
@@ -243,6 +270,8 @@ function App() {
     <Route path="/" element={<ScaletData getColId={getColIdHandler}/>} />
     <Route path="/ordineclientidata" element={<OrdineCliData getOrdId={getOrderIdHandler}/>} />
     <Route path="/ordinefornitoridata" element={<OrdineForniData getOrdFornId={getOrderFornIdHandler}/>} />
+    <Route path="/notadipdata" element={<NotaDipData notaDat={todayC} getNotaDip={getNotaDipHandler}/>} />
+    <Route path="/notadip" element={<NotaDip notaDipId={notaDipId} notaDipCont={notaDipCont} notaDipNome={notaDipNomeC} notaDipDataC={notaDipDataC}/>} />
     
     <Route element={<PrivateDashCli clientId={clientId}/>}>
     <Route path="/dashclienti" element={<DashClienti clientId={clientId} nomeCli={nomeCli}/>} />

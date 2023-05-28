@@ -167,11 +167,17 @@ body {
   font-family: "Times New Roman";
   border: px solid;
   border-radius: 20px;
-  width: 300px;
-  height: 60px;
-  margin-top: 50px;
-  margin-right: 500px;
+  width: 270px;
+  height: 35px;
 }
+.inputSearchOrd .MuiOutlinedInput-root {
+  font-family: "Times New Roman";
+  border: px solid;
+  border-radius: 20px;
+  width: 200px;
+  height: 35px;
+}
+
 
 .totAsc {
   margin-top: 40px;
@@ -290,7 +296,7 @@ width: 792px;
   margin-top: 20px;
 }
 .formScort{
-  height: 505px;
+  height: 250px;
 }
 
 .formAC {
@@ -351,6 +357,7 @@ width: 792px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
+.todo_containerDebCli,
 .todo_containerProdCli,
 .todo_containerOrdCli,
 .todo_containerFor,
@@ -362,12 +369,39 @@ width: 792px;
   padding-right: 10px;
   padding-bottom: 30px;
   margin: 0 auto;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  text-align: center;
   border-width: 3px;
   background-color: #efefef;
   border-radius: 10px;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
 
+.todo_containerDebCli,
+.todo_containerCli,
+.todo_containerScorta,
+.todo_containerFor,
+.todo_containerOrdCli,
+.todo_containerProdCli{
+  max-height: 500;
+  padding-right: 0px;
+}
+
+.scrollOrdCli,
+.scroll {
+  max-height: 830px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding-bottom: 0px;
+}
+.scrollOrdCli{
+  max-height: 500px;
+}
+
+.todo_containerDebCli{
+  width: 800px;
+}
 .todo_container {
   width: 1200px;
 }
@@ -376,7 +410,7 @@ width: 792px;
   width: 1200px;
 }
 .todo_containerScorta{
-  width: 800px;
+  width: 900px;
 }
 .todo_containerFor{
   width: 500px;
@@ -519,7 +553,6 @@ button:focus {
     width: 850x;
     margin: 0 auto;
   }
-
 }
 
 @media screen and (max-width: 392px) { /* smartphone iphone x*/ 
@@ -545,4 +578,12 @@ button:focus {
   }
 }
 
+@media screen and (max-width: 1370px) { /* surface pro 7*/
+  .scroll {
+    max-height: 510px;
+  }
+  .scrollOrdCli{
+    max-height: 300px;
+  }
+}
 

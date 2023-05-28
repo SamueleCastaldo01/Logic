@@ -1,22 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp} from 'firebase/firestore';
 import { useRef } from 'react';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
-import TodoNota from '../components/TodoNota';
-import TodoNotaForni from '../components/TodoNotaForni';
-import { getCountFromServer } from 'firebase/firestore';
-import { TextField } from '@mui/material';
+import BeenhereIcon from '@mui/icons-material/Beenhere';
+import TodoNotaDip from '../components/TodoNota';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
-
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
+import { fontSize } from '@mui/system';
 
 
-
-function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
+function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC }) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -24,16 +22,29 @@ function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
     const [todos, setTodos] = React.useState([]);
-
+    const [indirizzoC, setIndirizzoC] = React.useState("");
+    const [partitaIvaC, setPartitaIvaC] = React.useState("");
+    const [cellulareC, setCellulareC] = React.useState("");
     const [prodottoC, setProdottoC] = React.useState("");
+    const [t1, setT1] = React.useState("");   //tinte, che dentro una trupla ci possono essere massimo 5
+    const [t2, setT2] = React.useState("");
+    const [t3, setT3] = React.useState("");
+    const [t4, setT4] = React.useState("");
+    const [t5, setT5] = React.useState("");
+    const [nomTin, setnomTin] = React.useState("");
+    const [Completa, setCompleta] = useState(0);
 
+    const timeElapsed = Date.now();  //prende la data attuale in millisecondi
+    const today = new Date(timeElapsed);    //converte da millisecondi a data
 
     var FlagT=false;   //flag per le tinte, viene salvato nel database serve per far riconoscere ogni singola trupla
     const [flagStampa, setFlagStampa] = React.useState(false);  //quando è falso si vedono le icone,
    
     const [sumTot, setSumTot] =React.useState("");
 
-    const [quantita, setquantita] = React.useState("1");
+    const [qtProdotto, setQtProdotto] = React.useState("1");
+    const [prezzoUniProd, setprezzoUniProd] = React.useState("");
+    const [prezzoTotProd, setprezzoTotProd] = React.useState("");
 
     const componentRef = useRef();  //serve per la stampa
    //_________________________________________________________________________________________________________________
@@ -48,7 +59,6 @@ function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
     )
 
       const Remove = () => {
-          handleDelete(localStorage.getItem("IDNOTa"));
           toast.clearWaitingQueue(); 
                }
 
@@ -65,33 +75,10 @@ function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
         theme: "dark",
         className: "rounded-4"
         })}
-//_________________________________________________________________________________________________________________
-const SomAsc = async () => {
-  var sommaTot=0;
-  const q = query(collection(db, "Nota"), where("nomeC", "==", nomeForni), where("dataC", "==", dataNotaC));
-  const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      console.log(doc.id, "heeey", " => ", doc.data().nomeC, doc.data().dataC, doc.data().prezzoUniProd);
-      sommaTot=+doc.data().prezzoTotProd +sommaTot;
-      });
-      setSumTot(sommaTot);
-      await updateDoc(doc(db, "addNota", notaId), { sommaTotale:sommaTot});  //aggiorna la somma totale nell'add nota
-}
-
-//********************************************************************************** */
-    const cliEffect = async () => {  //funzione per l'anagrafica del cliente
-      const collectionRef = collection(db, "clin");
-        //aggiorna il contatore di tutti i dati di addNota della stessa data
-        const q = query(collectionRef, where("nomeC", "==", nomeForni));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (hi) => {
-        });
-        
-    }
 //********************************************************************************** */
   
      React.useEffect(() => {
-        const collectionRef = collection(db, "notaForni");
+        const collectionRef = collection(db, "Nota");
         const q = query(collectionRef, orderBy("createdAt"));
         const unsub = onSnapshot(q, (querySnapshot) => {
           let todosArray = [];
@@ -100,36 +87,10 @@ const SomAsc = async () => {
           });
           setTodos(todosArray);
         });
-        cliEffect();
-        SomAsc();
-        localStorage.removeItem("NotaForniId");
+        localStorage.removeItem("NotaDipId");
         return () => unsub();
       }, []);
-//********************************************************************************** */
 
-const createCate = async () => {
-
-  await addDoc(collection(db, "notaForni"), {
-    data: dataNotaC,
-    nomeF: nomeForni,
-    nomeP: "",
-    quantita: 1,
-    createdAt: serverTimestamp(),
-  });
-};
-//_________________________________________________________________________________________________________________
-const handleEdit = async ( todo, qt, prod) => {
-  await updateDoc(doc(db, "notaForni", todo.id), 
-  { quantita: qt, nomeP: prod});
-  notifyUpdateProd();
-  toast.clearWaitingQueue(); 
-};
-//_________________________________________________________________________________________________________________
-const handleDelete = async (id) => {
-  const colDoc = doc(db, "notaForni", id); 
-  //infine elimina la data
-  await deleteDoc(colDoc); 
-};
 //_________________________________________________________________________________________________________________
   //stampa
  const handlePrint = useReactToPrint({
@@ -150,30 +111,19 @@ const print = async () => {
 //************************************************************** */
     return (  
         <>
-    <h1 className='title mt-3'>Nota Fornitore</h1>
-    <span><button onClick={print}>Stampa </button></span>
-      <span><button onClick={() => {
-       FlagT=false
-       console.log({FlagT})
-        createCate()
-      }}>Aggiungi Prodotto</button></span>
-    
-    <div ref={componentRef} className="foglioA4" style={{paddingLeft:"50px", paddingRight:"50px", paddingTop:"20px"}}>
+    <h1 className='title mt-3'>NotaDip</h1>
+
+    <div className='container'>
     <div className='row rigaNota' >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
-            <h3 className='mb-4'>{nomeForni} </h3>
-            
+        <h5 style={{marginBottom:"0px", marginTop:"0px"}}> {notaDipNome} </h5>
         </div>
 
         <div className='col'  style={{textAlign:"left", padding:"0px", marginLeft:"5px"}}>
-        <h4>Data: {dataNotaC} </h4>
+        <h4 style={{marginBottom:"9px"}}> <b>N.</b> <span style={{marginRight:"10px"}}>{notaDipCont}</span> <span style={{fontSize:"13px"}}><b>del</b></span> {notaDipDataC} </h4>
     </div>
     </div>
-
-    <div className='row rigaNota'>
-
-    </div>
-{/***********tabella visuallizza prodotto************************************************** */}
+{/***********tabella aggiunta prodotto************************************************** */}
   <div className='row' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
     <div className='col-1' style={{padding:"0px"}}>Qt</div>
     <div className='col-6' style={{padding:"0px"}}>Prodotto</div>
@@ -183,17 +133,18 @@ const print = async () => {
   <div className="scrollNota">
   {todos.map((todo) => (
     <div key={todo.id}>
-    {todo.nomeF  === nomeForni && todo.data == dataNotaC &&  (
+    {todo.nomeC  === notaDipNome && todo.dataC == notaDipDataC &&  (
       <>
     { ta === true &&(
-    <TodoNotaForni
+    <TodoNotaDip
       key={todo.id}
       todo={todo}
-      handleDelete={handleDelete}
-      handleEdit={handleEdit}
+      handleDelete={""}
+      handleEdit={""}
       displayMsg={displayMsg}
-      nomeForni={nomeForni}
+      nomeCli={notaDipNome}
       flagStampa={flagStampa}
+      Completa={""}
     />
      )}
      </>
@@ -202,8 +153,31 @@ const print = async () => {
   ))}
   </div>
 
+  <div className='row'>
+    <div className='col' style={{textAlign:"left", padding:"0px"}}>
+    <h6 className='mt-2'>Numero Cartoni: <span> Bho </span> 
+    {Completa == 0 && flagStampa ==false &&
+      <span>
+        <button className="button-complete" style={{padding: "0px"}} onClick={""}> <AddCircleIcon sx={{ fontSize: 35 }}/> </button>
+        <button className="button-delete" style={{padding: "0px"}} onClick={""}> <RemoveCircleIcon sx={{ fontSize: 35 }}/> </button>
+      </span> }
+    </h6> 
+       </div>
+
+    <div className='col' style={{textAlign:"right", padding:"0px"}}>
+    {flagStampa == false && <>
+  {Completa==0 ?  <button onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1); }}>Conferma</button> :
+    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0);  }}>Annulla Conferma</button>
+     }
+  </>}
+
+    
+    </div>
+
+  </div>
+
     </div>
     </>
       )
 }
-export default NotaForni;
+export default NotaDip;

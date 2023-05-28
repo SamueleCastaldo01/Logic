@@ -25,7 +25,7 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 export const AutoProdCli = [];
 
-function AddClienteScalet({notaDat, getDataScal }) {
+function NotaDipData({notaDat, getNotaDip }) {
  
     const [todos, setTodos] = React.useState([]);
     const [todosScalet, setTodosScalet] = React.useState([]);
@@ -34,11 +34,8 @@ function AddClienteScalet({notaDat, getDataScal }) {
     const [nomeC, setNomeC] = React.useState("");
     const [cont, setCont] = React.useState(1);
     const [flagDelete, setFlagDelete] = useState(false); 
-    const [debitoRes, setDebitoRes] = React.useState("");
-    const [indirizzo, setIndirizzo] = React.useState("");
-    const [telefono, setTelefono] = React.useState("");
 
-    const [dataSc, setDataSc] = React.useState("");
+    const [dataSc, setDataSc] = React.useState(notaDat);
 
     const [popupActive, setPopupActive] = useState(true);  
   
@@ -57,7 +54,6 @@ function AddClienteScalet({notaDat, getDataScal }) {
     }
 //_________________________________________________________________________________________________________________
 const contEffect = async () => {
-    console.log({notaDat})
     const coll = collection(db, "addNota");
     const q = query(coll, where("data", "==", notaDat));
     const snapshot = await getCountFromServer(q);
@@ -115,22 +111,6 @@ const contEffect = async () => {
       localStorage.removeItem("OrdId");
       return () => unsub();
     }, []);
-
-    React.useEffect(() => {
-        const collectionRef = collection(db, "Scaletta");
-        const q = query(collectionRef, orderBy("createdAt"));
-    
-        const unsub = onSnapshot(q, (querySnapshot) => {
-          let todosArray = [];
-          querySnapshot.forEach((doc) => {
-            todosArray.push({ ...doc.data(), id: doc.id });
-          });
-          setTodosScalet(todosArray);
-        });
-        contEffect();
-        localStorage.removeItem("OrdId");
-        return () => unsub();
-      }, []);
   /******************************************************************************* */
   const createCate = async ( nomeCli, nCart, debTot, dataAddNota) => {
     var bol= true
@@ -193,36 +173,32 @@ const contEffect = async () => {
   //********************************************************************************** */
       return ( 
       <>  
-        <SpeedDial
-          ariaLabel="SpeedDial basic example"
-          hidden={!matches}
-          sx={{ position: 'absolute', bottom: 120, right: 36 }}
-          icon={<SpeedDialIcon />}
-        >
-          {actions.map((action) => (
-            <SpeedDialAction
-              key={action.name}
-              icon={action.icon}
-              tooltipTitle={action.name}
-              onClick={action.action}
-            />
-          ))}
-        </SpeedDial>
-          <h1 className='title mt-3'>Aggiungi Cliente alla Scaletta</h1>
+          <h1 className='title mt-3'>Nota Dip. Data</h1>
           {!matches &&
         <div>
           <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
         </div>
       }
   
-  {/**************tabella********************************************************************************************************/}
+  {/**************tabelle********************************************************************************************************/}
       <div className='row'>
         <div className='col'>
         {/***********tabella note completate********************************************************************************** */}
         <div  className='todo_containerOrdCli mt-5'>
         <div className='row'> 
-        <p className='colTextTitle'> Ordine Clienti &ensp; &ensp;&ensp;  {notaDat}</p>
-        <p className='textOrd'> Note Completate</p>
+        <div className='col'>
+        <p className='colTextTitle'> Ordine Clienti</p>
+        <p className='textOrdRed'> Note non completate</p>
+        </div>
+        <div className='col'>
+        <Autocomplete
+      value={dataSc}
+      options={AutoDataScal}
+      onInputChange={handleInputChange}
+      componentsProps={{ popper: { style: { width: 'fit-content' } } }}
+      renderInput={(params) => <TextField {...params} label="Seleziona la data" />}/>
+        </div>
+
         </div>
         <div className='row'>
         <div className='col-1' >
@@ -236,7 +212,7 @@ const contEffect = async () => {
       <hr style={{margin: "0"}}/>
        {todos.map((todo) => (
           <div key={todo.id}>
-          {todo.data  === notaDat && todo.completa === "1" &&  (
+          {todo.data  === dataSc && todo.completa === "0" &&  (
       <>
     <div className='row'>
         <div className='col-1 diviCol'>
@@ -244,14 +220,13 @@ const contEffect = async () => {
         </div>
          <div className='col-8 diviCol' 
           onClick={() => {
-
+            getNotaDip(todo.id, todo.cont, todo.nomeC, dataSc)
+                navigate("/notadip");
                          }}>
              <p className="inpTab"  style={{textAlign: "left"}}>{todo.nomeC}</p>
         </div>
         <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}>  
-           <button onClick={ ()=> {
-            createCate(todo.nomeC, todo.NumCartoni, todo.debitoTotale, todo.data)
-           }}> Add </button>          
+                        <NavigateNextIcon/>          
         </div>
     </div>
     <hr style={{margin: "0"}}/>
@@ -260,66 +235,9 @@ const contEffect = async () => {
           </div>
         ))} 
         </div>
-        </div>
-        <div className='col'> 
-{/**********Tabella Scaletta********************************************************************** */}
-<div  className='todo_containerOrdCli mt-5'>
-        <div className='row'> 
-        <div className='col-4'>
-            <p className='colTextTitle' onClick={ ()=> {
-            getDataScal(dataSc)
-                navigate("/scaletta");
-            }}> <u>Scaletta</u></p>                
-        </div>
-        <div className='col'>
-        <Autocomplete
-      value={dataSc}
-      options={AutoDataScal}
-      onInputChange={handleInputChange}
-      componentsProps={{ popper: { style: { width: 'fit-content' } } }}
-      renderInput={(params) => <TextField {...params} label="Seleziona la data" />}/>
-        </div>
-        </div>
-        <div className='row'>
-        <div className='col-8' >
-        <p className='coltext'>Cliente</p>
-        </div>
-        
-      </div>
-      <hr style={{margin: "0"}}/>
-       {todosScalet.map((todo) => (
-          <div key={todo.id}>
-          {todo.dataScal  === dataSc  &&  (
-      <>
-    <div className='row'>
-         <div className='col-8 diviCol' 
-          onClick={() => {
-                         }}>
-             <p className="inpTab"  style={{textAlign: "left"}}>{todo.nomeC}</p>
-        </div>
-        { flagDelete &&
-            <div className='col diviCol' style={{padding:"0px", marginTop:"-8px"}}>
-                <button
-                className="button-delete"
-                onClick={() => {
-                localStorage.setItem("scalId", todo.id);
-                displayMsg();
-                toast.clearWaitingQueue(); 
-                            }}>
-                <DeleteIcon id="i" />
-                </button>  
-            </div>}
-    </div>
-    <hr style={{margin: "0"}}/>
-             </>
-                  )}
-          </div>
-        ))} 
-        </div>
-
         </div>
       </div>
       </>
         )
   }
-export default AddClienteScalet;
+export default NotaDipData;

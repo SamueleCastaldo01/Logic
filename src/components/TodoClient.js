@@ -77,7 +77,6 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
     <div className="prova">
 
 <form  onSubmit={handleSubm}>
-<hr style={{margin: "0"}}/>
     <div className="row ">
 {/*********************NomeC************************************************************************ */}
     <div className="col-3 diviCol" >
@@ -162,7 +161,7 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
 
 </form>
 
-
+<hr style={{margin: "0"}}/>
     </div>
   );
 }

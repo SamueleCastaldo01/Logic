@@ -372,26 +372,15 @@ function handlePopUp(image, nota) {
       <div className="input_container">
       <TextField className='inp mt-2' id="filled-basic" label="Nome Prodotto" variant="outlined" autoComplete='off' value={nomeP} 
         onChange={(e) => setNomeP(e.target.value)}/>
-      <TextField className='inp mt-2' type="number" id="filled-basic" label="Prezzo" variant="outlined" autoComplete='off' value={prezzoIndi} 
+      <TextField className='inp mt-2' type="number"                 
+        inputProps={{
+                  step: 0.01,
+                }} id="filled-basic" label="Prezzo" variant="outlined" autoComplete='off' value={prezzoIndi} 
         onChange={(e) => setPrezzoIndi(e.target.value)}
         InputProps={{
             startAdornment: <InputAdornment position="start">€</InputAdornment>,
           }}
         />
-      <Autocomplete
-      className='mt-2'
-        value={brand}
-        options={arrBrand}
-        onInputChange={handleInputChangeBrand}
-        componentsProps={{ popper: { style: { width: 'fit-content' } } }}
-        renderInput={(params) => <TextField {...params} label="Brand" />}
-      />
-      <TextField className='inp mt-2' type="number" id="filled-basic" label="Quantità" variant="outlined" autoComplete='off' value={quantita} 
-        onChange={(e) => setQuantita(e.target.value)}/>
-      <TextField className='inp mt-2' type="number" id="filled-basic" label="Sotto Scorta" variant="outlined" autoComplete='off' value={sottoScorta} 
-        onChange={(e) => setSottoScorta(e.target.value)}/>
-      <TextField className='inp mt-2' type="number" id="filled-basic" label="Quantità ordinabile" variant="outlined" autoComplete='off' value={quantitaOrdinabile} 
-        onChange={(e) => setquantitaOrdinabile(e.target.value)}/>
       </div>
       <div className="btn_container">
       <Button  type='submit' variant="outlined" >Aggiungi Prodotto </Button>
@@ -402,12 +391,20 @@ function handlePopUp(image, nota) {
     </>
     )}
 
-{/** tabella per anagrafica cli *****************************************************************************************************************/}
+{/** tabella prodotti nel magazzino *****************************************************************************************************************/}
 {popupActiveScorta &&
 <>
-    <TextField
+
+
+<div ref={componentRef} className='todo_containerScorta mt-5'>
+<div className='row' > 
+<div className='col-7'>
+<p className='colTextTitle'> Magazzino</p>
+</div>
+<div className='col'>
+<TextField
       inputRef={inputRef}
-      className="inputSearch "
+      className="inputSearch"
       onChange={event => {setSearchTerm(event.target.value)}}
       type="text"
       placeholder="Ricerca Prodotto"
@@ -419,13 +416,11 @@ function handlePopUp(image, nota) {
                 ),
                 }}
        variant="outlined"/>
+  </div>
 
-<div ref={componentRef} className='todo_containerScorta '>
-<div className='row'> 
-<p className='colTextTitle'> Magazzino</p>
 </div>
 
-<div className='row'>
+<div className='row' style={{marginRight: "5px"}}>
 <div className='col-4' >
 <p className='coltext'>Prodotto</p>
 </div>
@@ -441,6 +436,7 @@ function handlePopUp(image, nota) {
 <div className='col-1' style={{padding: "0px"}}>
 <p className='coltext'>Agg</p>
 </div>
+<hr style={{margin: "0"}}/>
 </div>
 
 <div className="scroll">
@@ -469,7 +465,6 @@ function handlePopUp(image, nota) {
     </div>
   ))}
   </div>
-  <hr style={{margin: "0"}}/>
   </div>
   </>
 }
@@ -477,21 +472,22 @@ function handlePopUp(image, nota) {
 
 {/* tabella cronologia*******************************************************************************************************************/}
 {popupActiveCrono &&
-  <div className='todo_containerCli mt-3'>
+  <div className='todo_containerCli mt-5'>
   <div className='row'> 
 <p className='colTextTitle'> Cronologia</p>
 </div>
-  <div className='row' style={{padding: "0px"}}>
+  <div className='row' style={{marginRight: "5px"}}>
       <div className='col-3'><p className='coltext' >DataModifica</p></div>
       <div className='col-3' style={{padding: "0px"}}><p className='coltext' >Prodotto</p> </div>
       <div className='col-2' style={{padding: "0px"}}><p className='coltext'>Autore</p></div>
       <div className='col-1' style={{padding: "0px"}}><p className='coltext'>ValoreIni</p></div>
       <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Modifica</p></div>
       <div className='col-1' style={{padding: "0px"}}><p className='coltext'>ValoreFin</p></div>
+      <hr style={{margin: "0"}}/>
     </div>
+    <div className="scroll">
   {crono.map((col) => (
     <div key={col.id}>
-    <hr style={{margin: "0"}}/>
     <div className='row' style={{padding: "0px"}}>
       <div className='col-3 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
       <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeP} </p> </div>
@@ -499,9 +495,11 @@ function handlePopUp(image, nota) {
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantIni}</p></div>
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantAgg}</p></div>
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantFin}</p></div>
+      <hr style={{margin: "0"}}/>
     </div>
     </div>
     ))}
+    </div>
   </div>
 }
 

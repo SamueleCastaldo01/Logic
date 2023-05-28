@@ -19,6 +19,7 @@ import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import AdUnitsIcon from '@mui/icons-material/AdUnits';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ContactPageIcon from '@mui/icons-material/ContactPage';
@@ -31,6 +32,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import Avatar from '@mui/material/Avatar';
 import {signOut} from "firebase/auth";
+  
 
 const drawerWidth = 240;
 
@@ -105,6 +107,11 @@ export default function MiniDrawer( {signUserOut} ) {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
   const [auth, setAuth] = React.useState(localStorage.getItem("isAuth"))
+  const [selectedIndex, setSelectedIndex] = React.useState(1);
+
+  const handleListItemClick = (event, index) => {
+    setSelectedIndex(index);
+  };
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -191,6 +198,8 @@ export default function MiniDrawer( {signUserOut} ) {
 
         <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/scorta")}}>
               <ListItemButton
+          selected={selectedIndex === 0}
+          onClick={(event) => handleListItemClick(event, 0)}
                 sx={{
                   minHeight: 48,
                   justifyContent: open ? 'initial' : 'center',
@@ -212,6 +221,8 @@ export default function MiniDrawer( {signUserOut} ) {
 
         <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/")}}>
               <ListItemButton
+          selected={selectedIndex === 1}
+          onClick={(event) => handleListItemClick(event, 1)}
                 sx={{
                   minHeight: 48,
                   justifyContent: open ? 'initial' : 'center',
@@ -233,6 +244,8 @@ export default function MiniDrawer( {signUserOut} ) {
 
           <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/listaclienti")}}>
               <ListItemButton
+                        selected={selectedIndex === 2}
+          onClick={(event) => handleListItemClick(event, 2)}
                 sx={{
                   minHeight: 48,
                   justifyContent: open ? 'initial' : 'center',
@@ -254,6 +267,8 @@ export default function MiniDrawer( {signUserOut} ) {
 
           <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/listafornitori")}}>
               <ListItemButton
+                selected={selectedIndex === 3}
+                onClick={(event) => handleListItemClick(event, 3)}
                 sx={{
                   minHeight: 48,
                   justifyContent: open ? 'initial' : 'center',
@@ -275,6 +290,8 @@ export default function MiniDrawer( {signUserOut} ) {
 
           <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/ordineclientidata")}}>
               <ListItemButton
+                  selected={selectedIndex === 4}
+                 onClick={(event) => handleListItemClick(event, 4)}
                 sx={{
                   minHeight: 48,
                   justifyContent: open ? 'initial' : 'center',
@@ -296,6 +313,8 @@ export default function MiniDrawer( {signUserOut} ) {
 
           <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/ordinefornitoridata")}}>
               <ListItemButton
+                selected={selectedIndex === 5}
+                 onClick={(event) => handleListItemClick(event, 5)}
                 sx={{
                   minHeight: 48,
                   justifyContent: open ? 'initial' : 'center',
@@ -312,6 +331,29 @@ export default function MiniDrawer( {signUserOut} ) {
                   <ReceiptLongIcon sx={{ color: "white" }}/>
                 </ListItemIcon>
                 <ListItemText primary="Ordine Fornitori" sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+          </ListItem>
+
+          <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/notadipdata")}}>
+              <ListItemButton
+                selected={selectedIndex === 6}
+                 onClick={(event) => handleListItemClick(event, 6)}
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? 'initial' : 'center',
+                  px: 2.5,
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : 'auto',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <AdUnitsIcon sx={{ color: "white" }}/>
+                </ListItemIcon>
+                <ListItemText primary="Nota Dip" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
           </ListItem>
 

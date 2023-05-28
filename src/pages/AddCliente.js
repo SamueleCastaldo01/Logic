@@ -16,6 +16,8 @@ import { tutti } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
 import TodoDebiCli from '../components/TodoDebiCli';
+import SearchIcon from '@mui/icons-material/Search';
+import moment from 'moment';
 import MiniDrawer from '../components/MiniDrawer';
 import Box from '@mui/material/Box';
 
@@ -42,6 +44,11 @@ function AddCliente( {getCliId} ) {
   const [flagAnaCli, setFlagAnaCli] = useState(true);   
   const [flagDebiCli, setFlagDebiCli] = useState(false);
   const [flagDelete, setFlagDelete] = useState(false);  
+  const [popupActiveCrono, setPopupActiveCrono] = useState(false);  
+
+  const [searchTerm, setSearchTerm] = useState("");  //search
+  const inputRef= useRef();
+
 
   //permessi utente
   let sup= supa.includes(localStorage.getItem("uid"))
@@ -130,13 +137,20 @@ React.useEffect(() => {
   function handleButtonDebito() {
     setFlagAnaCli(false)
     setFlagDebiCli(true)
+    setPopupActiveCrono(false)
   } 
 
   function handleButtonAna() {
     setFlagAnaCli(true)
     setFlagDebiCli(false)
+    setPopupActiveCrono(false)
   } 
 
+  function handleButtonCronoDeb() {
+    setFlagAnaCli(false)
+    setFlagDebiCli(false)
+    setPopupActiveCrono(true)
+  } 
  //******************************************************************************* */
     //funzione che permette il caricamento automatico dell'aggiunta del prodotto personalizzato
  const handleProdClien = async () => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
@@ -164,8 +178,6 @@ React.useEffect(() => {
     const q = query(collection(db, "clin"), where("nomeC", "==", nomeC));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-  // doc.data() is never undefined for query doc snapshots
-    console.log(doc.id, " => ", doc.data().nomeC);
     if (doc.data().nomeC == nomeC) {
         notifyErrorCliList()
          toast.clearWaitingQueue(); 
@@ -200,26 +212,32 @@ React.useEffect(() => {
     await updateDoc(doc(db, "clin", todo.id), { nomeC: nome, partitaIva:iv, cellulare:cel});
     toast.clearWaitingQueue(); 
   };
-
+//****************************************************************************************** */
   const handleEditDeb = async ( todo, nome, dd1, dd2, dd3, dd4) => {
-    await updateDoc(doc(db, "debito", todo.id), { nomeC:nome, deb1:dd1, deb2:dd2, deb3:dd3, deb4:dd4});
-    if(todo.deb1 != dd1) {    //se il debito varia allora viene aggiunta la trupla, cronologiaDeb, altrimenti niente
-      handleCronologia(todo, dd1)
+    var debV
+    const q = query(collection(db, "debito"), where("nomeC", "==", todo.nomeC));  //vado a trovare il deb1 vecchio tramite query
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      debV= doc.data().deb1;
+    });
+    await updateDoc(doc(db, "debito", todo.id), { nomeC:nome, deb1:dd1, deb2:dd2, deb3:dd3, deb4:dd4});  //qui vado ad aggiornare il nuovo valore
+    if(debV != dd1) {    //se il debito varia allora viene aggiunta la trupla, cronologiaDeb, altrimenti niente
+      handleCronologia(todo, dd1, debV)
     }
     toast.clearWaitingQueue(); 
   };
    //******************************************************************************************************** */
-   const handleCronologia = async (todo, dd1) => {   //aggiunta della trupla cronologiaDebito;
+   const handleCronologia = async (todo, dd1, debV) => {   //aggiunta della trupla cronologiaDebito;
     await addDoc(collection(db, "cronologiaDeb"), {
       autore: auth.currentUser.displayName,
       createdAt: serverTimestamp(),
       nomeC: todo.nomeC,
       deb1: dd1,     //debito nuovo
-      deb1v: todo.deb1,  //debito vecchio   (cosi possiamo vedere la differenza)
+      debv: debV,
     });
     //rimuove in modo automatico una volta arrivata a 50 e cancella quello più vecchio
     const coll = collection(db, "cronologiaDeb");  
-    const snapshot = await getCountFromServer(coll);  //va a verificare quante trupe ne sono
+    const snapshot = await getCountFromServer(coll);  //va a verificare quante trupe ci sono sono
     if(snapshot.data().count>50) {  //se supera i 50, deve eliminare la trupla più vecchia (quindi la prima dato che è già ordinata)
       const q = query(collection(db, "cronologiaDeb"), orderBy("createdAt"), limit(1));  //prende solo la prima trupla
       const querySnapshot = await getDocs(q);
@@ -227,7 +245,6 @@ React.useEffect(() => {
       await deleteDoc(doc(db, "cronologiaDeb", hi.id)); //elimina la trupla (quindi quella più vecchia)
       });
     }
-
 };
 
   const handleDelete = async (id, nomeCli) => {
@@ -261,7 +278,7 @@ React.useEffect(() => {
         <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Cliente </button></span>
         <span><button onClick={handleButtonAna}>Anagrafiche Clienti</button></span>
         <span><button onClick={handleButtonDebito}>Debito Clienti </button></span>
-        <span><button onClick={handleButtonDebito}>Cronologia Debito </button></span>
+        <span><button onClick={handleButtonCronoDeb}>Cronologia Debito </button></span>
         <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
       </div>
 
@@ -321,10 +338,28 @@ React.useEffect(() => {
 {/********************tabella Anagrafiche************************************************************************/}
 {flagAnaCli &&
 <div className='todo_containerCli mt-5'>
-<div className='row'> 
+<div className='row' > 
+<div className='col-8'>
 <p className='colTextTitle'> Lista Clienti </p>
 </div>
-<div className='row'>
+<div className='col'>
+<TextField
+      inputRef={inputRef}
+      className="inputSearch"
+      onChange={event => {setSearchTerm(event.target.value)}}
+      type="text"
+      placeholder="Ricerca Cliente"
+      InputProps={{
+      startAdornment: (
+      <InputAdornment position="start">
+      <SearchIcon color='secondary'/>
+      </InputAdornment>
+                ),
+                }}
+       variant="outlined"/>
+</div>
+</div>
+<div className='row' style={{marginRight: "5px"}}>
 <div className='col-3' >
 <p className='coltext' >Cliente</p>
 </div>
@@ -334,10 +369,17 @@ React.useEffect(() => {
 <div className='col-2' style={{padding: "0px"}}>
 <p className='coltext' >Part. IVA</p>
 </div>
+    <hr style={{margin: "0"}}/>
 </div>
 
 <div className="scroll">
-  {todos.map((todo) => (
+{todos.filter((val)=> {
+        if(searchTerm === ""){
+          return val
+      } else if (val.nomeC.toLowerCase().includes(searchTerm.toLowerCase()) ) {
+        return val
+                }
+            }).map((todo) => (
     <div key={todo.id}>
     { ta === true &&(
     <TodoClient
@@ -353,36 +395,60 @@ React.useEffect(() => {
     </div>
   ))}
   </div>
-  <hr style={{margin: "0"}}/>
   </div>
   }
 {/********************tabella Debito************************************************************************/}
 {flagDebiCli &&
-<div className='todo_containerCli mt-5'>
-<div className='row'> 
+<div className='todo_containerDebCli mt-5'>
+<div className='row' > 
+<div className='col-7'>
 <p className='colTextTitle'> Lista Clienti </p>
 </div>
-<div className='row'>
+<div className='col'>
+<TextField
+      inputRef={inputRef}
+      className="inputSearch"
+      onChange={event => {setSearchTerm(event.target.value)}}
+      type="text"
+      placeholder="Ricerca Cliente"
+      InputProps={{
+      startAdornment: (
+      <InputAdornment position="start">
+      <SearchIcon color='secondary'/>
+      </InputAdornment>
+                ),
+                }}
+       variant="outlined"/>
+  </div>
+</div>
+<div className='row' style={{marginRight: "5px"}}>
 
-<div className='col-3' >
+<div className='col-4' >
 <p className='coltext' >Cliente</p>
 </div>
-<div className='col-1' style={{padding: "0px"}}>
+<div className='col' style={{padding: "0px"}}>
 <p className='coltext' >Debito1</p>
 </div>
-<div className='col-1' style={{padding: "0px"}}>
+<div className='col' style={{padding: "0px"}}>
 <p className='coltext' >Debito2</p>
 </div>
-<div className='col-1' style={{padding: "0px"}}>
+<div className='col' style={{padding: "0px"}}>
 <p className='coltext' >Debito3</p>
 </div>
-<div className='col-1' style={{padding: "0px"}}>
+<div className='col' style={{padding: "0px"}}>
 <p className='coltext' >Debito4</p>
 </div>
+<hr style={{margin: "0"}}/>
 </div>
 
 <div className="scroll">
-  {todosDebi.map((todo) => (
+{todosDebi.filter((val)=> {
+        if(searchTerm === ""){
+          return val
+      } else if (val.nomeC.toLowerCase().includes(searchTerm.toLowerCase()) ) {
+        return val
+                }
+            }).map((todo) => (
     <div key={todo.id}>
     { ta === true &&(
     <TodoDebiCli
@@ -397,9 +463,38 @@ React.useEffect(() => {
     </div>
   ))}
   </div>
-  <hr style={{margin: "0px", padding:"0px"}}/>
   </div>
   }
+{/* tabella cronologiaDebito*******************************************************************************************************************/}
+{popupActiveCrono &&
+  <div className='todo_containerCli mt-3'>
+  <div className='row'> 
+<p className='colTextTitle'> Cronologia</p>
+</div>
+  <div className='row' style={{marginRight: "5px"}}>
+      <div className='col-3'><p className='coltext' >DataModifica</p></div>
+      <div className='col-3' style={{padding: "0px"}}><p className='coltext' >Cliente</p> </div>
+      <div className='col-2' style={{padding: "0px"}}><p className='coltext'>Autore</p></div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Deb1V</p></div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Deb1N</p></div>
+      <hr style={{margin: "0"}}/>
+    </div>
+    <div className="scroll">
+  {crono.map((col) => (
+    <div key={col.id}>
+    <div className='row' style={{padding: "0px"}}>
+      <div className='col-3 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
+      <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeC} </p> </div>
+      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.autore}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.debv}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.deb1}</p></div>
+      <hr style={{margin: "0"}}/>
+    </div>
+    </div>
+    ))}
+  </div>
+  </div>
+}
    
     </>
       )

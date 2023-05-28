@@ -50,7 +50,7 @@ function ScaletData({ getColId }) {
 
 
     const auto = async () => {
-      const q = query(collection(db, "clin"));  //va a prendere tutti i clienti e li mette in questo array AutoComp
+      const q = query(collection(db, "clin"), orderBy("nomeC"));  //va a prendere tutti i clienti e li mette in questo array AutoComp
       const querySnapshot = await  getDocs(q);
       querySnapshot.forEach((doc) => {
       console.log(doc.id, " => ", doc.data().nomeC);
@@ -62,8 +62,7 @@ function ScaletData({ getColId }) {
       const handleChangeDataSelect = (event) => {
         setday(event.target.value);      //prende il valore del select
         var ok= event.target.value
-        console.log({ok})
-        today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo
+        today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo, il risultato sarà in millisecondi
          localStorage.setItem("bho", today.getTime())
       };
    //_________________________________________________________________________________________________________________
@@ -135,7 +134,7 @@ function ScaletData({ getColId }) {
   //_________________________________________________________________________________________________________________
   const createCol = async (e) => {    
     e.preventDefault(); 
-    var formattedDate = moment(nome).format('DD-MM-YYYY');
+    var formattedDate = moment(nome).format('DD/MM/YYYY');
     var bol= true
     if(!nome) {            
       notifyError();
@@ -216,7 +215,7 @@ function ScaletData({ getColId }) {
                 </div>
               </div>
 {/***************************lista date******************************************* */}
-<div className='todo_containerScorta' style={{width: "400px"}}>
+<div className='todo_container' style={{width: "400px"}}>
 <div className='row'>
   <div className='col colTextTitle'>
     Scaletta

@@ -116,7 +116,6 @@ function DashFornitori({ fornId, nomeForn }) {
 // doc.data() is never undefined for query doc snapshots
   console.log(doc.id, " => ", doc.data().nomeP);
   if (doc.data().nomeP == nomeP) {
-      notifyErrorProdList()
        toast.clearWaitingQueue(); 
       bol=false
   }

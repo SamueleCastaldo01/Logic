@@ -146,7 +146,7 @@ function OrdineForniData({ getOrdFornId }) {
   //_________________________________________________________________________________________________________________
   const createCol = async (e) => {    
     e.preventDefault();  
-    var formattedDate = moment(nome).format('DD-MM-YYYY');
+    var formattedDate = moment(nome).format('DD/MM/YYYY');
     var bol= true
     if(!nome) {            
       notifyError();
@@ -221,7 +221,7 @@ function OrdineForniData({ getOrdFornId }) {
                 </div>
               </div>
 
-          <div className='todo_containerScorta' style={{width: "400px"}}>
+          <div className='todo_container' style={{width: "400px"}}>
               <div className='row'>
                       <div className='col colTextTitle'>
                        Ordine Forn

@@ -33,6 +33,8 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
     const [t5, setT5] = React.useState("");
     const [nomTin, setnomTin] = React.useState("");
 
+    const timeElapsed = Date.now();  //prende la data attuale in millisecondi
+    const today = new Date(timeElapsed);    //converte da millisecondi a data
 
     var FlagT=false;   //flag per le tinte, viene salvato nel database serve per far riconoscere ogni singola trupla
     const [flagStampa, setFlagStampa] = React.useState(false);  //quando è falso si vedono le icone,
@@ -83,7 +85,6 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
   const q = query(collection(db, "Nota"), where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC));  //prende i prodotti di quel cliente di quella data
   const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-      console.log(doc.id, "heeey", " => ", doc.data().nomeC, doc.data().dataC, doc.data().prezzoUniProd);
       sommaTot=+doc.data().prezzoTotProd +sommaTot;
       });
       setSumTot(sommaTot);
@@ -127,6 +128,7 @@ const createCate = async () => {
     nomeC: nomeCli,
     qtProdotto,
     prodottoC,
+    complete: false,
     t1,
     t2,
     t3,
@@ -163,7 +165,7 @@ const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5
   toast.clearWaitingQueue(); 
 };
 //_________________________________________________________________________________________________________________
-const handleAddNumCart = async (e) => {  //non funziona correttamente, quando si preme il pulsante per aggiungere
+const handleAddNumCart = async (e) => {  //funzione aggiungere i cartoni
   var nuCut
   e.preventDefault();
   setNumCart(+NumCart+1);
@@ -171,7 +173,7 @@ const handleAddNumCart = async (e) => {  //non funziona correttamente, quando si
   await updateDoc(doc(db, "addNota", notaId), { NumCartoni: nuCut});
 }
 
-const handleRemoveNumCart = async (e) => {  //quando si preme il pulsante per rimuovere
+const handleRemoveNumCart = async (e) => {  //quando si preme il pulsante per rimuovere (numero di cartoni)
   var nuCut
   e.preventDefault();
   if(NumCart <= 0) {  //se il numero di cartoni è minore di 0 non fa nulla
@@ -311,7 +313,7 @@ const print = async () => {
   </div>
 
 {/** tabella dei prodotti */}
-  <div className="scroll">
+  <div className="scrollNota">
   {todos.map((todo) => (
     <div key={todo.id}>
     {todo.nomeC  === nomeCli && todo.dataC == dataNotaC &&  (

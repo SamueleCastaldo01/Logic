@@ -62,13 +62,12 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
   return (
     <div className="prova">
 
-    <hr style={{margin: "0"}}/>
-
     <form  onSubmit={handleSubm}>
     <div className="row ">
 {/*********************PRODOTTO********************************************************** */}
     <div className="col-4 diviCol" >
-    {sup ===true && ( 
+    { /*
+          {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
@@ -78,7 +77,9 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
         onChange={handleChange}
       />
     )}
-    {gui ===true && ( 
+       */}
+
+    {ta ===true && ( 
     <h4
       style={{ textDecoration: todo.completed && "line-through" }}
         type="text"
@@ -188,7 +189,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
   }
     </div>
     </form>
-
+    <hr style={{margin: "0"}}/>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp} from 'firebase/firestore';
 import moment from 'moment';
 import { TextField } from '@mui/material';
@@ -20,6 +20,7 @@ import { supa } from '../components/utenti';
 import { guid } from '../components/utenti';
 import { tutti } from '../components/utenti';
 import TodoProdClin from '../components/TodoProdClin';
+import SearchIcon from '@mui/icons-material/Search';
 
 function DashClienti({ clientId, nomeCli }) {
 
@@ -37,6 +38,8 @@ function DashClienti({ clientId, nomeCli }) {
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
+    const [searchTerm, setSearchTerm] = useState("");  //search
+    const inputRef= useRef();
 
 
     function handleInputChange(event, value) {
@@ -99,7 +102,6 @@ function DashClienti({ clientId, nomeCli }) {
     //****************************************************************************************** */
     const handleEdit = async ( todo, nome, prezUni) => {
       await updateDoc(doc(db, "prodottoClin", todo.id), { nomeP: nome, prezzoUnitario:prezUni});
-      notifyUpdateProd();
       toast.clearWaitingQueue(); 
     };
  //******************************************************************************* */
@@ -122,7 +124,6 @@ function DashClienti({ clientId, nomeCli }) {
 // doc.data() is never undefined for query doc snapshots
   console.log(doc.id, " => ", doc.data().nomeP);
   if (doc.data().nomeP == nomeP) {
-      notifyErrorProdList()
        toast.clearWaitingQueue(); 
       bol=false
   }
@@ -144,7 +145,7 @@ function DashClienti({ clientId, nomeCli }) {
       return ( 
       <>  
         <h1 className='title mt-3'> Dashboard Clienti</h1>
-        <h2 className='mt-4'>Nome Cliente: {nomeCli} </h2>
+        <h4 className='mt-3'>Nome Cliente: {nomeCli} </h4>
 
         {!matches &&
       <div>
@@ -191,19 +192,48 @@ function DashClienti({ clientId, nomeCli }) {
 {flagTabellaProdotti &&
 <>
 
-<div className='todo_containerProdCli mt-5 '>
-<div className='row'>
+<div className='todo_containerProdCli mt-3'>
+<div className='row' > 
+<div className='col-5'>
+<p className='colTextTitle'> Tabella Prodotti</p>
+</div>
+<div className='col'>
+<TextField
+      inputRef={inputRef}
+      className="inputSearchOrd"
+      onChange={event => {setSearchTerm(event.target.value)}}
+      type="text"
+      placeholder="Ricerca Prodotto"
+      InputProps={{
+      startAdornment: (
+      <InputAdornment position="start">
+      <SearchIcon color='secondary'/>
+      </InputAdornment>
+                ),
+                }}
+       variant="outlined"/>
+  </div>
+
+</div>
+<div className='row' style={{marginRight: "5px"}}>
 
 <div className='col-7' >
-<p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>Prodotto</p>
+<p className='coltext' >Prodotto</p>
 </div>
 <div className='col-3' style={{padding: "0px"}}>
-<p className='coltext' style={{textAlign: "left", fontSize: "18px"}}>PrezzoUni</p>
+<p className='coltext' >PrezzoUni</p>
 </div>
+    <hr style={{margin: "0"}}/>
 </div>
 
 <div className="scroll">
-  {todos.map((todo) => (
+{todos.filter((val)=> {
+        if(searchTerm === ""){
+          return val
+      } else if (val.nomeP.toLowerCase().includes(searchTerm.toLowerCase()) ) {
+        return val
+                }
+            }).map((todo) => (
     <div key={todo.id}>
     {todo.author.name  === nomeCli &&  (
       <>
@@ -220,7 +250,6 @@ function DashClienti({ clientId, nomeCli }) {
     </div>
   ))}
   </div>
-  <hr style={{margin: "0"}}/>
   </div>
   </>
 }

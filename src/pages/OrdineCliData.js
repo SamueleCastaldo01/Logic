@@ -52,17 +52,13 @@ function OrdineCliData({ getOrdId }) {
 
 
     const auto = async () => {
-      console.log("ottimo zizii");
-      const q = query(collection(db, "clin"));
+      const q = query(collection(db, "clin"), orderBy("nomeC"));
       const querySnapshot = await  getDocs(q);
       querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data().nomeC);
-
       let car = { label: doc.data().nomeC }
       AutoComp1.push(car);
 
       for(var i=0; i<10; i++) {
-       console.log(AutoComp1[i])
       }
       });
       }
@@ -147,7 +143,7 @@ function OrdineCliData({ getOrdId }) {
   //_________________________________________________________________________________________________________________
   const createCol = async (e) => {    
     e.preventDefault();  
-    var formattedDate = moment(nome).format('DD-MM-YYYY');
+    var formattedDate = moment(nome).format('DD/MM/YYYY');
     var bol= true
     if(!nome) {            
       notifyError();
@@ -167,6 +163,7 @@ function OrdineCliData({ getOrdId }) {
     });
     if(bol == true) {
     await addDoc(colleCollectionRef, {
+      dataMilli: nome.getTime(),
       data: formattedDate,
       dataMilli: nome.getTime(),
       nome,
@@ -222,7 +219,7 @@ function OrdineCliData({ getOrdId }) {
                 </div>
               </div>
 
-          <div className='todo_containerScorta' style={{width: "400px"}}>
+          <div className='todo_container' style={{width: "400px"}}>
               <div className='row'>
                       <div className='col colTextTitle'>
                        Ordine Clienti

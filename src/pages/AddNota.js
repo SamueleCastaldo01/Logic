@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp} from 'firebase/firestore';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import moment from 'moment';
@@ -19,7 +19,9 @@ import SpeedDialAction from '@mui/material/SpeedDialAction';
 import PrintIcon from '@mui/icons-material/Print';
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import InputAdornment from '@mui/material/InputAdornment';
 
 export const AutoProdCli = [];
 export const AutoDataScal = [];
@@ -35,7 +37,11 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal }) {
     const [telefono, setTelefono] = React.useState("");
 
     const [popupActive, setPopupActive] = useState(true);  
-  
+
+    const [searchTerm, setSearchTerm] = useState("");  //search
+    const [searchTerm2, setSearchTerm2] = useState("");  //search
+    const inputRef= useRef();
+
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))   //confronto con uid corrente
     let gui= guid.includes(localStorage.getItem("uid"))
@@ -51,11 +57,10 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal }) {
     }
 
 //_________________________________________________________________________________________________________________
-    const auto = async (nomeCli) => {  //array
+    const auto = async (nomeCli) => {  //array per i prodotti dei clienti
       const q = query(collection(db, "prodottoClin"), where("author.name", "==", nomeCli));
       const querySnapshot = await  getDocs(q);
       querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data().nomeP);
 
       let car = { label: doc.data().nomeP,
                   prezzoUni: doc.data().prezzoUnitario }
@@ -76,7 +81,6 @@ const contEffect = async () => {
     const coll = collection(db, "addNota");
     const q = query(coll, where("data", "==", dataOrdConf), orderBy("createdAt"));
     const snapshot = await getCountFromServer(q);
-    console.log('count: ', snapshot.data().count);
     setCont(snapshot.data().count+1)
   }
 
@@ -218,7 +222,7 @@ const contEffect = async () => {
       nomeC,
       completa : "0",
       data: dataOrdConf,
-      NumCartoni:"",
+      NumCartoni:"0",
       sommaTotale:0,
       debitoTotale:0,
       createdAt: serverTimestamp(),
@@ -331,8 +335,27 @@ const contEffect = async () => {
         <div className='col'>
   <div  className='todo_containerOrdCli mt-5'>
         <div className='row'> 
+        <div className='col'>
         <p className='colTextTitle'> Ordine Clienti</p>
         <p className='textOrdRed'> Note non Completate</p>
+        </div>
+        <div className='col'>
+        <TextField
+      inputRef={inputRef}
+      className="inputSearchOrd"
+      onChange={event => {setSearchTerm(event.target.value)}}
+      type="text"
+      placeholder="Ricerca Cliente"
+      InputProps={{
+      startAdornment: (
+      <InputAdornment position="start">
+      <SearchIcon color='secondary'/>
+      </InputAdornment>
+                ),
+                }}
+       variant="outlined"/>
+        </div>
+
         </div>
         <div className='row'>
         <div className='col-1' >
@@ -341,10 +364,17 @@ const contEffect = async () => {
         <div className='col-8' >
         <p className='coltext'>Cliente</p>
         </div>
-        
+        <hr style={{margin: "0"}}/>
       </div>
-      <hr style={{margin: "0"}}/>
-       {todos.map((todo) => (
+
+      <div className="scrollOrdCli">
+      {todos.filter((val)=> {
+        if(searchTerm === ""){
+          return val
+      } else if (val.nomeC.toLowerCase().includes(searchTerm.toLowerCase())  ) {
+        return val
+                }
+            }).map((todo) => (
           <div key={todo.id}>
           {todo.data  === dataOrdConf && todo.completa === "0" &&  (
       <>
@@ -387,12 +417,31 @@ const contEffect = async () => {
         ))} 
         </div>
         </div>
+        </div>
         <div className='col'> 
         {/***********Note completate********************************************************************************** */}
         <div  className='todo_containerOrdCli mt-5'>
         <div className='row'> 
+        <div className='col'>
         <p className='colTextTitle'> Ordine Clienti</p>
         <p className='textOrd'> Note Completate</p>
+        </div>
+        <div className='col'>
+        <TextField
+      inputRef={inputRef}
+      className="inputSearchOrd"
+      onChange={event => {setSearchTerm2(event.target.value)}}
+      type="text"
+      placeholder="Ricerca Cliente"
+      InputProps={{
+      startAdornment: (
+      <InputAdornment position="start">
+      <SearchIcon color='secondary'/>
+      </InputAdornment>
+                ),
+                }}
+       variant="outlined"/>
+          </div>
         </div>
         <div className='row'>
         <div className='col-1' >
@@ -401,10 +450,17 @@ const contEffect = async () => {
         <div className='col-8' >
         <p className='coltext'>Cliente</p>
         </div>
-        
+        <hr style={{margin: "0"}}/>
       </div>
-      <hr style={{margin: "0"}}/>
-       {todos.map((todo) => (
+
+      <div className="scrollOrdCli">
+      {todos.filter((val)=> {
+        if(searchTerm2 === ""){
+          return val
+      } else if (val.nomeC.toLowerCase().includes(searchTerm2.toLowerCase())  ) {
+        return val
+                }
+            }).map((todo) => (
           <div key={todo.id}>
           {todo.data  === dataOrdConf && todo.completa === "1" &&  (
       <>
@@ -445,6 +501,7 @@ const contEffect = async () => {
                   )}
           </div>
         ))} 
+        </div>
         </div>
         </div>
       </div>

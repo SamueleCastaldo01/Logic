@@ -49,6 +49,7 @@ export default function TodoProdForn({ todo, toggleComplete, handleEdit, display
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
+        onBlur={handleSubm}
         value={todo.nomeP === "" ? newNomeP : todo.nomeP}
         className="inpNumb"
         onChange={handleChange}

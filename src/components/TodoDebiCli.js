@@ -98,10 +98,9 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     <div className="prova">
 
 <form  onSubmit={handleNiente}>
-<hr style={{margin: "0"}}/>
     <div className="row ">
 {/*****************NOME**************************************************************************** */}
-    <div className="col-3 diviCol"  >
+    <div className="col-4 diviCol"  >
     <h5
       style={{ textDecoration: todo.completed && "line-through"  }}
         type="text"
@@ -117,7 +116,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     </div>
 
 {/*********************D1******************************************************************************** */}
-<div className="col-1 diviCol" style={{padding: "0px"}}>
+<div className="col diviCol" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -131,7 +130,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     </div>
 
 {/***********************D2****************************************************************************** */}
-<div className="col-1 diviCol" style={{padding: "0px"}}>
+<div className="col diviCol" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -144,7 +143,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     )}
     </div>
 {/*******************D3********************************************************************************** */}
-<div className="col-1 diviCol" style={{padding: "0px"}}>
+<div className="col diviCol" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -157,7 +156,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     )}
     </div>
 {/*******************D4********************************************************************************** */}
-<div className="col-1 diviCol" style={{padding: "0px"}}>
+<div className="col diviCol" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -169,22 +168,10 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
       />
     )}
     </div>
-{/********************BUTTON********************************************************************************* */}
-      <div className="col diviCol">
-      <button
-      hidden
-          className="button-edit" 
-          onClick={() => handleEditDeb(todo, newNomeC, d1, d2, d3, d4)}
-        >
-          <EditIcon id="i" />
-        </button>
-      </div>
-
     </div>
 
 </form>
-
-
+<hr style={{margin: "0"}}/>
     </div>
   );
 }

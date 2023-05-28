@@ -49,8 +49,6 @@ export default function TodoProdClin({ todo, toggleComplete, handleEdit, display
   return (
     <div className="prova">
 
-    <hr style={{margin: "0"}}/>
-
     <form  onSubmit={handleSubm}>
     <div className="row ">
 {/*******************Prodotto************************************************************ */}
@@ -59,6 +57,7 @@ export default function TodoProdClin({ todo, toggleComplete, handleEdit, display
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
+        onBlur={handleSubm}
         value={todo.nomeP === "" ? newNomeP : todo.nomeP}
         className="inpNumb"
         onChange={handleChange}
@@ -79,6 +78,7 @@ export default function TodoProdClin({ todo, toggleComplete, handleEdit, display
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
+        onBlur={handleSubm}
         value={todo.prezzoUnitario === "" ? newPrezzoUni : todo.prezzoUnitario}
         className="inpNumb"
         onChange={handleChangePU}
@@ -117,7 +117,7 @@ export default function TodoProdClin({ todo, toggleComplete, handleEdit, display
     </div>
     </div>
     </form>
-
+    <hr style={{margin: "0"}}/>
     </div>
   );
 }
