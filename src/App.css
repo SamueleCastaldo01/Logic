@@ -30,6 +30,11 @@ body {
  color: #cab497;
 }
 
+.checkboxStyle{
+  zoom: 2;
+  margin-top: 3px;
+}
+
 .but {
   margin-top: 12px;
   border-radius: 10px;
@@ -43,6 +48,22 @@ body {
   perspective: 20px;
   margin-top: 30px;
   margin-bottom: 30px;
+}
+
+.navMobile{
+  background-color: #333333;
+  position: fixed;
+  height: 60px;
+  left: 0;
+  right: 0;
+  top: 0;
+}
+
+.navText{
+  color: #f6f6f6;
+  margin-top: 15px;
+  text-align: left;
+  font-size: 20px;
 }
 
 .autocomp {
@@ -223,6 +244,30 @@ width: 792px;
 }
 
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap");
+
+.skipPageRi{
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  background-color: #f6f6f6;
+  border-radius: 50px;
+  position: fixed;
+  bottom: 9vh;
+  width: 50px;
+  height: 50px;
+  right: 2vh;
+  border: 0px solid black;
+}
+
+.skipPageLef{
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  background-color: #f6f6f6;
+  border-radius: 50px;
+  position: fixed;
+  bottom: 9vh;
+  width: 50px;
+  height: 50px;
+  left: 2vh;
+  border: 0px solid black;
+}
 
 .buttonClose,
 .butRemProd,
@@ -465,6 +510,7 @@ width: 792px;
   background-color: var(--red);
 }
 
+.buttonMenu,
 .button-navBar,
 .button-complete,
 .button-delete,
@@ -477,6 +523,9 @@ width: 792px;
 }
 #i {
   font-size: 35px;
+}
+.buttonMenu {
+  color: #333333;
 }
 .button-complete {
   color: var(--green);
@@ -553,6 +602,9 @@ button:focus {
     width: 850x;
     margin: 0 auto;
   }
+  .inpTabNota{
+    font-size: 14px;
+  }
 }
 
 @media screen and (max-width: 392px) { /* smartphone iphone x*/ 
@@ -575,6 +627,9 @@ button:focus {
   .todo_container {
     width: 750px;
     margin: 0 auto;
+  }
+  .inpTabNota{
+    font-size: 14px;
   }
 }
 

@@ -7,20 +7,11 @@ import { TextField } from '@mui/material';
 import { db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
-import Button from '@mui/material/Button';
-import CloseIcon from '@mui/icons-material/Close';
 import { notifyErrorCli, notifyUpdateCli, notifyErrorCliEm } from '../components/Notify';
 import Autocomplete from '@mui/material/Autocomplete';
-import { AutoComp1 } from './OrdineCliData';
 import { AutoDataScal } from './AddNota';
 import { supa, guid, tutti } from '../components/utenti';
-import SpeedDial from '@mui/material/SpeedDial';
-import SpeedDialIcon from '@mui/material/SpeedDialIcon';
-import SpeedDialAction from '@mui/material/SpeedDialAction';
 import PrintIcon from '@mui/icons-material/Print';
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from '@mui/icons-material/Add';
-import DescriptionIcon from '@mui/icons-material/Description';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 export const AutoProdCli = [];
@@ -174,16 +165,11 @@ const contEffect = async () => {
       return ( 
       <>  
           <h1 className='title mt-3'>Nota Dip. Data</h1>
-          {!matches &&
-        <div>
-          <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
-        </div>
-      }
   
   {/**************tabelle********************************************************************************************************/}
       <div className='row'>
         <div className='col'>
-        {/***********tabella note completate********************************************************************************** */}
+    {/***********tabella note completate********************************************************************************** */}
         <div  className='todo_containerOrdCli mt-5'>
         <div className='row'> 
         <div className='col'>

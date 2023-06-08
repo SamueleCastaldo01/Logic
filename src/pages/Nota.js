@@ -129,6 +129,8 @@ const createCate = async () => {
     qtProdotto,
     prodottoC,
     complete: false,
+    artPreso: false,
+    simbolo: "",
     t1,
     t2,
     t3,
@@ -262,7 +264,6 @@ const print = async () => {
 
     </div>
 
-
     <div ref={componentRef} className="foglioA4" style={{paddingLeft:"50px", paddingRight:"50px", paddingTop:"20px"}}>
     <div className='row rigaNota' >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
@@ -369,6 +370,7 @@ const print = async () => {
   </div>
 
     </div>
+
     </>
       )
 }

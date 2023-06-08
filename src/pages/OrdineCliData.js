@@ -178,6 +178,7 @@ function OrdineCliData({ getOrdId }) {
 //************************************************************** */
     return ( 
     <> 
+        <div className='container' style={{padding: "0px"}}>
     <h1 className='title mt-3'> Ordine Clienti</h1>
     <button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button>
 {/** inserimento Data *************************************************************/}
@@ -283,6 +284,7 @@ function OrdineCliData({ getOrdId }) {
                   </div>
                   ))}
               </div>
+            </div>
             </div>
            </>
       )

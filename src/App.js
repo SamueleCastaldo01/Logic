@@ -30,6 +30,12 @@ import { BrowserRouter as Router, Routes, Route, Link} from "react-router-dom";
 import {PrivateRoutes, PrivateCate, PrivatePerm, PrivateDashCli, PrivateOrd, PrivateOrdForn, PrivateNota, PrivateNotaForni, PrivateDashForn, PrivateAddClientiScalet} from './components/PrivateRoutes';
 import { styled } from "@mui/material/styles";
 import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
+import { BottomNavigation } from '@mui/material';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import ContactPageIcon from '@mui/icons-material/ContactPage';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import AdUnitsIcon from '@mui/icons-material/AdUnits';
 import MiniDrawer from './components/MiniDrawer';
 import Box from '@mui/material/Box';
 import CheckConnection from './components/CheckConnection';
@@ -251,14 +257,18 @@ function App() {
   return (
 <>
  <Router> 
- <Box sx={{ display: 'flex' }}> 
+ <Box sx={{ display: 'flex', padding: "0px" }}> 
 
+{!matches &&
   <MiniDrawer signUserOut={signUserOut}/>
+}
+  
+
 
     <Box component="main" sx={{ flexGrow: 1, p: 3, textAlign: "center" }}>
     <div><ToastContainer limit={1} /></div>
 
-<div style={{marginTop: "50px"}}>
+<div style={{marginTop: !matches && "50px"}}>
 
 
       <Routes>
@@ -314,8 +324,13 @@ function App() {
             <Route path="*" element={<Login setIsAuth={setIsAuth} />}/>    }
   </Routes>
   
-{/**************************************************************************************
- {matches &&
+
+  </div>
+    </Box>
+
+    </Box>
+
+    {matches &&
   <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3} >
         <BottomNavigation 
         sx={{
@@ -356,16 +371,15 @@ function App() {
            className="linq"
           to="/ordineclientidata"
            label="Ordine" icon={<ShoppingCartIcon />} />
+           <BottomNavigationAction
+           component={Link}
+           className="linq"
+          to="/notadipdata"
+           label="Nota Dip" icon={<AdUnitsIcon />} />
         </BottomNavigation>
+        
       </Paper>
  }
-  */}
-  </div>
-  
-    </Box>
-    </Box>
-
-
 
  </Router>
 

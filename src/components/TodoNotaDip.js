@@ -2,6 +2,7 @@ import React from "react";
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
 import EditIcon from '@mui/icons-material/Edit';
 import { auth, db } from "../firebase-config";
+import Checkbox from '@mui/material/Checkbox';
 import DeleteIcon from "@mui/icons-material/Delete";
 import { supa, guid, tutti } from '../components/utenti';
 import { useNavigate } from "react-router-dom";
@@ -10,8 +11,10 @@ import Autocomplete from '@mui/material/Autocomplete';
 import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { TextField } from "@mui/material";
 import InputLabel from '@mui/material/InputLabel';
+import Menu from '@mui/material/Menu';
 import { AutoProdCli } from "../pages/AddNota";
 import { fontSize } from "@mui/system";
 
@@ -36,9 +39,37 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
   const [newT4, setT4] = React.useState(todo.t4);
   const [newT5, setT5] = React.useState(todo.t5);
 
+  const [checked, setChecked] = React.useState(todo.artPreso);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
   const [age, setAge] = React.useState('');
 
   let navigate = useNavigate();
+
+  const handleChangeChecked = async (event) => {
+    await updateDoc(doc(db, "Nota", todo.id), { artPreso:!checked});
+    setChecked(!checked);
+  };
+
+  const handleChangeNo = async (event) => {
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"(NO)"});
+    handleClose()
+  };
+
+  const handleChangeX = async (event) => {
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"X"});
+    handleClose()
+  };
+
+  const handleChangeInterro = async (event) => {
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"?"});
+    handleClose()
+  };
+
+  const handleChangeRemMenu = async (event) => {
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:""});
+    handleClose()
+  };
 
   const handleInputChange = async (event, value) => {  //funzione per l'anagrafica del cliente, trova il prezzo unitario del prodotto
     setNewProdotto(value);
@@ -70,6 +101,15 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
   const handleSubm = (e) => {
     e.preventDefault();
     handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte)
+  };
+
+  const handleClose = () => {
+    console.log("entrato")
+    setAnchorEl(null);
+  };
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
 //******************************************************************** */
@@ -154,43 +194,23 @@ const handleChangeAge = (event) => {
 <form  onSubmit={handleSubm}>
 <hr style={{margin: "0"}}/>
     <div className="row " style={{ borderBottom:"solid",  borderWidth: "2px" }}>
+{/**************************CHECKED'******************************************************************* */}
+    <div className="col-1" style={{padding:"0px" }}>
+    <input className="checkboxStyle" type="checkbox" id="coding" name="interest" checked={checked} onChange={handleChangeChecked} />
+    </div>
 {/**************************QUANTITA'******************************************************************* */}
-    <div className="col-1" style={{padding:"0px", }}>    
-    {sup ===true && localStorage.getItem("completa") == 0 &&  ( 
-      <>
-      <span style={{padding:"0px"}}>
-      <input
-      style={{ textDecoration: todo.completed && "line-through", textAlign:"center", padding:"0px", width:"30px", marginTop:"0px" }}
-      onBlur={handleSubm}
-        type="number"
-        value={todo.qtProdotto === "" ? newQtProdotto : todo.qtProdotto}
-        className="inpTab"
-        onChange={handleChange}
-      />
-      </span>
-    </>
-    )}
+    <div className="col-1" style={{padding:"0px" }}>    
 
-    {sup ===true && localStorage.getItem("completa") == 1 &&  ( 
+    {sup ===true &&   ( 
       <h3 className="inpTabNota" style={{ textAlign:"center"}}> {todo.qtProdotto} </h3>
     )}
     </div>
 
 {/*******************Prodotto********************************************************************************** */}
-<div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px",}}>
+<div className="col-8" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px",}}>
       {/***Prodotti********************** */}
-    {sup ===true && todo.flagTinte===false && Completa == 0 &&( 
-      <Autocomplete
-      value={newProdotto}
-      options={AutoProdCli}
-      onInputChange={handleInputChange}
-      onBlur={handleSubm}
-      componentsProps={{ popper: { style: { width: 'fit-content' } } }}
-      renderInput={(params) => <TextField {...params}  size="small"/>}
-    />
-    )}
 
-    {sup ===true && todo.flagTinte===false && Completa == 1 &&( 
+    {sup ===true &&( 
       <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> {todo.prodottoC} </h3>
     )}
 
@@ -269,9 +289,13 @@ const handleChangeAge = (event) => {
       </>
 
     )}
-
     </div>
-{/***************************************************************************************************** */}
+{/*****************Simbolo************************************************************************************ */}
+<div className="col-1" style={{padding: "0px"}}>
+<h3 className="inpTabNota" style={{color: "red", fontSize: "16px", textAlign: "center"}}>{todo.simbolo}</h3>
+</div>
+{/*****************button************************************************************************************ */}
+
       <div className="col-1" style={{padding: "0px"}}>
       <button hidden
           className="button-edit"
@@ -279,7 +303,7 @@ const handleChangeAge = (event) => {
         >
         </button>
         {sup ===true && flagStampa==false && Completa == 0 && (   
-        <button type="button" className="button-delete" style={{padding: "0px"}}                          
+        <button hidden type="button" className="button-delete" style={{padding: "0px"}}                          
           onClick={() => {
                 localStorage.setItem("IDNOTa", todo.id);
                 localStorage.setItem("NomeCliProd", todo.nomeC);
@@ -289,6 +313,35 @@ const handleChangeAge = (event) => {
         <DeleteIcon id="i" />
         </button>
         )}
+
+        <button type="button" className="buttonMenu" style={{padding: "0px"}} >
+        <MoreVertIcon id="i" onClick={handleMenu}/>
+        <Menu  sx={
+        { mt: "1px", "& .MuiMenu-paper": 
+        { backgroundColor: "#333",
+          color: "white" }, 
+        }
+        }
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={handleChangeNo}>(NO)</MenuItem>
+                <MenuItem onClick={handleChangeX}>X</MenuItem>
+                <MenuItem onClick={handleChangeInterro}>?</MenuItem>
+                <MenuItem onClick={handleChangeRemMenu}>Rimuovi</MenuItem>
+              </Menu>
+        </button>
       </div>
 
     </div>
