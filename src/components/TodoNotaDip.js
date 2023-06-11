@@ -56,8 +56,8 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
     handleClose()
   };
 
-  const handleChangeX = async (event) => {
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"X"});
+  const handleChangeEvi = async (event) => {
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:" "});
     handleClose()
   };
 
@@ -202,16 +202,16 @@ const handleChangeAge = (event) => {
     <div className="col-1" style={{padding:"0px" }}>    
 
     {sup ===true &&   ( 
-      <h3 className="inpTabNota" style={{ textAlign:"center"}}> {todo.qtProdotto} </h3>
+      <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: todo.simbolo == " " && "#FFFF00"}}>{todo.qtProdotto}</span></h3>
     )}
     </div>
 
 {/*******************Prodotto********************************************************************************** */}
-<div className="col-8" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px",}}>
+<div className="col-8" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px"}}>
       {/***Prodotti********************** */}
 
     {sup ===true &&( 
-      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> {todo.prodottoC} </h3>
+      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}><span style={{background: todo.simbolo == " " && "#FFFF00"}}>{todo.prodottoC}</span>  </h3>
     )}
 
       {/*****Tinte********************************************************************/}
@@ -336,8 +336,8 @@ const handleChangeAge = (event) => {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
+                <MenuItem onClick={handleChangeEvi}>Evidenzia</MenuItem>
                 <MenuItem onClick={handleChangeNo}>(NO)</MenuItem>
-                <MenuItem onClick={handleChangeX}>X</MenuItem>
                 <MenuItem onClick={handleChangeInterro}>?</MenuItem>
                 <MenuItem onClick={handleChangeRemMenu}>Rimuovi</MenuItem>
               </Menu>

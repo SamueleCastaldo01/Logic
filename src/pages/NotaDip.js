@@ -19,7 +19,7 @@ import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../compon
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
 
 
-function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC }) {
+function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -28,6 +28,7 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC }) {
 
     const [todos, setTodos] = React.useState([]);
     const [todosAddNot, setTodosAddNot] = React.useState([]);
+    const [NumCart, setNumCart] = React.useState(numCart);
     const [indirizzoC, setIndirizzoC] = React.useState("");
     const [partitaIvaC, setPartitaIvaC] = React.useState("");
     const [cellulareC, setCellulareC] = React.useState("");
@@ -40,6 +41,7 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC }) {
     const [nomTin, setnomTin] = React.useState("");
     const [Completa, setCompleta] = useState(0);
     const [contPage, setContPage] = useState(notaDipCont);
+    const [numeroPagineNota, setNumeroPagineNota] = useState("");
 
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
     const today = new Date(timeElapsed);    //converte da millisecondi a data
@@ -99,6 +101,7 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC }) {
           setTodos(todosArray);
         });
         localStorage.removeItem("NotaDipId");
+        handleNumeroDiNote();
         return () => unsub();
       }, []);
 
@@ -117,13 +120,79 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC }) {
         return () => unsub();
       }, []);
 
-    //******************************************************************* */
-    const handleAddContPage = async (cont) => {
-      console.log({cont})
-      if(cont) {
-        setContPage(contPage+1);
+  //************************************************************************************************* */
+      const handleAddNumCart = async (id, nct) => {  //funzione aggiungere i cartoni
+        var nuCut
+        setNumCart(+NumCart+1);
+        nuCut= +nct+1
+        await updateDoc(doc(db, "addNota", id), { NumCartoni: nuCut});
+      }
+      
+      const handleRemoveNumCart = async (id, nct) => {  //quando si preme il pulsante per rimuovere (numero di cartoni)
+        var nuCut
+        if(nct <= 0) {  //se il numero di cartoni è minore di 0 non fa nulla
+          return
+        }
+        nuCut= +nct-1
+        await updateDoc(doc(db, "addNota", id), { NumCartoni:nuCut});
       }
 
+      const handleAddNumBuste = async (id, nct) => {  //funzione aggiungere i cartoni
+        var nuCut
+        setNumCart(+NumCart+1);
+        nuCut= +nct+1
+        await updateDoc(doc(db, "addNota", id), { NumBuste: nuCut});
+      }
+      
+      const handleRemoveNumBuste = async (id, nct) => {  //quando si preme il pulsante per rimuovere (numero di cartoni)
+        var nuCut
+        if(nct <= 0) {  //se il numero di cartoni è minore di 0 non fa nulla
+          return
+        }
+        nuCut= +nct-1
+        await updateDoc(doc(db, "addNota", id), { NumBuste:nuCut});
+      }
+
+  //******************************************************************* */
+     //funzioni per la conferma della nota e per il calcolo del prezzo dei prodotti
+     const SommaTot = async (id, nomeC ) => {  //fa la somma totale, di tutti i prezzi totali
+      var sommaTot=0;
+      const q = query(collection(db, "Nota"), where("nomeC", "==", nomeC), where("dataC", "==", notaDipDataC));  //prende i prodotti di quel cliente di quella data
+      const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          sommaTot=+doc.data().prezzoTotProd +sommaTot;  //fa la somma
+          });
+          setSumTot(sommaTot);
+          await updateDoc(doc(db, "addNota", id), { sommaTotale:sommaTot});  //aggiorna la somma totale nell'add nota
+    }
+
+  const handleEditComp = async (id) => {  //aggiorna lo stato nel database che è stata completata la nota, oppure annullata, tramite il localStorage
+    await updateDoc(doc(db, "addNota", id), { completa: localStorage.getItem("completa")});
+  };
+  
+  const handleConferma = async (id, nomeC, sommaTot, debitoRes) => {
+    var debTot= +sommaTot+(+debitoRes);   // va a fare il calcolo del debito totale
+    await updateDoc(doc(db, "addNota", id), { debitoTotale:debTot});  //aggiorna la somma totale nell'add nota
+        //aggiorna ded1 nel database debito
+    const q = query(collection(db, "debito"), where("nomeC", "==", nomeC));
+    const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (hi) => {
+        await updateDoc(doc(db, "debito", hi.id), { deb1:debTot});  //aggiorna deb1 nel database del debito
+        });
+        toast.clearWaitingQueue(); 
+  };
+
+  //************************************************************************************************* */
+  const handleNumeroDiNote = async () => {   //funzione che mi permette di prendere il numero di note di quelle data
+    const q = query(collection(db, "ordDat"), where("data", "==", notaDipDataC));  
+    const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        setNumeroPagineNota(doc.data().numeroNote);
+      })
+  } 
+  
+  const handleAddContPage = async () => {
+        setContPage(contPage+1);
     }
 
     const handleRemoveContPage = async () => {
@@ -155,7 +224,6 @@ const print = async () => {
         <>
       <div className='navMobile row'>
       <div className='col-2'>
-
         <IconButton className="buttonArrow" aria-label="delete" sx={{ color: "#f6f6f6", marginTop: "7px" }}
         onClick={ ()=> {navigate("/notadipdata"); }}>
         <ArrowBackIcon sx={{ fontSize: 30 }}/>
@@ -165,19 +233,21 @@ const print = async () => {
       <p className='navText'> NoteDip </p>
       </div>
       </div>
-  <div className='container' style={{padding: "0px"}}>
 
+
+  <div className='container' style={{padding: "0px"}}>
     {todosAddNot.map((todo) => (
     <div key={todo.id}>
     {todo.data == notaDipDataC && todo.cont == contPage &&  (
       <>
-      <div className='row rigaNota mt-5' >
+      <hr className='hrNotDip' style={{borderTop: todo.completa==1 ? "6px solid green" : "6px solid red"}}></hr>
+      <div className='row' style={{marginTop: "40px"}} >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
-        <h5 style={{marginBottom:"0px", marginTop:"0px"}}> {todo.nomeC} </h5>
+        <h5 className='titleNotaDip' style={{marginBottom:"0px", marginTop:"0px"}}> {todo.nomeC} </h5>
         </div>
 
         <div className='col'  style={{textAlign:"left", padding:"0px", marginLeft:"5px"}}>
-        <h4 style={{marginBottom:"9px"}}> <b>N.</b> <span style={{marginRight:"10px"}}>{todo.cont}</span> <span style={{fontSize:"13px"}}><b>del</b></span> {todo.data} </h4>
+        <h4 className='titleNotaDip' style={{marginBottom:"9px"}}> <b>N.</b> <span style={{marginRight:"10px"}}>{todo.cont}</span> <span style={{fontSize:"13px"}}><b>del</b></span> {todo.data} </h4>
     </div>
     </div>
 
@@ -212,42 +282,57 @@ const print = async () => {
   ))}
   </div>
 
-     </>
-                  )}
-  {matches &&
-  <>
-  <button type="button" className="skipPageLef" style={{padding: "0px"}} onClick={ () =>{handleRemoveContPage() }}>
-        <KeyboardArrowLeftIcon sx={{ fontSize: 40 }} id="i" />
-        </button>
-  <button type="button" className="skipPageRi" style={{padding: "0px"}} onClick={ () =>{handleAddContPage(todo.cont) }}>
-        <KeyboardArrowRightIcon sx={{ fontSize: 40 }} id="i" />
-        </button>
-        </>
-  }
-
-
-    </div>
-  ))}
-
   <div className='row'>
     <div className='col' style={{textAlign:"left", padding:"0px"}}>
-    <h6 className='mt-2'>Numero Cartoni: <span> Bho </span> 
+    <h6 className='mt-2'>Numero Cartoni: <span> {todo.NumCartoni} </span> 
+    {todo.completa == 0 && flagStampa ==false &&
+      <span>
+        <button className="button-complete" style={{padding: "0px"}} onClick={()=> {handleAddNumCart(todo.id, todo.NumCartoni)}}> <AddCircleIcon sx={{ fontSize: 30 }}/> </button>
+        <button className="button-delete" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumCart(todo.id, todo.NumCartoni)}}> <RemoveCircleIcon sx={{ fontSize: 30 }}/> </button>
+      </span> }
+    </h6>
+    <h6 className='mt-2'>Numero Buste: <span> {todo.NumBuste} </span> 
     {Completa == 0 && flagStampa ==false &&
       <span>
-        <button className="button-complete" style={{padding: "0px"}} onClick={""}> <AddCircleIcon sx={{ fontSize: 35 }}/> </button>
-        <button className="button-delete" style={{padding: "0px"}} onClick={""}> <RemoveCircleIcon sx={{ fontSize: 35 }}/> </button>
+        <button className="button-complete" style={{padding: "0px"}} onClick={()=> {handleAddNumBuste(todo.id, todo.NumBuste)}}> <AddCircleIcon sx={{ fontSize: 30 }}/> </button>
+        <button className="button-delete" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumBuste(todo.id, todo.NumBuste)}}> <RemoveCircleIcon sx={{ fontSize: 30 }}/> </button>
       </span> }
-    </h6> 
+    </h6>  
        </div>
 
-    <div className='col' style={{textAlign:"right", padding:"0px"}}>
+    <div className='col-3' style={{textAlign:"right", padding:"0px"}}>
     {flagStampa == false && <>
-  {Completa==0 ?  <button onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1); }}>Conferma</button> :
-    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0);  }}>Annulla Conferma</button>
+  {todo.completa == 0 ?  
+    <button onClick={ ()=> {
+    localStorage.setItem("completa", 1);
+     setCompleta(1);
+     SommaTot(todo.id, todo.nomeC);  //va a fare la somma totale del prezzo dei prodotti
+     handleEditComp(todo.id);    //aggiorna la nota se è completa nel db
+     handleConferma(todo.id, todo.nomeC, todo.sommaTotale, todo.debitoRes); }}>Conferma</button> :
+    <button onClick={ ()=> {
+      localStorage.setItem("completa", 0);
+       setCompleta(0);
+       handleEditComp(todo.id);  }}>Annulla Conferma</button>
      }
   </>}
     </div>
   </div>
+  {todo.cont > 1 &&
+    <button type="button" className="skipPageLef" style={{padding: "0px"}} onClick={ () =>{handleRemoveContPage() }}>
+        <KeyboardArrowLeftIcon sx={{ fontSize: 40 }} id="i" />
+        </button>
+  }
+  {todo.cont < numeroPagineNota &&
+    <button type="button" className="skipPageRi" style={{padding: "0px"}} onClick={ () =>{handleAddContPage() }}>
+        <KeyboardArrowRightIcon sx={{ fontSize: 40 }} id="i" />
+        </button>
+  }
+
+     </>
+                  )}
+
+    </div>
+  ))}
 
 <div style={{marginTop:"15vh"}}></div>
 

@@ -104,7 +104,6 @@ const contEffect = async () => {
  //_________________________________________________________________________________________________________________   
       const handleDebitoRes = async () => {   //funzione che viene richiamata quando si crea la nota
         var debRes=0;
-        console.log("ciaohihi")
         const q = query(collection(db, "debito"), where("nomeC", "==", nomeC));  //dobbiamo prendere d1, tramite nome del cliente
         const querySnapshot = await getDocs(q);
           querySnapshot.forEach((doc) => {
@@ -131,6 +130,14 @@ const contEffect = async () => {
           console.log(localStorage.getItem("indiri"))
           setIndirizzo(indiri);
           setTelefono(telefo);
+      }
+
+      const handleContaNote = async () => {   //funzione che viene richiamata quando si crea/elimina la nota    fa il conteggio delle note di quella data
+        const coll = collection(db, "addNota");
+        const q = query(coll, where("data", "==", dataOrdConf));
+        const snapshot = await getCountFromServer(q);
+        console.log('count: ', snapshot.data().count);
+        await updateDoc(doc(db, "ordDat", ordId), { numeroNote: snapshot.data().count});  //aggiorna il conteggio nel database
       }
 
     //_________________________________________________________________________________________________________________
@@ -223,6 +230,7 @@ const contEffect = async () => {
       completa : "0",
       data: dataOrdConf,
       NumCartoni:"0",
+      NumBuste:"0",
       sommaTotale:0,
       debitoTotale:0,
       createdAt: serverTimestamp(),
@@ -233,6 +241,7 @@ const contEffect = async () => {
     });
     setNomeC("");
     setClear();
+    handleContaNote();
     }
   };
 
@@ -258,7 +267,8 @@ const contEffect = async () => {
       await deleteDoc(doc(db, "Nota", hi.id)); 
       });
       //infine elimina la data di AddNota
-      await deleteDoc(colDoc); 
+      await deleteDoc(colDoc);
+      handleContaNote(); 
     };
     //**************************************************************************** */
     const actions = [

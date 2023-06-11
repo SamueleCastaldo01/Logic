@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, limit} from 'firebase/firestore';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import moment from 'moment';
 import { getCountFromServer } from 'firebase/firestore';
@@ -19,7 +19,7 @@ export const AutoProdCli = [];
 function NotaDipData({notaDat, getNotaDip }) {
  
     const [todos, setTodos] = React.useState([]);
-    const [todosScalet, setTodosScalet] = React.useState([]);
+    const [todosDataAuto, setTodosDataAuto] = React.useState([]);
 
 
     const [nomeC, setNomeC] = React.useState("");
@@ -41,6 +41,7 @@ function NotaDipData({notaDat, getNotaDip }) {
     let navigate = useNavigate();
   
     function handleInputChange(event, value) {
+      console.log({todosDataAuto});
         setDataSc(value)
     }
 //_________________________________________________________________________________________________________________
@@ -100,6 +101,21 @@ const contEffect = async () => {
       });
       contEffect();
       localStorage.removeItem("OrdId");
+      return () => unsub();
+    }, []);
+
+
+    React.useEffect(() => {  //va a prendere tutte le date degli ordini creati, mi serve come autocomplete
+      const collectionRef = collection(db, "ordDat");
+      const q = query(collectionRef, orderBy("dataMilli", "desc"), limit(100));
+  
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        let todosArray = [];
+        querySnapshot.forEach((doc) => {
+          todosArray.push({ ...doc.data(), id: doc.id });
+        });
+        setTodosDataAuto(todosArray);
+      });
       return () => unsub();
     }, []);
   /******************************************************************************* */
@@ -179,7 +195,7 @@ const contEffect = async () => {
         <div className='col'>
         <Autocomplete
       value={dataSc}
-      options={AutoDataScal}
+      options={todosDataAuto.map((option) => option.data)}
       onInputChange={handleInputChange}
       componentsProps={{ popper: { style: { width: 'fit-content' } } }}
       renderInput={(params) => <TextField {...params} label="Seleziona la data" />}/>
@@ -206,7 +222,7 @@ const contEffect = async () => {
         </div>
          <div className='col-8 diviCol' 
           onClick={() => {
-            getNotaDip(todo.id, todo.cont, todo.nomeC, dataSc)
+            getNotaDip(todo.id, todo.cont, todo.nomeC, dataSc, todo.NumCartoni)
                 navigate("/notadip");
                          }}>
              <p className="inpTab"  style={{textAlign: "left"}}>{todo.nomeC}</p>
@@ -219,7 +235,7 @@ const contEffect = async () => {
              </>
                   )}
           </div>
-        ))} 
+        ))}  
         </div>
         </div>
       </div>

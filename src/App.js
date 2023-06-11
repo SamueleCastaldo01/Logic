@@ -111,6 +111,7 @@ function App() {
   const [notaDipCont, setNotaDipCont] = useState(localStorage.getItem("notaDipCon"));
   const [notaDipNomeC, setNotaDipNomeC] = useState(localStorage.getItem("notaDipNomeC"));  
   const [notaDipDataC, setNotaDipDataC] = useState(localStorage.getItem("notaDipDataC"));
+  const [NumCartNotaDip, setNumCartoniDip] = useState(localStorage.getItem("NumCartNotaDip"));
 
   const [notaFornId, setNotaFornId] = useState(localStorage.getItem("NotaFornId")); 
   const [notaFornNomeF, setNotaFornNomeF] = useState(localStorage.getItem("notaFornNomeF")); 
@@ -211,15 +212,17 @@ function App() {
     setNotaCompleta(comp)
   };
 
-  const getNotaDipHandler = (id, cont, nome, datac) => {
+  const getNotaDipHandler = (id, cont, nome, datac, nuCat) => {
     localStorage.setItem("notaDipId", id);
     localStorage.setItem("notaDipContC", cont);
     localStorage.setItem("notaDipNomeC", nome);
-    localStorage.setItem("notaDipDataC", datac); 
+    localStorage.setItem("notaDipDataC", datac);
+    localStorage.setItem("NumCartNotaDip", nuCat); 
     setNotaDipId(id);
     setNotaDipCont(cont);
     setNotaDipNomeC(nome);
     setNotaDipDataC(datac);
+    setNumCartoniDip(nuCat);
   }
 
   const getNotafornHandler = (id, nome, datav, datac) => {
@@ -240,7 +243,6 @@ function App() {
 
   const getDataScalHandler = (data) => {
     localStorage.setItem("dataScal", data);
-    console.log("ok entrato")
     setDateEli(data);
   }
   //______________________________________________________________________________________________________________
@@ -281,7 +283,7 @@ function App() {
     <Route path="/ordineclientidata" element={<OrdineCliData getOrdId={getOrderIdHandler}/>} />
     <Route path="/ordinefornitoridata" element={<OrdineForniData getOrdFornId={getOrderFornIdHandler}/>} />
     <Route path="/notadipdata" element={<NotaDipData notaDat={todayC} getNotaDip={getNotaDipHandler}/>} />
-    <Route path="/notadip" element={<NotaDip notaDipId={notaDipId} notaDipCont={notaDipCont} notaDipNome={notaDipNomeC} notaDipDataC={notaDipDataC}/>} />
+    <Route path="/notadip" element={<NotaDip notaDipId={notaDipId} notaDipCont={notaDipCont} notaDipNome={notaDipNomeC} notaDipDataC={notaDipDataC} numCart={NumCartNotaDip}/>} />
     
     <Route element={<PrivateDashCli clientId={clientId}/>}>
     <Route path="/dashclienti" element={<DashClienti clientId={clientId} nomeCli={nomeCli}/>} />

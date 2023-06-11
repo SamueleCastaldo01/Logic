@@ -186,7 +186,7 @@ const handleRemoveNumCart = async (e) => {  //quando si preme il pulsante per ri
   await updateDoc(doc(db, "addNota", notaId), { NumCartoni:nuCut});
 }
 
-const handleEditComp = async (e) => {
+const handleEditComp = async (e) => {  //completa
   await updateDoc(doc(db, "addNota", notaId), { completa: localStorage.getItem("completa")});
 };
 
@@ -253,7 +253,7 @@ const print = async () => {
       </>}
 
     <div>
-    {Completa==0 ? 
+    {Completa== 0 ? 
       <button type="button" className="button-delete" style={{padding: "0px", float: "left"}}>
         <BeenhereIcon sx={{ fontSize: 40 }}/>
         </button> :

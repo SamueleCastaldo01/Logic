@@ -120,6 +120,14 @@ body {
   height: 40px;
 }
 
+.hrNotDip{
+position: fixed;
+top: 40px;
+left: 0;
+right: 0;
+opacity: 1;
+}
+
 .inpNumb{
   width: 100%;
   cursor: pointer;
@@ -265,7 +273,7 @@ width: 792px;
   bottom: 9vh;
   width: 50px;
   height: 50px;
-  left: 2vh;
+  left: 7vh;
   border: 0px solid black;
 }
 
@@ -366,8 +374,12 @@ width: 792px;
   font-size: 20px;
   color: #cab497;
 }
+
+.titleNotaDip{
+  font-size: 20px;
+}
+
 .coltext {
-  
   font-size: 14px;
 }
 .textOrd{
@@ -581,6 +593,15 @@ button:focus {
 }
 
 
+@media screen and (max-width: 920px) { /* tablet*/
+  .skipPageLef{
+    left: 2vh;
+  }
+  .titleNotaDip{
+    font-size: 20px;
+  }
+}
+
 @media screen and (max-width: 600px) { /* smartphone s20 ultra*/
   .autocomp {
     width: 100%;
@@ -604,6 +625,15 @@ button:focus {
   }
   .inpTabNota{
     font-size: 14px;
+  }
+  .inpTinte{
+    font-size: 14px;
+  }
+  .skipPageLef{
+    left: 2vh;
+  }
+  .titleNotaDip{
+    font-size: 16px;
   }
 }
 
@@ -629,6 +659,9 @@ button:focus {
     margin: 0 auto;
   }
   .inpTabNota{
+    font-size: 14px;
+  }
+  .inpTinte{
     font-size: 14px;
   }
 }
