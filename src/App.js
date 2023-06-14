@@ -9,6 +9,7 @@ import {signOut} from "firebase/auth";
 import './App.css';
 import Page_per from './pages/Page_per';
 import Login from "./pages/Login";
+import HomePage from './pages/HomePage';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import ScaletData from './pages/ScaletData';
 import Scalet from './pages/Scalet';
@@ -54,7 +55,6 @@ const elimDb = async () => {
   }); 
  }  
  */
-
  const polling = {
   enabled: true,
   interval: 500,
@@ -64,6 +64,8 @@ const elimDb = async () => {
 function App() {
   const [value, setValue] = React.useState(0);
   const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
+
+  document.addEventListener("touchstart", function() {}, true);
 
   const timeElapsed = Date.now();  //prende la data attuale in millisecondi
   const today = new Date(timeElapsed);    //converte nel tipo data
@@ -276,10 +278,11 @@ function App() {
       <Routes>
   <Route element={<PrivateRoutes isAuth={isAuth}/>}>
   <Route element={<PrivatePerm/>}>
+  <Route path="/" element={<HomePage />} />
     <Route path="/listaclienti" element={<AddCliente getCliId={getCliIdHandler}/>} />
     <Route path="/scorta" element={<Scorta />} />
     <Route path="/listafornitori" element={<AddFornitori getFornId={getFornIdHandler}/>} />
-    <Route path="/" element={<ScaletData getColId={getColIdHandler}/>} />
+    <Route path="/scalettadata" element={<ScaletData getColId={getColIdHandler}/>} />
     <Route path="/ordineclientidata" element={<OrdineCliData getOrdId={getOrderIdHandler}/>} />
     <Route path="/ordinefornitoridata" element={<OrdineForniData getOrdFornId={getOrderFornIdHandler}/>} />
     <Route path="/notadipdata" element={<NotaDipData notaDat={todayC} getNotaDip={getNotaDipHandler}/>} />
@@ -356,7 +359,7 @@ function App() {
           <BottomNavigationAction
           component={Link}
           className="linq"
-          to="/"
+          to="/scalettadata"
            label="Scaletta" icon={<FormatListBulletedIcon/>}/>
           <BottomNavigationAction
           component={Link}

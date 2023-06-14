@@ -7,7 +7,6 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { notifyError, notifyErrorDat } from '../components/Notify';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
 import Button from '@mui/material/Button';
 import 'moment/locale/it'
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -192,7 +191,7 @@ function OrdineCliData({ getOrdId }) {
               </button>   
       </div>
       <div className="input_container">
-      <Calendar onChange={setData} value={nome} />
+      <Calendar onChange={setData} value={nome}  elevation={3} />
       </div>
       <div className="btn_container">
       <Button type='submit' variant="outlined">Aggiungi la data</Button>

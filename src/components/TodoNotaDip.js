@@ -199,7 +199,7 @@ const handleChangeAge = (event) => {
     <input className="checkboxStyle" type="checkbox" id="coding" name="interest" checked={checked} onChange={handleChangeChecked} />
     </div>
 {/**************************QUANTITA'******************************************************************* */}
-    <div className="col-1" style={{padding:"0px" }}>    
+    <div className="col-1" style={{padding:"0px", background: todo.simbolo == " " && "#FFFF00" }}>    
 
     {sup ===true &&   ( 
       <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: todo.simbolo == " " && "#FFFF00"}}>{todo.qtProdotto}</span></h3>
@@ -207,7 +207,7 @@ const handleChangeAge = (event) => {
     </div>
 
 {/*******************Prodotto********************************************************************************** */}
-<div className="col-8" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px"}}>
+<div className="col-8" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px", background: todo.simbolo == " " && "#FFFF00"}}>
       {/***Prodotti********************** */}
 
     {sup ===true &&( 
@@ -215,7 +215,7 @@ const handleChangeAge = (event) => {
     )}
 
       {/*****Tinte********************************************************************/}
-    {sup ===true && todo.flagTinte===true && Completa == 0 &&( 
+    {sup ===true && todo.flagTinte===true && Completa == 1 &&( 
       <>
         <div className="divTinte"><span>
         <FormControl >
@@ -285,13 +285,11 @@ const handleChangeAge = (event) => {
       {todo.t4 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t4} </span> </> }
       {todo.t5 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t5} </span> </> }
       </h3>
-      
       </>
-
     )}
     </div>
 {/*****************Simbolo************************************************************************************ */}
-<div className="col-1" style={{padding: "0px"}}>
+<div className="col-1" style={{padding: "0px", background: todo.simbolo == " " && "#FFFF00"}}>
 <h3 className="inpTabNota" style={{color: "red", fontSize: "16px", textAlign: "center"}}>{todo.simbolo}</h3>
 </div>
 {/*****************button************************************************************************************ */}
@@ -314,6 +312,8 @@ const handleChangeAge = (event) => {
         </button>
         )}
 
+        {sup ===true  && Completa == 0 &&(
+      <>
         <button type="button" className="buttonMenu" style={{padding: "0px"}} >
         <MoreVertIcon id="i" onClick={handleMenu}/>
         <Menu  sx={
@@ -342,6 +342,9 @@ const handleChangeAge = (event) => {
                 <MenuItem onClick={handleChangeRemMenu}>Rimuovi</MenuItem>
               </Menu>
         </button>
+        </>
+      )}
+
       </div>
 
     </div>

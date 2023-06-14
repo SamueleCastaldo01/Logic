@@ -524,17 +524,3 @@ function handlePopUp(image, nota) {
       )
 }
 export default Scorta;
-
-const arrBrand = [
-  { label: 'WAHL' },
-  { label: 'MOSER' },
-  { label: 'GAMA' },
-  { label: 'MOVE' },
-  { label: 'GAMMA PIU' },
-  { label: 'GORDON' },
-  { label: 'MELCAP' },
-  { label: 'KEPRO' },
-  { label: 'GHD' },
-  { label: 'JRL' },
-  { label: 'BABYLISS' },
-];

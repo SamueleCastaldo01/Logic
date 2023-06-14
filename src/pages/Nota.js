@@ -160,7 +160,8 @@ const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5
   if(!nomTinte){ 
     nomTinte=""
   conTinte=1 }
-  var preT= (conTinte*qt)*prezU;
+  var preT= (conTinte*qt)*prezU;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
+  if(todo.simbolo == "(NO)"){ preT=0;  }   //se il simbolo è no, non va a fare il suo prezzo totale
   await updateDoc(doc(db, "Nota", todo.id), 
   { qtProdotto: qt, prodottoC:prod, prezzoUniProd:prezU, prezzoTotProd:preT, t1:tt1, t2:tt2, t3:tt3, t4:tt4, t5:tt5, nomeTinte:nomTinte});
   SommaTot();

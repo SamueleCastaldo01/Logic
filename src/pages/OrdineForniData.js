@@ -7,7 +7,6 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { notifyError, notifyErrorDat } from '../components/Notify';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
 import Button from '@mui/material/Button';
 import 'moment/locale/it'
 import DeleteIcon from "@mui/icons-material/Delete";

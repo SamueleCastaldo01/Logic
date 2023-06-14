@@ -10,11 +10,15 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import CheckIcon from '@mui/icons-material/Check';
+import ClearIcon from '@mui/icons-material/Clear';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import IconButton from '@mui/material/IconButton';
+import Collapse from '@mui/material/Collapse';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
+import Fade from '@mui/material/Fade';
 import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
 
@@ -48,6 +52,7 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
 
     var FlagT=false;   //flag per le tinte, viene salvato nel database serve per far riconoscere ogni singola trupla
     const [flagStampa, setFlagStampa] = React.useState(false);  //quando è falso si vedono le icone,
+    const [checked, setChecked] = React.useState(false);
    
     const [sumTot, setSumTot] =React.useState("");
 
@@ -154,7 +159,7 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
       }
 
   //******************************************************************* */
-     //funzioni per la conferma della nota e per il calcolo del prezzo dei prodotti
+     //funzioni per la conferma della nota e per il calcolo del prezzo dei prodotti, e mettere nella lista inOrdine
      const SommaTot = async (id, nomeC ) => {  //fa la somma totale, di tutti i prezzi totali
       var sommaTot=0;
       const q = query(collection(db, "Nota"), where("nomeC", "==", nomeC), where("dataC", "==", notaDipDataC));  //prende i prodotti di quel cliente di quella data
@@ -167,7 +172,10 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
     }
 
   const handleEditComp = async (id) => {  //aggiorna lo stato nel database che è stata completata la nota, oppure annullata, tramite il localStorage
-    await updateDoc(doc(db, "addNota", id), { completa: localStorage.getItem("completa")});
+    setTimeout(async function(){
+      await updateDoc(doc(db, "addNota", id), { completa: localStorage.getItem("completa")});
+    },50);
+    
   };
   
   const handleConferma = async (id, nomeC, sommaTot, debitoRes) => {
@@ -182,6 +190,29 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
         toast.clearWaitingQueue(); 
   };
 
+  const handleInOrdine = async (nomeC) => {  //Inserisce una nuova trupa nella tabella in ordine quando viene confermata la nota    si attiva quando premo il pulsante conferma
+    //query per prendere tutti i prodotti di quel cliente in quella data che ha il simbolo (NO), per poi metterli nel database InOrdine
+    const q = query(collection(db, "Nota"),where("nomeC", "==", nomeC), where("dataC", "==", notaDipDataC), where("simbolo", "==", "(NO)"));  //prende i prodotti di quel cliente di quella data che ha il simbolo (NO)
+    const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async (doc) => {
+        await addDoc(collection(db, "inOrdine"), {   //va a creare la nuova trupla nella tabella inOrdine
+          nomeC: nomeC,
+          dataC: notaDipDataC,
+          qtProdotto: doc.data().qtProdotto,
+          prodottoC: doc.data().prodottoC,
+        });
+        });
+  }
+
+  const handleInOrdineRemove = async (nomeC) => {  //Va ad eliminare i prodotti da InOrdine, quando viene annullata la conferma    si attiva quando premo il pulsante annulla conferma
+    //Devo andare a prendere tutti i proddotti nella tabella inOrdine dello stesso cliente e della stessa data e devo eliminare tutti i prodotti
+    const q = query(collection(db, "inOrdine"),where("nomeC", "==", nomeC), where("dataC", "==", notaDipDataC));  //prende i prodotti di quel cliente di quella data che ha il simbolo (NO)
+    const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async (hi) => {
+        await deleteDoc(doc(db, "inOrdine", hi.id)); //elimina tutti i prodotti di quel cliente con quella data  quando viene annullata la conferma 
+        });
+  }
+
   //************************************************************************************************* */
   const handleNumeroDiNote = async () => {   //funzione che mi permette di prendere il numero di note di quelle data
     const q = query(collection(db, "ordDat"), where("data", "==", notaDipDataC));  
@@ -192,14 +223,19 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
   } 
   
   const handleAddContPage = async () => {
-        setContPage(contPage+1);
+    setTimeout(function(){
+      setContPage(contPage+1);
+    },50);
+        
     }
 
     const handleRemoveContPage = async () => {
-      setContPage(contPage-1);
-      if(contPage<=1) {
-        setContPage(1);
-      }
+      setTimeout(function(){
+        setContPage(contPage-1);
+        if(contPage<=1) {
+          setContPage(1);
+        }
+      },50);
     }
 
 //_________________________________________________________________________________________________________________
@@ -222,6 +258,7 @@ const print = async () => {
 //************************************************************** */
     return (  
         <>
+    {/**************NAVBAR MOBILE*************************************** */}
       <div className='navMobile row'>
       <div className='col-2'>
         <IconButton className="buttonArrow" aria-label="delete" sx={{ color: "#f6f6f6", marginTop: "7px" }}
@@ -273,7 +310,7 @@ const print = async () => {
       displayMsg={displayMsg}
       nomeCli={notaDipNome}
       flagStampa={flagStampa}
-      Completa={""}
+      Completa={todo.completa}
     />
      )}
      </>
@@ -282,43 +319,55 @@ const print = async () => {
   ))}
   </div>
 
+{/****numero cartoni e numero buste************************************************************ */}
   <div className='row'>
     <div className='col' style={{textAlign:"left", padding:"0px"}}>
-    <h6 className='mt-2'>Numero Cartoni: <span> {todo.NumCartoni} </span> 
-    {todo.completa == 0 && flagStampa ==false &&
-      <span>
-        <button className="button-complete" style={{padding: "0px"}} onClick={()=> {handleAddNumCart(todo.id, todo.NumCartoni)}}> <AddCircleIcon sx={{ fontSize: 30 }}/> </button>
-        <button className="button-delete" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumCart(todo.id, todo.NumCartoni)}}> <RemoveCircleIcon sx={{ fontSize: 30 }}/> </button>
-      </span> }
-    </h6>
-    <h6 className='mt-2'>Numero Buste: <span> {todo.NumBuste} </span> 
-    {Completa == 0 && flagStampa ==false &&
-      <span>
-        <button className="button-complete" style={{padding: "0px"}} onClick={()=> {handleAddNumBuste(todo.id, todo.NumBuste)}}> <AddCircleIcon sx={{ fontSize: 30 }}/> </button>
-        <button className="button-delete" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumBuste(todo.id, todo.NumBuste)}}> <RemoveCircleIcon sx={{ fontSize: 30 }}/> </button>
-      </span> }
-    </h6>  
-       </div>
+    
+    <div className='row'>
 
-    <div className='col-3' style={{textAlign:"right", padding:"0px"}}>
-    {flagStampa == false && <>
+      <div className='col-4' style={{paddingRight: "0px", width:"100px"}}>
+      <h6 style={{marginTop: "12px"}}><b>N.</b> CT. = <span> {todo.NumCartoni} </span> </h6>
+      <h6 style={{marginTop: "20px"}}><b>N.</b> B.&nbsp;&nbsp; = <span> {todo.NumBuste} </span> </h6>
+      </div>
+
+      <div className='col-3' style={{padding: "0px", paddingRight:"2px",  width:"197px"}}>
+      {todo.completa == 0 && flagStampa ==false &&
+      <span>
+        <button className="button-rem" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumCart(todo.id, todo.NumCartoni)}}> - </button>
+        <button className="button-add" style={{padding: "0px"}} onClick={()=> {handleAddNumCart(todo.id, todo.NumCartoni)}}> + </button>
+      </span> }
+      {todo.completa == 0 && flagStampa ==false &&
+        <>
+        <button className="button-rem" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumBuste(todo.id, todo.NumBuste)}}> - </button>
+        <button className="button-add" style={{padding: "0px"}} onClick={()=> {handleAddNumBuste(todo.id, todo.NumBuste)}}> + </button>
+        </>
+   }
+      </div>
+    </div>
+       </div>
+  </div>
+
+  {/*******************Conferma la nota  (completa)*************************************************************** */}
+
+  {flagStampa == false && <>
   {todo.completa == 0 ?  
-    <button onClick={ ()=> {
+    <button className='button-comp' onClick={ ()=> {
     localStorage.setItem("completa", 1);
      setCompleta(1);
      SommaTot(todo.id, todo.nomeC);  //va a fare la somma totale del prezzo dei prodotti
      handleEditComp(todo.id);    //aggiorna la nota se è completa nel db
-     handleConferma(todo.id, todo.nomeC, todo.sommaTotale, todo.debitoRes); }}>Conferma</button> :
-    <button onClick={ ()=> {
+     handleInOrdine(todo.nomeC);  //aggiunge i prodotti con il (NO) nella tabella InOrdine
+     handleConferma(todo.id, todo.nomeC, todo.sommaTotale, todo.debitoRes); }}><CheckIcon sx={{ fontSize: 48 }}  /> conferma</button> :
+    <button className='button-clear' onClick={ ()=> {
       localStorage.setItem("completa", 0);
        setCompleta(0);
-       handleEditComp(todo.id);  }}>Annulla Conferma</button>
+       handleEditComp(todo.id);
+       handleInOrdineRemove(todo.nomeC)  }}><ClearIcon sx={{ fontSize: 29 }}/>  Annulla Conferma</button>
      }
   </>}
-    </div>
-  </div>
+  {/*******************Tasti per passare da una nota ad un altra*************************************************************** */}
   {todo.cont > 1 &&
-    <button type="button" className="skipPageLef" style={{padding: "0px"}} onClick={ () =>{handleRemoveContPage() }}>
+    <button type="button" className="skipPageLef" style={{padding: "0px"}} onClick={ () =>{ handleRemoveContPage() }}>
         <KeyboardArrowLeftIcon sx={{ fontSize: 40 }} id="i" />
         </button>
   }

@@ -15,6 +15,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
+import HomeIcon from '@mui/icons-material/Home';
 import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
@@ -196,6 +197,29 @@ export default function MiniDrawer( {signUserOut} ) {
         <Divider />
         <List>
 
+        <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/")}}>
+              <ListItemButton
+          selected={selectedIndex === 7}
+          onClick={(event) => handleListItemClick(event, 7)}
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? 'initial' : 'center',
+                  px: 2.5,
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : 'auto',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <HomeIcon sx={{ color: "white" }}/>
+                </ListItemIcon>
+                <ListItemText primary="HomePage" sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+          </ListItem>
+
         <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/scorta")}}>
               <ListItemButton
           selected={selectedIndex === 0}
@@ -219,7 +243,7 @@ export default function MiniDrawer( {signUserOut} ) {
               </ListItemButton>
           </ListItem>
 
-        <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/")}}>
+        <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/scalettadata")}}>
               <ListItemButton
           selected={selectedIndex === 1}
           onClick={(event) => handleListItemClick(event, 1)}

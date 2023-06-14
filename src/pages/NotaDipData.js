@@ -185,15 +185,16 @@ const contEffect = async () => {
   {/**************tabelle********************************************************************************************************/}
       <div className='row'>
         <div className='col'>
-    {/***********tabella note completate********************************************************************************** */}
+    {/***********tabella note Non completate********************************************************************************** */}
         <div  className='todo_containerOrdCli mt-5'>
         <div className='row'> 
-        <div className='col'>
+        <div className='col' style={{paddingRight: "0px"}} >
         <p className='colTextTitle'> Ordine Clienti</p>
         <p className='textOrdRed'> Note non completate</p>
         </div>
-        <div className='col'>
+        <div className='col' style={{paddingLeft: "0px"}}>
         <Autocomplete
+        freeSolo
       value={dataSc}
       options={todosDataAuto.map((option) => option.data)}
       onInputChange={handleInputChange}

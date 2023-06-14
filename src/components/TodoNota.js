@@ -30,6 +30,7 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
   const [newProdotto, setNewProdotto] = React.useState(todo.prodottoC);
   const [newPrezzoUni, setPrezzoUni] = React.useState(todo.prezzoUniProd);
   const [newPrezzoTot, setnewPrezzoTot] = React.useState(todo.prezzoTotProd);
+  const [simbolo, setSimbolo] = React.useState(todo.simbolo);
   const [newT1, setT1] = React.useState(todo.t1);
   const [newT2, setT2] = React.useState(todo.t2);
   const [newT3, setT3] = React.useState(todo.t3);
@@ -153,14 +154,15 @@ const handleChangeAge = (event) => {
 
 <form  onSubmit={handleSubm}>
 <hr style={{margin: "0"}}/>
+{((sup ===true && todo.flagTinte===false && Completa== "1" && simbolo != "(NO)") || (sup ===true && todo.flagTinte===false && Completa== "0")) &&( 
     <div className="row " style={{ borderBottom:"solid",  borderWidth: "2px" }}>
 {/**************************QUANTITA'******************************************************************* */}
-    <div className="col-1" style={{padding:"0px", }}>    
+    <div className="col-1" style={{padding:"0px", background: todo.simbolo == " " && "#FFFF00" }}>    
     {sup ===true && Completa == 0 &&  ( 
       <>
       <span style={{padding:"0px"}}>
       <input
-      style={{ textDecoration: todo.completed && "line-through", textAlign:"center", padding:"0px", width:"60px", marginTop:"0px" }}
+      style={{ textDecoration: todo.completed && "line-through", textAlign:"center", padding:"0px", width:"60px", marginTop:"0px"}}
       onBlur={handleSubm}
         type="number"
         value={todo.qtProdotto === "" ? newQtProdotto : todo.qtProdotto}
@@ -172,26 +174,29 @@ const handleChangeAge = (event) => {
     )}
 
     {sup ===true && Completa == 1 &&  ( 
-      <h3 className="inpTabNota" style={{ textAlign:"center"}}> {todo.qtProdotto} </h3>
+      <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: todo.simbolo == " " && "#FFFF00"}}>{todo.qtProdotto}</span></h3>
     )}
     </div>
 
 {/*******************Prodotto********************************************************************************** */}
-<div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px",}}>
+<div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px", background: todo.simbolo == " " && "#FFFF00", height: "40px"}}>
       {/***Prodotti********************** */}
     {sup ===true && todo.flagTinte===false && Completa == 0 &&( 
       <Autocomplete
+      freeSolo
       value={newProdotto}
       options={AutoProdCli}
       onInputChange={handleInputChange}
       onBlur={handleSubm}
-      componentsProps={{ popper: { style: { width: 'fit-content' } } }}
+      componentsProps={{ popper: { style: { width: 'fit-content', border: "none" } } }}
       renderInput={(params) => <TextField {...params}  size="small"/>}
     />
     )}
-
-    {sup ===true && todo.flagTinte===false && Completa == 1 &&( 
-      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> {todo.prodottoC} </h3>
+    {sup ===true && todo.flagTinte===false && Completa == 0 &&( 
+    <h3 className="simboloNota" style={{color: "red", fontSize: "16px"}}>{todo.simbolo}</h3>
+    )}
+    {sup ===true && todo.flagTinte===false && Completa == 1 && simbolo != "(NO)" &&( 
+      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> <span style={{background: todo.simbolo == " " && "#FFFF00"}}>{todo.prodottoC}</span> </h3>
     )}
 
       {/*****Tinte********************************************************************/}
@@ -265,13 +270,9 @@ const handleChangeAge = (event) => {
       {todo.t4 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t4} </span> </> }
       {todo.t5 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t5} </span> </> }
       </h3>
-      
       </>
-
     )}
-
     </div>
-
 {/************************Prezzo Uni***************************************************************************** */}
 <div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px" }}>
 
@@ -324,7 +325,7 @@ const handleChangeAge = (event) => {
       </div>
 
     </div>
-
+    )}
 </form>
 
 

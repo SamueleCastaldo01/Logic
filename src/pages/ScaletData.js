@@ -14,7 +14,7 @@ import { supa, guid, tutti } from '../components/utenti';
 import Box from '@mui/material/Box';
 import MiniDrawer from '../components/MiniDrawer';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+import "../Calendar.css"
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';

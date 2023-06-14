@@ -21,6 +21,11 @@ body {
   font-size: 32px;
 }
 
+button:active {
+  box-shadow:inset 0 0.6em 2em -0.3em rgba(0,0,0,0.15),inset 0 0 0em 0.05em rgba(255,255,255,0.12);
+  transform: translateY(-1px);
+}
+
 .linq {
   color: white;
   text-decoration: none;
@@ -265,6 +270,21 @@ width: 792px;
   border: 0px solid black;
 }
 
+.simboloNota {
+  position: relative;
+  bottom: 30px;
+  left: 158px;
+}
+
+.delayed {
+  transition: all 0.2s;
+  transition-delay: 1000ms;
+}
+
+.delayed:active {
+  transition: none;
+}
+
 .skipPageLef{
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
   background-color: #f6f6f6;
@@ -360,6 +380,7 @@ width: 792px;
   height: 253px;
 }
 .formSD {
+  max-width: 355px;
   height: 370px;
 }
 
@@ -395,7 +416,7 @@ width: 792px;
 .input_container {
   margin-bottom: 20px;
   padding: 0px 20px;
-  
+  padding: 0px;
 }
 .btn_container {
   text-align: center;
@@ -414,6 +435,7 @@ width: 792px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
+.todo_containerInOrdine,
 .todo_containerDebCli,
 .todo_containerProdCli,
 .todo_containerOrdCli,
@@ -435,7 +457,9 @@ width: 792px;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
 
+
 .todo_containerDebCli,
+.todo_containerInOrdine,
 .todo_containerCli,
 .todo_containerScorta,
 .todo_containerFor,
@@ -455,14 +479,15 @@ width: 792px;
 .scrollOrdCli{
   max-height: 500px;
 }
-
+.todo_containerInOrdine {
+  width: 1000px;
+}
 .todo_containerDebCli{
   width: 800px;
 }
 .todo_container {
   width: 1200px;
 }
-
 .todo_containerCli {
   width: 1200px;
 }
@@ -473,7 +498,7 @@ width: 792px;
   width: 500px;
 }
 .todo_containerOrdCli{
-  width: 400px;
+  max-width: 400px;
 }
 .todo_containerProdCli{
   width: 500px;
@@ -510,8 +535,6 @@ width: 792px;
 
 .button-close {
   color: white;
-  
-  margin-left: 50px;
   background-color: var(--red);
   border: none;
   outline: none;
@@ -552,6 +575,56 @@ width: 792px;
   padding-top: 10px;
   padding-bottom: 10px;
   color: rgb(255, 122, 98);
+}
+.button-rem {
+  padding-top: 10px;
+  border: none;
+  padding-bottom: 10px;
+  margin-top: 2px;
+  width: 40%;
+  font-size: 24px;
+  background-color: rgb(255, 122, 98);
+  color: white;
+}
+.button-add {
+padding-top: 10px;
+padding-bottom: 10px;
+border: none;
+width: 40%;
+font-size: 24px;
+background-color: var(--green);
+color: white;
+}
+.button-comp {
+box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  position: fixed;
+  bottom: 63px;
+  left: 34%;
+  border-radius: 15px; 
+  background-color: var(--green);
+  color: white;
+  border: none;
+}
+
+.skipPageRi,
+.skipPageLef,
+.button-comp{
+  transition: all 0.2s;
+  transition-delay: 300ms;
+}
+
+.skipPageRi:active,
+.skipPageLef:active,
+.button-comp:active{
+  transition: none;
+}
+
+.button-clear {
+  margin-top: 2px;
+  border-radius: 15px; 
+  background-color: rgb(255, 122, 98);
+  color: white;
+  border: none;
 }
 .button-navBar {
   padding-top: 10px;
@@ -609,13 +682,6 @@ button:focus {
   .navb{
     width: 102.8%;
   }
-  .formAC,
-  .formScort,
-  .formCli,
-  .formSD,
-  .formSC {
-    width: 85%;
-  }
   .inp {
     width: 100%;
   }
@@ -643,13 +709,6 @@ button:focus {
   }
   .navb{
     width: 103.1%;
-  }
-  .formAC,
-  .formScort,
-  .formCli,
-  .formSD,
-  .formSC {
-    width: 85%;
   }
   .inp {
     width: 100%;
