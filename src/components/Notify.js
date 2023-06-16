@@ -45,6 +45,21 @@ export function notifyErrorProd () {
         });
 }
 //________________________________________________________________________
+export function notifyErrorNumCartoni () {
+    toast.error('Aggiungi il numero di cartoni', {
+        position: "top-center",
+        autoClose: false,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        transition: Slide,
+        theme: "dark",
+        className: "rounded-4"
+        });
+}
+//________________________________________________________________________
 export function notifyErrorNumNegativo () {
     toast.error('Inserisci un numero positivo', {
         position: "top-center",

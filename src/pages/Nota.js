@@ -82,13 +82,14 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
 //_________________________________________________________________________________________________________________
 const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
   var sommaTot=0;
-  const q = query(collection(db, "Nota"), where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC));  //prende i prodotti di quel cliente di quella data
+  const q = query(collection(db, "Nota"), where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC));  //prende i prodotti di quel cliente di quella data che sono diversi da (NO)
   const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       sommaTot=+doc.data().prezzoTotProd +sommaTot;
       });
-      setSumTot(sommaTot);
-      await updateDoc(doc(db, "addNota", notaId), { sommaTotale:sommaTot});  //aggiorna la somma totale nell'add nota
+      var somTrunc = sommaTot.toFixed(2);
+      setSumTot(somTrunc);
+      await updateDoc(doc(db, "addNota", notaId), { sommaTotale: somTrunc});  //aggiorna la somma totale nell'add nota
 }
 
 //********************************************************************************** */
@@ -150,6 +151,31 @@ const createCate = async () => {
   SommaTot();
 };
 //_________________________________________________________________________________________________________________
+const handleInOrdine = async () => {  //Inserisce una nuova trupa nella tabella in ordine quando viene confermata la nota    si attiva quando premo il pulsante conferma
+  console.log("sono entrato")
+  //query per prendere tutti i prodotti di quel cliente in quella data che ha il simbolo (NO), per poi metterli nel database InOrdine
+  const q = query(collection(db, "Nota"),where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC), where("simbolo", "==", "(NO)"));  //prende i prodotti di quel cliente di quella data che ha il simbolo (NO)
+  const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (doc) => {
+      await addDoc(collection(db, "inOrdine"), {   //va a creare la nuova trupla nella tabella inOrdine
+        nomeC: nomeCli,
+        dataC: dataNotaC,
+        qtProdotto: doc.data().qtProdotto,
+        prodottoC: doc.data().prodottoC,
+      });
+      });
+}
+
+const handleInOrdineRemove = async () => {  //Va ad eliminare i prodotti da InOrdine, quando viene annullata la conferma    si attiva quando premo il pulsante annulla conferma
+  //Devo andare a prendere tutti i proddotti nella tabella inOrdine dello stesso cliente e della stessa data e devo eliminare tutti i prodotti
+  const q = query(collection(db, "inOrdine"),where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC));  //prende i prodotti di quel cliente di quella data che ha il simbolo (NO)
+  const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (hi) => {
+      await deleteDoc(doc(db, "inOrdine", hi.id)); //elimina tutti i prodotti di quel cliente con quella data  quando viene annullata la conferma 
+      });
+}
+
+//_________________________________________________________________________________________________________________
 const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5, nomTinte) => {
   var conTinte=0;    //alogoritmo per le tinte
   if(tt1) {conTinte=conTinte+1}
@@ -160,7 +186,7 @@ const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5
   if(!nomTinte){ 
     nomTinte=""
   conTinte=1 }
-  var preT= (conTinte*qt)*prezU;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
+  var preT= (conTinte*qt)*prezU;  //qui va a fare il prezzo totale del prodotto in base alla quantità e al prezzo unitario
   if(todo.simbolo == "(NO)"){ preT=0;  }   //se il simbolo è no, non va a fare il suo prezzo totale
   await updateDoc(doc(db, "Nota", todo.id), 
   { qtProdotto: qt, prodottoC:prod, prezzoUniProd:prezU, prezzoTotProd:preT, t1:tt1, t2:tt2, t3:tt3, t4:tt4, t5:tt5, nomeTinte:nomTinte});
@@ -194,19 +220,20 @@ const handleEditComp = async (e) => {  //completa
 const handleEditDebitoRes = async (e) => {
   e.preventDefault();
   await updateDoc(doc(db, "addNota", notaId), { debitoRes:debitoRes});
-  notifyUpdateDebRes();
   toast.clearWaitingQueue(); 
 };
 
 const handleConferma = async () => {
+  SommaTot();
   var debTot= +sumTot+(+debitoRes);
-  setDebTot(debTot);
-  await updateDoc(doc(db, "addNota", notaId), { debitoTotale:debTot});  //aggiorna la somma totale nell'add nota
+  var debTrunc = debTot.toFixed(2);
+  setDebTot(debTrunc);
+  await updateDoc(doc(db, "addNota", notaId), { debitoTotale:debTrunc});  //aggiorna la somma totale nell'add nota
       //aggiorna ded1 nel database debito
   const q = query(collection(db, "debito"), where("nomeC", "==", nomeCli));
   const querySnapshot = await getDocs(q);
       querySnapshot.forEach(async (hi) => {
-      await updateDoc(doc(db, "debito", hi.id), { deb1:debTot});  //aggiorna deb1 nel database del debito
+      await updateDoc(doc(db, "debito", hi.id), { deb1:debTrunc});  //aggiorna deb1 nel database del debito
       });
       toast.clearWaitingQueue(); 
 };
@@ -330,6 +357,7 @@ const print = async () => {
       nomeCli={nomeCli}
       flagStampa={flagStampa}
       Completa={Completa}
+      SommaTot={SommaTot}
     />
      )}
      </>
@@ -352,16 +380,15 @@ const print = async () => {
     <div className='col' style={{textAlign:"right", padding:"0px"}}>
     <h6>Totale: {sumTot} €</h6>
     <form onSubmit={handleEditDebitoRes}>
-    <h6>Debito Residuo:     <input value={debitoRes} style={{textAlign:"center", padding: "0px", width:"50px"}} 
+    <h6>Debito Residuo:     <input value={debitoRes} onBlur={handleEditDebitoRes} style={{textAlign:"center", padding: "0px", width:"50px"}} 
       onChange={(event) => {
       setDebitoRes(event.target.value);}}
     />  €</h6>
-    <button hidden type='submit' onClick={handleEditDebitoRes}>Aggiorna</button>
     </form>
     <h6>Debito Totale: {debitoTot} €</h6>
     {flagStampa == false && <>
-  {Completa==0 ?  <button onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1);  handleEditComp();  handleConferma()}}>Conferma</button> :
-    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleEditComp(); }}>Annulla Conferma</button>
+  {Completa==0 ?  <button onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1);  handleEditComp(); handleInOrdine();  handleConferma()}}>Conferma</button> :
+    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleEditComp(); }}>Annulla Conferma</button>
      }
   </>}
 

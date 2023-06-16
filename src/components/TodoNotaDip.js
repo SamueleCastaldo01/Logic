@@ -20,7 +20,7 @@ import { fontSize } from "@mui/system";
 
 export const AutoCompProd = [];
 
-export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, flagStampa, Completa}) {
+export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, flagStampa, Completa, SommaTot}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -46,65 +46,54 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
 
   let navigate = useNavigate();
 
-  const handleChangeChecked = async (event) => {
+  const handleChangeChecked = async (event) => {  //handle per il check
     await updateDoc(doc(db, "Nota", todo.id), { artPreso:!checked});
     setChecked(!checked);
   };
-
-  const handleChangeNo = async (event) => {
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"(NO)"});
+//***************************************************************************************** */
+  const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodotto, e il suo prezzo totale diventa 0, in questo modo non va a fare la somma con il resto
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"(NO)", prezzoTotProd:0});
+    SommaTot();
     handleClose()
   };
 
   const handleChangeEvi = async (event) => {
+    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
+      await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:preT});
+    }
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:" "});
+    SommaTot();
     handleClose()
   };
 
   const handleChangeInterro = async (event) => {
+    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
+      await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:preT});
+    }
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:"?"});
+    SommaTot();
     handleClose()
   };
 
   const handleChangeRemMenu = async (event) => {
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:""});
-    handleClose()
+    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
+      await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:preT});
+    }
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:""}); //infine aggiorna il simbolo
+    SommaTot();
+    handleClose();
   };
-
-  const handleInputChange = async (event, value) => {  //funzione per l'anagrafica del cliente, trova il prezzo unitario del prodotto
-    setNewProdotto(value);
-    const collectionRef = collection(db, "prodottoClin");
-    //trova il prezzo unitario del prodotto
-    const q = query(collectionRef, where("author.name", "==", nomeCli), where("nomeP", "==", value) );
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (hi) => {
-      setPrezzoUni(hi.data().prezzoUnitario);
-    });
-  }
-
-  const handlePrezzUniUpd = async (e) => {  // funzione che si attiva quando cambio il prezzo unitario del prodotto
-    console.log("sono entrato nel handle prezzoUni")
-    e.preventDefault();
-    const collectionRef = collection(db, "prodottoClin");
-    //trova l'id del prodottoClin, per poi poter aggiornare il prezzo unitario del prodottoPersonalizzato
-    const q = query(collectionRef, where("author.name", "==", nomeCli), where("nomeP", "==", todo.prodottoC) );
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (hi) => {
-      console.log(hi.id, " => ", hi.data().author.name, hi.data().prezzoUnitario, hi.data().nomeP);
-      await updateDoc(doc(db, "prodottoClin", hi.id),  //aggiorna il prezzoUni di prodottoCli
-      { prezzoUnitario: newPrezzoUni });
-    });
-    handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte) //aggiorna la nota e fa la somma
-    toast.clearWaitingQueue(); 
-  };
+ //******************************************************************** */ 
 
   const handleSubm = (e) => {
     e.preventDefault();
     handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte)
   };
 
-  const handleClose = () => {
-    console.log("entrato")
+  const handleClose = () => {  //chiude il menu
     setAnchorEl(null);
   };
 
@@ -201,89 +190,26 @@ const handleChangeAge = (event) => {
 {/**************************QUANTITA'******************************************************************* */}
     <div className="col-1" style={{padding:"0px", background: todo.simbolo == " " && "#FFFF00" }}>    
 
-    {sup ===true &&   ( 
       <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: todo.simbolo == " " && "#FFFF00"}}>{todo.qtProdotto}</span></h3>
-    )}
+
     </div>
 
 {/*******************Prodotto********************************************************************************** */}
 <div className="col-8" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px", background: todo.simbolo == " " && "#FFFF00"}}>
       {/***Prodotti********************** */}
 
-    {sup ===true &&( 
+    { todo.flagTinte===false &&( 
       <h3 className="inpTabNota" style={{ marginLeft: "12px"}}><span style={{background: todo.simbolo == " " && "#FFFF00"}}>{todo.prodottoC}</span>  </h3>
     )}
 
       {/*****Tinte********************************************************************/}
-    {sup ===true && todo.flagTinte===true && Completa == 1 &&( 
+    { todo.flagTinte===true && (
       <>
-        <div className="divTinte"><span>
-        <FormControl >
-        <InputLabel id="demo-simple-select-label"></InputLabel>
-        <Select sx={{height:39, marginLeft:-1}}
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={nomeTinte}
-          onChange={handleChangeTintSelect}
-          onBlur={handleSubm}
-        >
-          <MenuItem value={"KF"}>KF</MenuItem>
-          <MenuItem value={"KR"}>KR</MenuItem>
-          <MenuItem value={"CB"}>CB</MenuItem>
-        </Select>
-      </FormControl>
-         </span> 
-        <input
-      style={{textAlign:"center", width:"42px", padding:"0px"}}
-        className="inpTinte"
-        type="text"
-        value={todo.t1 === "" ? newT1 : todo.t1}
-        onChange={handleT1}
-        onBlur={handleSubm}
-      /> -
-        <input
-      style={{textAlign:"center", width:"42px", padding:"0px"}}
-        className="inpTinte"
-        type="text"
-        value={todo.t2 === "" ? newT2 : todo.t2}
-        onChange={handleT2}
-        onBlur={handleSubm}
-      /> -
-        <input
-      style={{textAlign:"center", width:"42px", padding:"0px"}}
-        className="inpTinte"
-        type="text"
-        value={todo.t3 === "" ? newT3 : todo.t3}
-        onChange={handleT3}
-        onBlur={handleSubm}
-      /> -
-        <input
-      style={{textAlign:"center", width:"42px", padding:"0px"}}
-        className="inpTinte"
-        type="text"
-        value={todo.t4 === "" ? newT4 : todo.t4}
-        onChange={handleT4}
-        onBlur={handleSubm}
-      /> -
-      <input
-      style={{textAlign:"center", width:"42px", padding:"0px"}}
-        className="inpTinte"
-        type="text"
-        value={todo.t5 === "" ? newT5 : todo.t5}
-        onChange={handleT5}
-        onBlur={handleSubm}
-      /> 
-        </div>
-      </>
-    )}
-    {sup ===true && todo.flagTinte===true && Completa == 1 &&(
-      <>
-      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> {todo.nomeTinte} 
+      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> {todo.prodottoC} 
       {todo.t1 && <> <span className="inpTabNota" style={{ marginLeft: "35px", textAlign:"center", padding:"0px"}}> {todo.t1} </span>   </> }
       {todo.t2 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t2} </span>  </> }
       {todo.t3 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t3} </span> </> }
       {todo.t4 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t4} </span> </> }
-      {todo.t5 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t5} </span> </> }
       </h3>
       </>
     )}
@@ -300,7 +226,7 @@ const handleChangeAge = (event) => {
           onClick={() => handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte)}
         >
         </button>
-        {sup ===true && flagStampa==false && Completa == 0 && (   
+        {  flagStampa==false && Completa == 0 && (   
         <button hidden type="button" className="button-delete" style={{padding: "0px"}}                          
           onClick={() => {
                 localStorage.setItem("IDNOTa", todo.id);
@@ -312,7 +238,7 @@ const handleChangeAge = (event) => {
         </button>
         )}
 
-        {sup ===true  && Completa == 0 &&(
+        { Completa == 0 &&(
       <>
         <button type="button" className="buttonMenu" style={{padding: "0px"}} >
         <MoreVertIcon id="i" onClick={handleMenu}/>

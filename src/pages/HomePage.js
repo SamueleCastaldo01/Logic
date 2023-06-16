@@ -14,35 +14,66 @@ import { supa } from '../components/utenti';
 import { guid } from '../components/utenti';
 import { tutti } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
-import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
-import TodoDebiCli from '../components/TodoDebiCli';
 import SearchIcon from '@mui/icons-material/Search';
-import moment from 'moment';
-import MiniDrawer from '../components/MiniDrawer';
-import Box from '@mui/material/Box';
+import { Bar } from 'react-chartjs-2';
+import { optionsNumCart, optionsTotQuota, optionsNumAsc } from '../components/OptionsGrafici';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Filler,
+  Legend,
+} from 'chart.js';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAygsHvhG251qZ7-N9oR8A-q1ls9yhNkOQ';
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Filler,
+  Legend
+);
 
-function HomePage( {getCliId} ) {
+function HomePage(  ) {
 
   const [todos, setTodos] = React.useState([]);
-  const [todosDebi, setTodosDebi] = React.useState([]);
+  const [todosNumNote, setTodosNumNote] = React.useState([]);
+  const [todosScaletta, setTodosScaletta] = React.useState([]);
+  
   const [crono, setCrono] = React.useState([]);
 
-  const [indirizzo, setIndirizzo] = React.useState("");
-  const [indirizzoLink, setIndirizzoLink] = React.useState("");
-  const [nomeC, setNomeC] = React.useState("");
-  const [partitaIva, setPartitaIva] = React.useState("");
-  const [cellulare, setCellulare] = React.useState("");
+  const [dataNumNot, setDataNumNot] = useState({
+    labels: "",
+    datasets: [{
+      label: "Numero note",
+      data: "",
+    }]
+  })
 
-  const [deb1, setDeb1] = React.useState("");
-  const [deb2, setDeb2] = React.useState("");
-  const [deb3, setDeb3] = React.useState("");
-  const [deb4, setDeb4] = React.useState("");
+  const [dataTotQuota, setDataTotQuota] = useState({
+    labels: "",
+    datasets: [{
+      label: "Numero note",
+      data: "",
+    }]
+  })
 
-  const [popupActive, setPopupActive] = useState(false);
+  const [dataTotAsc, setDataTotAsc] = useState({
+    labels: "",
+    datasets: [{
+      label: "Numero note",
+      data: "",
+    }]
+  })
+
   const [flagAnaCli, setFlagAnaCli] = useState(true);   
-  const [flagDebiCli, setFlagDebiCli] = useState(false);
   const [flagDelete, setFlagDelete] = useState(false);  
   const [popupActiveCrono, setPopupActiveCrono] = useState(false);  
 
@@ -103,30 +134,83 @@ React.useEffect(() => {
 
   }, []);
 
-//****************************************************************************************** */
-  const handleEdit = async ( todo, nome, iv, cel) => {
-    await updateDoc(doc(db, "clin", todo.id), { nomeC: nome, partitaIva:iv, cellulare:cel});
-    toast.clearWaitingQueue(); 
-  };
-   //******************************************************************************************************** */
-   const handleCronologia = async (todo, dd1, debV) => {   //aggiunta della trupla cronologiaDebito;
-    await addDoc(collection(db, "cronologiaDeb"), {
-      autore: auth.currentUser.displayName,
-      createdAt: serverTimestamp(),
-      nomeC: todo.nomeC,
-      deb1: dd1,     //debito nuovo
-      debv: debV,
-    });
-    //rimuove in modo automatico una volta arrivata a 50 e cancella quello più vecchio
-    const coll = collection(db, "cronologiaDeb");  
-    const snapshot = await getCountFromServer(coll);  //va a verificare quante trupe ci sono sono
-    if(snapshot.data().count>50) {  //se supera i 50, deve eliminare la trupla più vecchia (quindi la prima dato che è già ordinata)
-      const q = query(collection(db, "cronologiaDeb"), orderBy("createdAt"), limit(1));  //prende solo la prima trupla
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(async (hi) => {
-      await deleteDoc(doc(db, "cronologiaDeb", hi.id)); //elimina la trupla (quindi quella più vecchia)
+  React.useEffect(() => {    //si va a prendere il numero di note nelle varie date solo le
+    const collectionRef = collection(db, "ordDat");
+    const q = query(collectionRef, orderBy("dataMilli"), limit(30));
+
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let todosArray = [];
+      querySnapshot.forEach((doc) => {
+        todosArray.push({ ...doc.data(), id: doc.id });
       });
-    }
+      setTodosNumNote(todosArray);
+    });
+    return () => unsub();
+  }, []);
+
+  React.useEffect(() => {    //se la variabile cambia allora viene eseguita questa funzione
+    handleNumNot()
+  }, [todosNumNote]);
+
+  React.useEffect(() => {    //si va a prendere i dati dal database scaletta
+    const collectionRef = collection(db, "scalDat");
+    const q = query(collectionRef, orderBy("dataMilli"), limit(30));
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let todosArray = [];
+      querySnapshot.forEach((doc) => {
+        todosArray.push({ ...doc.data(), id: doc.id });
+      });
+      setTodosScaletta(todosArray);
+    });
+    return () => unsub();
+  }, []);
+
+  React.useEffect(() => {    //se la variabile cambia allora viene eseguita questa funzione
+    handleTotQuota();
+    handleNumAsc();
+  }, [todosScaletta]);
+
+//**************************************************************************** */
+const handleNumNot = async () => {
+    setDataNumNot({
+      labels: todosNumNote.map((dati) => dati.data ),
+      datasets: [{
+        label: "Numero Note",
+        data: todosNumNote.map((dati) => dati.numeroNote ),
+        backgroundColor: ["#CCB497"],
+        borderColor: ["#CCB497"],
+        tension: 0.0,
+        pointStyle: "line"
+      }]
+    })
+};
+
+const handleTotQuota = async () => {
+  setDataTotQuota({
+    labels: todosScaletta.map((dati) => dati.data ),
+    datasets: [{
+      label: "Totale Quota",
+      data: todosScaletta.map((dati) => dati.totalQuota ),
+      backgroundColor: ["#CCB497"],
+      borderColor: ["#CCB497"],
+      tension: 0.0,
+      pointStyle: "line"
+    }]
+  })
+};
+
+const handleNumAsc = async () => {
+  setDataTotAsc({
+    labels: todosScaletta.map((dati) => dati.data ),
+    datasets: [{
+      label: "Numero Asciugamani",
+      data: todosScaletta.map((dati) => dati.totalAsc ),
+      backgroundColor: ["#CCB497"],
+      borderColor: ["#CCB497"],
+      tension: 0.0,
+      pointStyle: "line"
+    }]
+  })
 };
 
   const handleDelete = async (id, nomeCli) => {
@@ -160,6 +244,25 @@ React.useEffect(() => {
         <span><button>In ordine</button></span>
         <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
       </div>
+
+<div className='row mt-2'>
+  <div className='col'>
+    <div className='grafici'>
+      <Line data={dataNumNot} options={optionsNumCart}/>
+    </div>
+  </div>
+  <div className='col'>
+    <div className='grafici'>
+      <Line data={dataTotQuota} options={optionsTotQuota}/>
+    </div>
+  </div>
+  <div className='col'>
+    <div className='grafici'>
+      <Line data={dataTotAsc} options={optionsNumAsc}/>
+    </div>
+  </div>
+</div>
+
 
 {/********************tabella In ordine************************************************************************/}
 {flagAnaCli &&

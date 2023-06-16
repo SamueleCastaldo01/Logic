@@ -14,6 +14,13 @@ body {
   --red: #FD2B38;
 }
 
+.grafici {
+  background-color: #efefef;
+  max-width: 450px;
+  border-radius: 20px;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
 .title {
   text-align: center;
   color: #cab497;
@@ -435,6 +442,11 @@ width: 792px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
+.divScalDipData{
+width: 110%;
+}
+
+.todo_containerScalet,
 .todo_containerInOrdine,
 .todo_containerDebCli,
 .todo_containerProdCli,
@@ -457,6 +469,9 @@ width: 792px;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
 
+.ContaScaletDip {
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
 
 .todo_containerDebCli,
 .todo_containerInOrdine,
@@ -469,12 +484,17 @@ width: 792px;
   padding-right: 0px;
 }
 
+.scrollScaletDatDip,
 .scrollOrdCli,
 .scroll {
   max-height: 830px;
   overflow-y: scroll;
   overflow-x: hidden;
   padding-bottom: 0px;
+}
+.scrollScaletDatDip{
+  overflow-x: scroll;
+  width: 1000px;
 }
 .scrollOrdCli{
   max-height: 500px;
@@ -486,6 +506,9 @@ width: 792px;
   width: 800px;
 }
 .todo_container {
+  width: 1200px;
+}
+.todo_containerScalet {
   width: 1200px;
 }
 .todo_containerCli {
@@ -701,6 +724,9 @@ button:focus {
   .titleNotaDip{
     font-size: 16px;
   }
+  .divScalDipData{
+    width: 360px;
+  }
 }
 
 @media screen and (max-width: 392px) { /* smartphone iphone x*/ 
@@ -722,6 +748,9 @@ button:focus {
   }
   .inpTinte{
     font-size: 14px;
+  }
+  .divScalDipData{
+    width: 325px;
   }
 }
 

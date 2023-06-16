@@ -12,6 +12,8 @@ import { app } from './firebase-config';
 import { db } from './firebase-config';
 import { CssBaseline } from '@mui/material';
 
+
+
 const darkTheme = createTheme({
   palette: {
     mode: 'light',
@@ -26,7 +28,6 @@ const darkTheme = createTheme({
     }
   },
 });
-
 
 
 enableIndexedDbPersistence(db)

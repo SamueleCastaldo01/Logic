@@ -132,7 +132,7 @@ const contEffect = async () => {
         return () => unsub();
       }, []);
   /******************************************************************************* */
-  const createCate = async ( nomeCli, nCart, debTot, dataAddNota) => {
+  const createCate = async ( nomeCli, nCart, nBt, debTot, dataAddNota) => {
     var bol= true
     var bol2= false
     var qtNAsc = ""
@@ -172,6 +172,7 @@ const contEffect = async () => {
       createdAt: serverTimestamp(),
       dataScal: dataSc,
       NumCartoni: nCart,
+      NumBuste: nBt,
       note: "",
       quota: "",
       debito: debTot,
@@ -250,7 +251,7 @@ const contEffect = async () => {
         </div>
         <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}>  
            <button onClick={ ()=> {
-            createCate(todo.nomeC, todo.NumCartoni, todo.debitoTotale, todo.data)
+            createCate(todo.nomeC, todo.NumCartoni, todo.NumBuste, todo.debitoTotale, todo.data)
            }}> Add </button>          
         </div>
     </div>

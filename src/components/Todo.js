@@ -196,7 +196,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
 {/********************NOTE*************************************************************** */}
     <div className="col diviCol" style={{padding: "0px"}}> 
     <textarea
-        style={{textAlign: "left"}}
+        style={{textAlign: "left", width:"500px"}}
         type="text"
         onBlur={handleSubm}
         value={todo.note === "" ? newNote : todo.note}
@@ -205,7 +205,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
       />
     </div>
 {/*************************BUTTON********************************************************** */}
-    <div className="col diviCol">
+    <div className="col diviCol" style={{padding:"0px", marginTop:"-8px"}}>
       {flagStampa==false &&
       <>
     {gui ===true && (
@@ -216,12 +216,6 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
           <CheckCircleIcon id="i" />
         </button>
         )}
-        <button
-          className="button-edit"
-          onClick={() => handleEdit(todo, newNomeC, newNumAsc, newNote, newDebito, newQuota)}
-        >
-          <EditIcon id="i" />
-        </button>
         {sup ===true && (   
         <button className="button-delete" onClick={() => handleDelete(todo.id)}>
           <DeleteIcon id="i" />

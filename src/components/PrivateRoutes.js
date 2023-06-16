@@ -1,5 +1,5 @@
 import { Outlet, Navigate } from 'react-router-dom'
-import { tutti } from './utenti';
+import { tutti, dipen, guid, supa } from './utenti';
 
 
 export function PrivateRoutes ({isAuth})  {
@@ -8,7 +8,39 @@ export function PrivateRoutes ({isAuth})  {
     );
 }
 
-  
+export function PrivateRoutesSup ({})  {
+    var str="/";
+    let sup = supa.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
+    let gui = guid.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
+    let dip = dipen.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
+    if (dip==true) {  str= "/notadipdata" }
+    if (gui== true) { str= "/scalettadatadip" }
+    return(
+        sup ? <Outlet/> : <Navigate to={str}/>
+    );
+}
+
+export function PrivateRoutesGuid ({})  {
+    var a=false;
+    let gui = guid.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
+    let sup = supa.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
+    if(gui==true || sup==true) { a=true }
+    return(
+        a ? <Outlet/> : <Navigate to="/"/>
+    );
+}
+
+
+export function PrivateRoutesDipen ({})  {
+    var a=false;
+    let dip = dipen.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
+    let sup = supa.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
+    if(dip==true || sup==true) { a=true }
+    return(
+        a ? <Outlet/> : <Navigate to="/"/>
+    );
+}
+
 export function PrivateCate({dataScal}) {
     return (
         dataScal ? <Outlet/> : <Navigate to="/"/>

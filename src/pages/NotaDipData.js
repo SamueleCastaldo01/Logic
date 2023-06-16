@@ -45,7 +45,7 @@ function NotaDipData({notaDat, getNotaDip }) {
         setDataSc(value)
     }
 //_________________________________________________________________________________________________________________
-const contEffect = async () => {
+const contEffect = async () => {  //fa il conteggio
     const coll = collection(db, "addNota");
     const q = query(coll, where("data", "==", notaDat));
     const snapshot = await getCountFromServer(q);
@@ -180,13 +180,21 @@ const contEffect = async () => {
   //********************************************************************************** */
       return ( 
       <>  
-          <h1 className='title mt-3'>Nota Dip. Data</h1>
+    {/**************NAVBAR MOBILE*************************************** */}
+    <div className='navMobile row'>
+      <div className='col-2'>
+      </div>
+      <div className='col' style={{padding: 0}}>
+      <p className='navText'> NoteDip </p>
+      </div>
+      </div>
   
+      <div className='container' style={{padding: "20px"}}>
   {/**************tabelle********************************************************************************************************/}
-      <div className='row'>
+      <div className='row' style={{marginTop: "40px"}}>
         <div className='col'>
     {/***********tabella note Non completate********************************************************************************** */}
-        <div  className='todo_containerOrdCli mt-5'>
+        <div  className='todo_containerOrdCli'>
         <div className='row'> 
         <div className='col' style={{paddingRight: "0px"}} >
         <p className='colTextTitle'> Ordine Clienti</p>
@@ -239,6 +247,8 @@ const contEffect = async () => {
         ))}  
         </div>
         </div>
+      </div>
+
       </div>
       </>
         )

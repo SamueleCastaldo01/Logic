@@ -14,10 +14,12 @@ import { TextField } from "@mui/material";
 import InputLabel from '@mui/material/InputLabel';
 import { AutoProdCli } from "../pages/AddNota";
 import { fontSize } from "@mui/system";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from '@mui/material/Menu';
 
 export const AutoCompProd = [];
 
-export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, nomeCli, flagStampa, Completa}) {
+export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, nomeCli, flagStampa, Completa, SommaTot}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -30,7 +32,6 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
   const [newProdotto, setNewProdotto] = React.useState(todo.prodottoC);
   const [newPrezzoUni, setPrezzoUni] = React.useState(todo.prezzoUniProd);
   const [newPrezzoTot, setnewPrezzoTot] = React.useState(todo.prezzoTotProd);
-  const [simbolo, setSimbolo] = React.useState(todo.simbolo);
   const [newT1, setT1] = React.useState(todo.t1);
   const [newT2, setT2] = React.useState(todo.t2);
   const [newT3, setT3] = React.useState(todo.t3);
@@ -38,6 +39,7 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
   const [newT5, setT5] = React.useState(todo.t5);
 
   const [age, setAge] = React.useState('');
+  const [anchorEl, setAnchorEl] = React.useState(null);
 
   let navigate = useNavigate();
 
@@ -52,9 +54,20 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
     });
   }
 
+  const handleChangeTintSelect = async (event) => {  //funzione che si attiva quando selezioni l'autocomplete delle tinte
+    setNewProdotto(event.target.value);
+    const collectionRef = collection(db, "prodottoClin");    //trova il prezzo unitario delle tinte per quel cliente
+        //trova il prezzo unitario del prodotto
+        const q = query(collectionRef, where("author.name", "==", nomeCli), where("nomeP", "==", event.target.value) );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (hi) => {
+          setPrezzoUni(hi.data().prezzoUnitario);
+        });
+  };
+
   const handlePrezzUniUpd = async (e) => {  // funzione che si attiva quando cambio il prezzo unitario del prodotto
-    console.log("sono entrato nel handle prezzoUni")
     e.preventDefault();
+    console.log("sono entrato baby")
     const collectionRef = collection(db, "prodottoClin");
     //trova l'id del prodottoClin, per poi poter aggiornare il prezzo unitario del prodottoPersonalizzato
     const q = query(collectionRef, where("author.name", "==", nomeCli), where("nomeP", "==", todo.prodottoC) );
@@ -73,13 +86,53 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
     handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte)
   };
 
+  const handleClose = () => {  //chiude il menu
+    setAnchorEl(null);
+  };
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  //***************************************************************************************** */
+  const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodotto, e il suo prezzo totale diventa 0, in questo modo non va a fare la somma con il resto
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"(NO)", prezzoTotProd:0});
+    SommaTot();
+    handleClose()
+  };
+
+  const handleChangeEvi = async (event) => {
+    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
+      await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:preT});
+    }
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:" "});
+    SommaTot();
+    handleClose()
+  };
+
+  const handleChangeInterro = async (event) => {
+    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
+      await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:preT});
+    }
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"?"});
+    SommaTot();
+    handleClose()
+  };
+
+  const handleChangeRemMenu = async (event) => {
+    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
+      await updateDoc(doc(db, "Nota", todo.id), { prezzoTotProd:preT});
+    }
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:""});
+    SommaTot();
+    handleClose();
+  };
+ //******************************************************************** */ 
+
 //******************************************************************** */
 //handle change
-
-const handleChangeTintSelect = (event) => {
-  setNomeTinte(event.target.value);
-};
-
 const handleChangeAge = (event) => {
   setAge(event.target.value);
 };
@@ -154,7 +207,7 @@ const handleChangeAge = (event) => {
 
 <form  onSubmit={handleSubm}>
 <hr style={{margin: "0"}}/>
-{((sup ===true && todo.flagTinte===false && Completa== "1" && simbolo != "(NO)") || (sup ===true && todo.flagTinte===false && Completa== "0")) &&( 
+{((sup ===true  && Completa== "1" && todo.simbolo != "(NO)") || (sup ===true  && Completa== "0")) &&( 
     <div className="row " style={{ borderBottom:"solid",  borderWidth: "2px" }}>
 {/**************************QUANTITA'******************************************************************* */}
     <div className="col-1" style={{padding:"0px", background: todo.simbolo == " " && "#FFFF00" }}>    
@@ -195,7 +248,7 @@ const handleChangeAge = (event) => {
     {sup ===true && todo.flagTinte===false && Completa == 0 &&( 
     <h3 className="simboloNota" style={{color: "red", fontSize: "16px"}}>{todo.simbolo}</h3>
     )}
-    {sup ===true && todo.flagTinte===false && Completa == 1 && simbolo != "(NO)" &&( 
+    {sup ===true && todo.flagTinte===false && Completa == 1 &&( 
       <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> <span style={{background: todo.simbolo == " " && "#FFFF00"}}>{todo.prodottoC}</span> </h3>
     )}
 
@@ -208,13 +261,18 @@ const handleChangeAge = (event) => {
         <Select sx={{height:39, marginLeft:-1}}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          value={nomeTinte}
+          value={newProdotto}
           onChange={handleChangeTintSelect}
           onBlur={handleSubm}
         >
           <MenuItem value={"KF"}>KF</MenuItem>
           <MenuItem value={"KR"}>KR</MenuItem>
+          <MenuItem value={"KG"}>KG</MenuItem>
+          <MenuItem value={"K10"}>K10</MenuItem>
           <MenuItem value={"CB"}>CB</MenuItem>
+          <MenuItem value={"NUAGE"}>NUAGE</MenuItem>
+          <MenuItem value={"ROIAL"}>ROIAL</MenuItem>
+          <MenuItem value={"VIBRANCE"}>VIB</MenuItem>
         </Select>
       </FormControl>
          </span> 
@@ -249,26 +307,17 @@ const handleChangeAge = (event) => {
         value={todo.t4 === "" ? newT4 : todo.t4}
         onChange={handleT4}
         onBlur={handleSubm}
-      /> -
-      <input
-      style={{textAlign:"center", width:"42px", padding:"0px"}}
-        className="inpTinte"
-        type="text"
-        value={todo.t5 === "" ? newT5 : todo.t5}
-        onChange={handleT5}
-        onBlur={handleSubm}
-      /> 
+      />
         </div>
       </>
     )}
     {sup ===true && todo.flagTinte===true && Completa == 1 &&(
       <>
-      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> {todo.nomeTinte} 
+      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> {todo.prodottoC} 
       {todo.t1 && <> <span className="inpTabNota" style={{ marginLeft: "35px", textAlign:"center", padding:"0px"}}> {todo.t1} </span>   </> }
       {todo.t2 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t2} </span>  </> }
       {todo.t3 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t3} </span> </> }
       {todo.t4 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t4} </span> </> }
-      {todo.t5 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t5} </span> </> }
       </h3>
       </>
     )}
@@ -304,7 +353,7 @@ const handleChangeAge = (event) => {
         >{ todo.prezzoTotProd } €</h4>
     )}
     </div>
-{/***************************************************************************************************** */}
+{/*************Button**************************************************************************************** */}
       <div className="col-1" style={{padding: "0px"}}>
       <button hidden
           className="button-edit"
@@ -312,15 +361,43 @@ const handleChangeAge = (event) => {
         >
         </button>
         {sup ===true && flagStampa==false && Completa == 0 && (   
-        <button type="button" className="button-delete" style={{padding: "0px"}}                          
-          onClick={() => {
+          <>
+        <button type="button" className="buttonMenu" style={{padding: "0px"}} >
+        <MoreVertIcon id="i" onClick={handleMenu}/>
+        <Menu  sx={
+        { mt: "1px", "& .MuiMenu-paper": 
+        { backgroundColor: "#333",
+          color: "white" }, 
+        }
+        }
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={handleChangeEvi}>Evidenzia</MenuItem>
+                <MenuItem onClick={handleChangeNo}>(NO)</MenuItem>
+                <MenuItem onClick={handleChangeInterro}>?</MenuItem>
+                <MenuItem onClick={handleChangeInterro}>X</MenuItem>
+                <MenuItem onClick={handleChangeRemMenu}>Rimuovi</MenuItem>
+                <MenuItem onClick={() => {
                 localStorage.setItem("IDNOTa", todo.id);
                 localStorage.setItem("NomeCliProd", todo.nomeC);
                     displayMsg();
                     toast.clearWaitingQueue(); 
-                            }}>
-        <DeleteIcon id="i" />
+                            }}>Elimina Pr.</MenuItem>
+              </Menu>
         </button>
+        </>
         )}
       </div>
 

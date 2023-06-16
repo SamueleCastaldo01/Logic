@@ -37,7 +37,7 @@ function Scalet({ dateEli }) {
   const [sum, setSum]  = React.useState("");
   const [sumQ, setSumQ] =React.useState("");
 
-  const [popupActive, setPopupActive] = useState(true);  
+  const [popupActive, setPopupActive] = useState(false);  
   const [flagStampa, setFlagStampa] = useState(false); 
 
   const componentRef = useRef();
@@ -64,18 +64,23 @@ function Scalet({ dateEli }) {
       toast.clearWaitingQueue();}
 
 //********************************************************************************** */
-const SomAsc = async () => {
+const SomAsc = async () => {  //qui fa sia la somma degli asc che della quota, tramite query
   var somma=0;
   var sommaQ=0;
-  const q = query(collection(db, "Scaletta"), where("dataScal", "==", dateEli));
+  const q = query(collection(db, "Scaletta"), where("dataScal", "==", dateEli));  //query per fare la somma
   const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       somma =+doc.data().numAsc + somma;
       sommaQ=+doc.data().quota +sommaQ;
       });
+  
+  const p = query(collection(db, "scalDat"), where("data", "==", dateEli));  //query per aggiornare la quota totale e gli asc, va a trovare l'id
+  const querySnapshotp = await getDocs(p);
+        querySnapshotp.forEach(async (hi) => {
+          await updateDoc(doc(db, "scalDat", hi.id), { totalQuota: sommaQ, totalAsc:somma });
+          });
       setSumQ(sommaQ);
       setSum(somma);
-      console.log("somma", somma);
 }
 //********************************************************************************** */
 
@@ -90,7 +95,6 @@ const SomAsc = async () => {
       });
       setTodos(todosArray);
     });
-    SomAsc();
     localStorage.removeItem("scalId");
     return () => unsub();
   }, []);
@@ -164,9 +168,6 @@ const createCate = async (e) => {
     await updateDoc(doc(db, "Scaletta", todo.id), { nomeC: nome, numAsc:numA, note:not, debito:deb, quota:quot, NumCartoni:ncart});
     SomAsc();
     toast.clearWaitingQueue(); 
-  };
-  const toggleComplete = async (todo) => {
-    await updateDoc(doc(db, "Scaletta", todo.id), { completed: !todo.completed });
   };
   const handleDelete = async (id) => {
     await deleteDoc(doc(db, "Scaletta", id));
@@ -257,7 +258,7 @@ const createCate = async (e) => {
       </div>
     
 
-      <div ref={componentRef} className='todo_container'>
+      <div ref={componentRef} className='todo_containerScalet'>
       <div className='row'> 
       <p className='colTextTitle'> Scaletta</p>
       </div>
@@ -295,7 +296,6 @@ const createCate = async (e) => {
           <Todo
             key={todo.id}
             todo={todo}
-            toggleComplete={toggleComplete}
             handleDelete={handleDelete}
             handleEdit={handleEdit}
             flagStampa= {flagStampa}

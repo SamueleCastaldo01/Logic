@@ -19,7 +19,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
 import Fade from '@mui/material/Fade';
-import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
+import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes, notifyErrorNumCartoni} from '../components/Notify';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
 
 
@@ -162,13 +162,14 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
      //funzioni per la conferma della nota e per il calcolo del prezzo dei prodotti, e mettere nella lista inOrdine
      const SommaTot = async (id, nomeC ) => {  //fa la somma totale, di tutti i prezzi totali
       var sommaTot=0;
-      const q = query(collection(db, "Nota"), where("nomeC", "==", nomeC), where("dataC", "==", notaDipDataC));  //prende i prodotti di quel cliente di quella data
+      const q = query(collection(db, "Nota"), where("nomeC", "==", nomeC), where("dataC", "==", notaDipDataC),);  //prende i prodotti di quel cliente di quella data
       const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
-          sommaTot=+doc.data().prezzoTotProd +sommaTot;  //fa la somma
+          sommaTot=+doc.data().prezzoTotProd +sommaTot;  //fa la somma Totale
           });
-          setSumTot(sommaTot);
-          await updateDoc(doc(db, "addNota", id), { sommaTotale:sommaTot});  //aggiorna la somma totale nell'add nota
+          var somTrunc = sommaTot.toFixed(2);
+          setSumTot(somTrunc);
+          await updateDoc(doc(db, "addNota", id), { sommaTotale:somTrunc});  //aggiorna la somma totale nell'add nota
     }
 
   const handleEditComp = async (id) => {  //aggiorna lo stato nel database che è stata completata la nota, oppure annullata, tramite il localStorage
@@ -178,15 +179,26 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
     
   };
   
-  const handleConferma = async (id, nomeC, sommaTot, debitoRes) => {
+  const handleConferma = async (id, nomeC, sommaTot, debitoRes, Nb, NCt) => {
+    SommaTot(id, nomeC);  //va a fare la somma totale dei prodotti
+    if (Nb==0 && NCt==0) {    //va a controllare il numero di cartoni, e compare la notifica che ci mancano il numero di cartoni
+      notifyErrorNumCartoni();
+      return;
+    }
+    if (Nb>0 || NCt>0){ //condizione tramite il numero di cartoni
+    setCompleta(1);
+    handleEditComp(id);
+    handleInOrdine(nomeC);
     var debTot= +sommaTot+(+debitoRes);   // va a fare il calcolo del debito totale
-    await updateDoc(doc(db, "addNota", id), { debitoTotale:debTot});  //aggiorna la somma totale nell'add nota
+    var debTrunc = debTot.toFixed(2);   //va a troncare il risultato del debito, per non avere problemi di visualizzazione
+    await updateDoc(doc(db, "addNota", id), { debitoTotale:debTrunc});  //aggiorna la somma totale nell'add nota
         //aggiorna ded1 nel database debito
     const q = query(collection(db, "debito"), where("nomeC", "==", nomeC));
     const querySnapshot = await getDocs(q);
         querySnapshot.forEach(async (hi) => {
-        await updateDoc(doc(db, "debito", hi.id), { deb1:debTot});  //aggiorna deb1 nel database del debito
+        await updateDoc(doc(db, "debito", hi.id), { deb1:debTrunc});  //aggiorna deb1 nel database del debito
         });
+      }
         toast.clearWaitingQueue(); 
   };
 
@@ -272,7 +284,7 @@ const print = async () => {
       </div>
 
 
-  <div className='container' style={{padding: "0px"}}>
+  <div className='container' style={{paddingLeft: "24px", paddingRight: "24px"}}>
     {todosAddNot.map((todo) => (
     <div key={todo.id}>
     {todo.data == notaDipDataC && todo.cont == contPage &&  (
@@ -311,6 +323,7 @@ const print = async () => {
       nomeCli={notaDipNome}
       flagStampa={flagStampa}
       Completa={todo.completa}
+      SommaTot={SommaTot}
     />
      )}
      </>
@@ -353,11 +366,7 @@ const print = async () => {
   {todo.completa == 0 ?  
     <button className='button-comp' onClick={ ()=> {
     localStorage.setItem("completa", 1);
-     setCompleta(1);
-     SommaTot(todo.id, todo.nomeC);  //va a fare la somma totale del prezzo dei prodotti
-     handleEditComp(todo.id);    //aggiorna la nota se è completa nel db
-     handleInOrdine(todo.nomeC);  //aggiunge i prodotti con il (NO) nella tabella InOrdine
-     handleConferma(todo.id, todo.nomeC, todo.sommaTotale, todo.debitoRes); }}><CheckIcon sx={{ fontSize: 48 }}  /> conferma</button> :
+     handleConferma(todo.id, todo.nomeC, todo.sommaTotale, todo.debitoRes, todo.NumBuste, todo.NumCartoni); }}><CheckIcon sx={{ fontSize: 48 }}  /> conferma</button> :
     <button className='button-clear' onClick={ ()=> {
       localStorage.setItem("completa", 0);
        setCompleta(0);

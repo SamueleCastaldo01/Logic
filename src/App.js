@@ -13,6 +13,7 @@ import HomePage from './pages/HomePage';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import ScaletData from './pages/ScaletData';
 import Scalet from './pages/Scalet';
+import ScalettaDataDip from './pages/ScalettaDataDip';
 import AddCliente from './pages/AddCliente';
 import AddFornitori from './pages/AddFornitori';
 import OrdineCliData from './pages/OrdineCliData'
@@ -21,6 +22,7 @@ import AddNota from './pages/AddNota';
 import AddClienteScalet from './pages/AddClienteScalet';
 import NotaDipData from './pages/NotaDipData';
 import NotaDip from './pages/NotaDip';
+import ListaClientiDip from './pages/ListaClientiDip';
 import AddNotaForni from './pages/AddNotaForn';
 import Nota from './pages/Nota';
 import NotaForni from './pages/NotaForni';
@@ -28,7 +30,7 @@ import DashClienti from './pages/DashboardClienti';
 import DashFornitori from './pages/DashboardFornitori';
 import Scorta from './pages/Scorta';
 import { BrowserRouter as Router, Routes, Route, Link} from "react-router-dom";
-import {PrivateRoutes, PrivateCate, PrivatePerm, PrivateDashCli, PrivateOrd, PrivateOrdForn, PrivateNota, PrivateNotaForni, PrivateDashForn, PrivateAddClientiScalet} from './components/PrivateRoutes';
+import {PrivateRoutes, PrivateCate, PrivatePerm, PrivateDashCli, PrivateOrd, PrivateOrdForn, PrivateNota, PrivateNotaForni, PrivateDashForn, PrivateAddClientiScalet, PrivateRoutesDipen, PrivateRoutesSup, PrivateRoutesGuid} from './components/PrivateRoutes';
 import { styled } from "@mui/material/styles";
 import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
 import { BottomNavigation } from '@mui/material';
@@ -42,7 +44,9 @@ import Box from '@mui/material/Box';
 import CheckConnection from './components/CheckConnection';
 import { Detector } from 'react-detect-offline';
 import moment from 'moment/moment';
+import { getDatabase, ref, onValue  } from "firebase/database";
 import 'moment/locale/it'
+import { guid, supa, tutti, dipen } from './components/utenti';
 
 /*  elimina tutti i dati di una collezione
 const elimDb = async () => {
@@ -55,15 +59,16 @@ const elimDb = async () => {
   }); 
  }  
  */
- const polling = {
-  enabled: true,
-  interval: 500,
-  timeout: 10000
-};
 
 function App() {
   const [value, setValue] = React.useState(0);
   const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
+
+    //permessi utente
+    let sup= supa.includes(localStorage.getItem("uid"))
+    let gui= guid.includes(localStorage.getItem("uid"))
+    let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
+    let dip= dipen.includes(localStorage.getItem("uid"))
 
   document.addEventListener("touchstart", function() {}, true);
 
@@ -73,8 +78,18 @@ function App() {
   localStorage.setItem("today", formattedDate);
   const [todayC, setTodayC] = useState(localStorage.getItem("today"));  //variabile che andiamo ad utilizzare
 
+  const db = getDatabase();
+  //stato della connessione con il database
+  const connectedRef = ref(db, ".info/connected");
+  onValue(connectedRef, (snap) => {
+    if (snap.val() === true) {
+      console.log("connected");
+    } else {
+      console.log("not connected");
+    }
+  });
 
-  const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
+  const matches = useMediaQuery('(max-width:920px)');  //media query true se è un dispositivo più piccolo del value
 
   const [uid, setUid] = useState(localStorage.getItem("uid"));
   const [scalId, setScalId] = useState(localStorage.getItem("scalId")); //id della data della scaletta
@@ -269,7 +284,7 @@ function App() {
   
 
 
-    <Box component="main" sx={{ flexGrow: 1, p: 3, textAlign: "center" }}>
+    <Box component="main" sx={{ flexGrow: 1, p: 3, textAlign: "center", padding: matches ? "0px" : "24px", paddingTop: "24px" }}>
     <div><ToastContainer limit={1} /></div>
 
 <div style={{marginTop: !matches && "50px"}}>
@@ -278,16 +293,27 @@ function App() {
       <Routes>
   <Route element={<PrivateRoutes isAuth={isAuth}/>}>
   <Route element={<PrivatePerm/>}>
+
+  <Route element={<PrivateRoutesDipen/>}>
+  <Route path="/notadipdata" element={<NotaDipData notaDat={todayC} getNotaDip={getNotaDipHandler}/>} />
+  <Route path="/notadip" element={<NotaDip notaDipId={notaDipId} notaDipCont={notaDipCont} notaDipNome={notaDipNomeC} notaDipDataC={notaDipDataC} numCart={NumCartNotaDip}/>} />
+  </Route>
+
+  <Route element={<PrivateRoutesSup/>}>
   <Route path="/" element={<HomePage />} />
-    <Route path="/listaclienti" element={<AddCliente getCliId={getCliIdHandler}/>} />
-    <Route path="/scorta" element={<Scorta />} />
-    <Route path="/listafornitori" element={<AddFornitori getFornId={getFornIdHandler}/>} />
-    <Route path="/scalettadata" element={<ScaletData getColId={getColIdHandler}/>} />
-    <Route path="/ordineclientidata" element={<OrdineCliData getOrdId={getOrderIdHandler}/>} />
-    <Route path="/ordinefornitoridata" element={<OrdineForniData getOrdFornId={getOrderFornIdHandler}/>} />
-    <Route path="/notadipdata" element={<NotaDipData notaDat={todayC} getNotaDip={getNotaDipHandler}/>} />
-    <Route path="/notadip" element={<NotaDip notaDipId={notaDipId} notaDipCont={notaDipCont} notaDipNome={notaDipNomeC} notaDipDataC={notaDipDataC} numCart={NumCartNotaDip}/>} />
-    
+  <Route path="/listafornitori" element={<AddFornitori getFornId={getFornIdHandler}/>} />
+  <Route path="/scorta" element={<Scorta />} />
+  <Route path="/scalettadata" element={<ScaletData getColId={getColIdHandler}/>} />
+  <Route path="/ordineclientidata" element={<OrdineCliData getOrdId={getOrderIdHandler}/>} />
+  <Route path="/ordinefornitoridata" element={<OrdineForniData getOrdFornId={getOrderFornIdHandler}/>} />
+  <Route path="/listaclienti" element={<AddCliente getCliId={getCliIdHandler}/>} />
+  </Route>
+
+  <Route element={<PrivateRoutesGuid/>}>
+  <Route path="/scalettadatadip" element={<ScalettaDataDip notaDat={todayC} getColId={getColIdHandler}/>} />
+  <Route path="/listaclientidip" element={<ListaClientiDip />} />
+  </Route>
+
     <Route element={<PrivateDashCli clientId={clientId}/>}>
     <Route path="/dashclienti" element={<DashClienti clientId={clientId} nomeCli={nomeCli}/>} />
     </Route>
@@ -356,31 +382,36 @@ function App() {
             setValue(newValue);
           }}
         >
+        {(gui ==true || sup==true)  && 
           <BottomNavigationAction
           component={Link}
           className="linq"
-          to="/scalettadata"
-           label="Scaletta" icon={<FormatListBulletedIcon/>}/>
+          to="/scalettadatadip"
+           label="Scaletta" icon={<FormatListBulletedIcon/>}/> }
+        {((gui ==true) || (sup ==true))  && 
           <BottomNavigationAction
           component={Link}
           className="linq"
-          to="/listaclienti"
-           label="Clienti" icon={<ContactPageIcon/>} />
+          to="/listaclientidip"
+           label="Clienti" icon={<ContactPageIcon/>} /> }
+        {(dip ==true || sup == true) &&
           <BottomNavigationAction
           component={Link}
           className="linq"
           to="/scorta"
-           label="Scorta"  icon={<InventoryIcon />} />
+           label="Scorta"  icon={<InventoryIcon />} /> }
+        {sup ==true  &&
           <BottomNavigationAction
            component={Link}
            className="linq"
           to="/ordineclientidata"
-           label="Ordine" icon={<ShoppingCartIcon />} />
+           label="Ordine" icon={<ShoppingCartIcon />} />}
+        {(dip == true || sup == true) &&
            <BottomNavigationAction
            component={Link}
            className="linq"
           to="/notadipdata"
-           label="Nota Dip" icon={<AdUnitsIcon />} />
+           label="Nota Dip" icon={<AdUnitsIcon />} />}
         </BottomNavigation>
         
       </Paper>

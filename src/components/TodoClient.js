@@ -96,7 +96,7 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
 {/********************Indirizzo************************************************************************* */}
     <div className="col-5 diviCol" style={{padding: "0px"}}>
     <p className="inpTab" ><a
-      style={{ textDecoration: todo.completed && "line-through", textAlign: "center"}}
+      style={{ textAlign: "center"}}
         href={ newIndirizzoLink }
         target="_blank"
         className="linkTab"
