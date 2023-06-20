@@ -36,14 +36,16 @@ function Row(props) {
     const {dataSc} = props;
     const {quot} = props;
     const {noti} = props;
+    const {idnote} = props;
     const [open, setOpen] = React.useState(false);
-    const [debitoRes, setDebitoRes] = React.useState(quot);
+    const [Quota, setQuota] = React.useState(quot);
     const [nota, setNota] = React.useState(noti);
 
     const SomAsc = async () => {  //qui fa sia la somma degli asc che della quota, tramite query
         var somma=0;
         var sommaQ=0;
-        const q = query(collection(db, "Scaletta"), where("dataScal", "==", dataSc));  //query per fare la somma
+        var id="";
+        const q = query(collection(db, "Scaletta"), where("dataScal", "==", dataSc));  //query per fare la somma quota e ASC
         const querySnapshot = await getDocs(q);
           querySnapshot.forEach((doc) => {
             somma =+doc.data().numAsc + somma;
@@ -53,20 +55,22 @@ function Row(props) {
         const p = query(collection(db, "scalDat"), where("data", "==", dataSc));  //query per aggiornare la quota totale e gli asc, va a trovare l'id
         const querySnapshotp = await getDocs(p);
               querySnapshotp.forEach(async (hi) => {
-                await updateDoc(doc(db, "scalDat", hi.id), { totalQuota: sommaQ, totalAsc:somma });
+               id = hi.id;
                 });
+        await updateDoc(doc(db, "scalDat", id), { totalQuota: sommaQ, totalAsc:somma });
       }
 
 
-    const handleEditDebitoRes = async (id) => {
-        await updateDoc(doc(db, "Scaletta", id), { quota:debitoRes});
+    const handleEditQuota = async (id) => {  //handler quando cambio la quota, aggiorna sia add nota, che mi serve per gli ordini chiusi
+        await updateDoc(doc(db, "Scaletta", id), { quota:Quota});   //Aggiorna la quota nella scaletta
+        await updateDoc(doc(db, "addNota", idnote), { quota:Quota});  //aggiorna addNota, questa quota mi serve perché poi va nella dashClienti
         toast.clearWaitingQueue(); 
+        SomAsc();
       };
     
     const handleEditNota = async (id) => {
         await updateDoc(doc(db, "Scaletta", id), { note:nota});
-        toast.clearWaitingQueue();
-        SomAsc(); 
+        toast.clearWaitingQueue(); 
       };
   
     return (
@@ -86,9 +90,9 @@ function Row(props) {
             {row.nomeC}
           </TableCell>
           <TableCell align="right">{row.debito}</TableCell>
-          <TableCell align="right"><input value={debitoRes}  onBlur={ handleEditDebitoRes(row.id)} style={{textAlign:"center", padding: "0px", width:"50px", border:"none"}} 
+          <TableCell align="right"><input value={Quota}  onBlur={ handleEditQuota(row.id)} style={{textAlign:"center", padding: "0px", width:"50px", border:"none"}} 
       onChange={(event) => {
-      setDebitoRes(event.target.value);}}
+      setQuota(event.target.value);}}
     /></TableCell>
         </TableRow>
        )}
@@ -169,9 +173,9 @@ function ScalettaDataDip({notaDat, getNotaDip }) {
       return () => unsub();
     }, []);
 
-    React.useEffect(() => {  //effect per l'autocompleate
+    React.useEffect(() => {  //effect per l'autocompleate, vado a prendermi le date della scaletta
         const collectionRef = collection(db, "scalDat");
-        const q = query(collectionRef, orderBy("dataMilli", "desc"));
+        const q = query(collectionRef, orderBy("dataMilli", "desc"), limit(3));
     
         const unsub = onSnapshot(q, (querySnapshot) => {
           let todosArray = [];
@@ -257,7 +261,7 @@ function ScalettaDataDip({notaDat, getNotaDip }) {
         </TableHead>
         <TableBody>
           {todos.map((row) => (
-            <Row key={row.id} row={row} dataSc={dataSc} quot={row.quota} noti={row.note} />
+            <Row key={row.id} row={row} dataSc={dataSc} quot={row.quota} noti={row.note} idnote={row.idNota} />
           ))}
         </TableBody>
       </Table>

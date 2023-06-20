@@ -67,6 +67,7 @@ function Scalet({ dateEli }) {
 const SomAsc = async () => {  //qui fa sia la somma degli asc che della quota, tramite query
   var somma=0;
   var sommaQ=0;
+  var id ="";
   const q = query(collection(db, "Scaletta"), where("dataScal", "==", dateEli));  //query per fare la somma
   const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
@@ -77,8 +78,9 @@ const SomAsc = async () => {  //qui fa sia la somma degli asc che della quota, t
   const p = query(collection(db, "scalDat"), where("data", "==", dateEli));  //query per aggiornare la quota totale e gli asc, va a trovare l'id
   const querySnapshotp = await getDocs(p);
         querySnapshotp.forEach(async (hi) => {
-          await updateDoc(doc(db, "scalDat", hi.id), { totalQuota: sommaQ, totalAsc:somma });
+          id= hi.id
           });
+      await updateDoc(doc(db, "scalDat", id), { totalQuota: sommaQ, totalAsc:somma });
       setSumQ(sommaQ);
       setSum(somma);
 }

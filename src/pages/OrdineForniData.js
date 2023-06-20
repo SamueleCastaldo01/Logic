@@ -70,7 +70,7 @@ function OrdineForniData({ getOrdFornId }) {
           var ok= event.target.value
           console.log({ok})
           today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo
-           localStorage.setItem("bho1", today.getTime())
+           localStorage.setItem("bho4", today.getTime())
         };
 
    //_________________________________________________________________________________________________________________
@@ -119,6 +119,8 @@ function OrdineForniData({ getOrdFornId }) {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
       setColle(todosArray);
+      today.setDate(today.getDate() - 8);   //fa la differenza rispetto al valore del select sottraendo
+      localStorage.setItem("bho4", today.getTime())
     });
     return () => unsub();
 
@@ -244,7 +246,7 @@ function OrdineForniData({ getOrdFornId }) {
 
                 {colle.map((col) => (
                   <div key={col.id}>
-                  {col.dataMilli >= localStorage.getItem("bho1") && 
+                  {col.dataMilli >= localStorage.getItem("bho4") && 
                     <>
                     <div className="diviCol" > 
                       <div className="row">

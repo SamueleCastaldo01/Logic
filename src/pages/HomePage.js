@@ -9,6 +9,10 @@ import { useNavigate } from "react-router-dom";
 import { notifyErrorCliEm, notifyUpdateCli, notifyErrorCliList } from '../components/Notify';
 import CloseIcon from '@mui/icons-material/Close';
 import TodoClient from '../components/TodoClient';
+import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
 import Button from '@mui/material/Button';
 import { supa } from '../components/utenti';
 import { guid } from '../components/utenti';
@@ -43,11 +47,9 @@ ChartJS.register(
 
 function HomePage(  ) {
 
-  const [todos, setTodos] = React.useState([]);
   const [todosNumNote, setTodosNumNote] = React.useState([]);
   const [todosScaletta, setTodosScaletta] = React.useState([]);
   
-  const [crono, setCrono] = React.useState([]);
 
   const [dataNumNot, setDataNumNot] = useState({
     labels: "",
@@ -73,9 +75,11 @@ function HomePage(  ) {
     }]
   })
 
-  const [flagAnaCli, setFlagAnaCli] = useState(true);   
   const [flagDelete, setFlagDelete] = useState(false);  
-  const [popupActiveCrono, setPopupActiveCrono] = useState(false);  
+  const timeElapsed = Date.now();  //prende la data attuale in millisecondi
+  const today = new Date(timeElapsed);    //converte
+  const [day, setday] = React.useState("");
+  const [day1, setday1] = React.useState("");  //primo flitro dei giorni
 
   const [searchTerm, setSearchTerm] = useState("");  //search
   const inputRef= useRef();
@@ -87,6 +91,21 @@ function HomePage(  ) {
   let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
   let navigate = useNavigate();
+
+  const handleChangeDataSelect = (event) => {
+    setday(event.target.value);      //prende il valore del select
+    var ok= event.target.value
+    today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo, il risultato sarà in millisecondi
+     localStorage.setItem("bho", today.getTime())
+  };
+
+
+  const handleChangeDataSelect1 = (event) => {
+    setday1(event.target.value);      //prende il valore del select
+    var ok= event.target.value
+    today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo, il risultato sarà in millisecondi
+     localStorage.setItem("bho1", today.getTime())
+  };
    //_________________________________________________________________________________________________________________
      //confirmation notification to remove the collection
      const Msg = () => (
@@ -117,119 +136,63 @@ function HomePage(  ) {
         className: "rounded-4"
         })}
 
-//********************************************************************************** */
-      //Anagrafiche
-React.useEffect(() => {
-    const collectionRef = collection(db, "inOrdine");
-    const q = query(collectionRef, orderBy("nomeC"));
 
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
-      });
-      setTodos(todosArray);
-    });
-    return () => unsub();
 
-  }, []);
-
+//******************Per il grafico Ordini********************************************************************* */
   React.useEffect(() => {    //si va a prendere il numero di note nelle varie date solo le
-    const collectionRef = collection(db, "ordDat");
+    const collectionRef = collection(db, "ordDatBloccata");
     const q = query(collectionRef, orderBy("dataMilli"), limit(30));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
       querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
+        if(doc.data().dataMilli >= localStorage.getItem("bho1")) {
+          let car = { data: doc.data().data,  numeroNote: doc.data().numeroNote}
+          todosArray.push(car);
+        }
       });
       setTodosNumNote(todosArray);
     });
     return () => unsub();
-  }, []);
+  }, [day1]);
 
   React.useEffect(() => {    //se la variabile cambia allora viene eseguita questa funzione
-    handleNumNot()
+    handleNumNot();
+    handleTotQuota();
   }, [todosNumNote]);
 
-  React.useEffect(() => {    //si va a prendere i dati dal database scaletta
-    const collectionRef = collection(db, "scalDat");
-    const q = query(collectionRef, orderBy("dataMilli"), limit(30));
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
-      });
-      setTodosScaletta(todosArray);
-    });
-    return () => unsub();
-  }, []);
-
-  React.useEffect(() => {    //se la variabile cambia allora viene eseguita questa funzione
-    handleTotQuota();
-    handleNumAsc();
-  }, [todosScaletta]);
 
 //**************************************************************************** */
 const handleNumNot = async () => {
     setDataNumNot({
       labels: todosNumNote.map((dati) => dati.data ),
       datasets: [{
-        label: "Numero Note",
+        label: "Ordini",
         data: todosNumNote.map((dati) => dati.numeroNote ),
         backgroundColor: ["#CCB497"],
         borderColor: ["#CCB497"],
-        tension: 0.0,
-        pointStyle: "line"
+        tension: 0.4,
       }]
     })
 };
 
 const handleTotQuota = async () => {
   setDataTotQuota({
-    labels: todosScaletta.map((dati) => dati.data ),
+    labels: todosNumNote.map((dati) => dati.data ),
     datasets: [{
       label: "Totale Quota",
-      data: todosScaletta.map((dati) => dati.totalQuota ),
+      data: todosNumNote.map((dati) => dati.totalQuota ),
       backgroundColor: ["#CCB497"],
       borderColor: ["#CCB497"],
-      tension: 0.0,
-      pointStyle: "line"
+      tension: 0.4,
     }]
   })
 };
 
-const handleNumAsc = async () => {
-  setDataTotAsc({
-    labels: todosScaletta.map((dati) => dati.data ),
-    datasets: [{
-      label: "Numero Asciugamani",
-      data: todosScaletta.map((dati) => dati.totalAsc ),
-      backgroundColor: ["#CCB497"],
-      borderColor: ["#CCB497"],
-      tension: 0.0,
-      pointStyle: "line"
-    }]
-  })
-};
+
 
   const handleDelete = async (id, nomeCli) => {
     const colDoc = doc(db, "clin", id); 
-     
-  //elimina tutti i dati di prodottoClin con lo stesso nome del Cliente     elimina tutti gli articoli di quel cliente
-    const q = query(collection(db, "prodottoClin"), where("author.name", "==", localStorage.getItem("NomeCliProd")));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (hi) => {
-  // doc.data() is never undefined for query doc snapshots
-    console.log(hi.id, " => ", hi.data().nomeC, hi.data().dataScal);
-    await deleteDoc(doc(db, "prodottoClin", hi.id)); 
-    });
-  //elimina la trupla debito, che ha lo stesso nome del cliente che è stato eliminato
-    const p = query(collection(db, "debito"), where("nomeC", "==", nomeCli));
-    const querySnapshotP = await getDocs(p);
-    querySnapshotP.forEach(async (hi) => {
-    await deleteDoc(doc(db, "debito", hi.id));    //elimina il documento che ha lo stesso nome
-    });
     //infine elimina la data
     await deleteDoc(colDoc); 
   };
@@ -248,83 +211,44 @@ const handleNumAsc = async () => {
 <div className='row mt-2'>
   <div className='col'>
     <div className='grafici'>
+    <FormControl >
+        <InputLabel id="demo-simple-select-label"></InputLabel>
+        <Select sx={{height:39, marginLeft:-1, width: 200}}
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          defaultValue={31}
+          onChange={handleChangeDataSelect1}
+        >
+          <MenuItem value={8}>Ultimi 7 giorni</MenuItem>
+          <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
+          <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
+          <MenuItem value={366}>Ultimi 365 giorni</MenuItem>
+        </Select>
+      </FormControl>
       <Line data={dataNumNot} options={optionsNumCart}/>
     </div>
   </div>
   <div className='col'>
     <div className='grafici'>
+    <FormControl >
+        <InputLabel id="demo-simple-select-label"></InputLabel>
+        <Select sx={{height:39, marginLeft:-1, width: 200}}
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          defaultValue={31}
+          onChange={handleChangeDataSelect}
+        >
+          <MenuItem value={8}>Ultimi 7 giorni</MenuItem>
+          <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
+          <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
+          <MenuItem value={366}>Ultimi 365 giorni</MenuItem>
+        </Select>
+      </FormControl>
       <Line data={dataTotQuota} options={optionsTotQuota}/>
     </div>
   </div>
-  <div className='col'>
-    <div className='grafici'>
-      <Line data={dataTotAsc} options={optionsNumAsc}/>
-    </div>
-  </div>
 </div>
 
-
-{/********************tabella In ordine************************************************************************/}
-{flagAnaCli &&
-<div className='todo_containerInOrdine mt-5'>
-<div className='row' > 
-<div className='col-8'>
-<p className='colTextTitle'> In ordine </p>
-</div>
-<div className='col'>
-<TextField
-      inputRef={inputRef}
-      className="inputSearch"
-      onChange={event => {setSearchTerm(event.target.value)}}
-      type="text"
-      placeholder="Ricerca Cliente"
-      InputProps={{
-      startAdornment: (
-      <InputAdornment position="start">
-      <SearchIcon color='secondary'/>
-      </InputAdornment>
-                ),
-                }}
-       variant="outlined"/>
-</div>
-</div>
-<div className='row' style={{marginRight: "5px"}}>
-<div className='col-4' >
-<p className='coltext' >Cliente</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' >Qt</p>
-</div>
-<div className='col-5' style={{padding: "0px"}}>
-<p className='coltext' >Prodotto</p>
-</div>
-<div className='col-2' style={{padding: "0px"}}>
-<p className='coltext' >Data Inserimento</p>
-</div>
-    <hr style={{margin: "0"}}/>
-</div>
-
-
-{todos.filter((val)=> {
-        if(searchTerm === ""){
-          return val
-      } else if (val.nomeC.toLowerCase().includes(searchTerm.toLowerCase()) ) {
-        return val
-                }
-            }).map((todo) => (
-    <div key={todo.id}>
-    <div className='row' style={{padding: "0px", marginRight: "5px"}}>
-      <div className='col-4 diviCol'><p className='inpTab'>{todo.nomeC} </p> </div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.qtProdotto}</p></div>
-      <div className='col-5 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.prodottoC}</p></div>
-      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.dataC}</p></div>
-      <hr style={{margin: "0"}}/>
-    </div>
-    </div>
-  ))}
-
-  </div>
-  }   
     </>
       )
 }

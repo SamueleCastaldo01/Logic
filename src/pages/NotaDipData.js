@@ -13,6 +13,7 @@ import { AutoDataScal } from './AddNota';
 import { supa, guid, tutti } from '../components/utenti';
 import PrintIcon from '@mui/icons-material/Print';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import Switch from '@mui/material/Switch';
 
 export const AutoProdCli = [];
 
@@ -25,6 +26,8 @@ function NotaDipData({notaDat, getNotaDip }) {
     const [nomeC, setNomeC] = React.useState("");
     const [cont, setCont] = React.useState(1);
     const [flagDelete, setFlagDelete] = useState(false); 
+    const [switChchecked, setSwitchChecked] = React.useState(false);
+    const [switInt, setswitInt] = React.useState("0");
 
     const [dataSc, setDataSc] = React.useState(notaDat);
 
@@ -44,6 +47,11 @@ function NotaDipData({notaDat, getNotaDip }) {
       console.log({todosDataAuto});
         setDataSc(value)
     }
+
+    const handleChangeSwitch = (event) => {
+      setSwitchChecked(event.target.checked);
+
+    };
 //_________________________________________________________________________________________________________________
 const contEffect = async () => {  //fa il conteggio
     const coll = collection(db, "addNota");
@@ -118,53 +126,6 @@ const contEffect = async () => {  //fa il conteggio
       });
       return () => unsub();
     }, []);
-  /******************************************************************************* */
-  const createCate = async ( nomeCli, nCart, debTot, dataAddNota) => {
-    var bol= true
-    var bol2= false
-    var qtNAsc = ""
-    //verifica che la data che è stata presa nell'autocomplete sia vera, che fa parte di scaletData
-    const q2 = query(collection(db, "scalDat"), where("data", "==", dataSc));
-    const querySnapshot2 = await getDocs(q2);
-    querySnapshot2.forEach((doc) => {
-    if (doc.data().data == dataSc) {
-        bol2= true
-    }
-    });
-    if (bol2 === false) {  //se la data è sbagliata non esegue la creazione
-        return
-    }
-            //query che va a trovare il numero di ASCIUGAMANI,  !!attenzione il nome è statico
-    const q3 = query(collection(db, "Nota"), where("dataC", "==", dataAddNota), where("nomeC", "==", nomeCli), where("prodottoC", "==", "ROIAL ASCIUGAMANO 60 pz"));
-    const querySnapshotq3 = await getDocs(q3);
-    querySnapshotq3.forEach(async (hi) => {
-        console.log("sono entrato nella query")
-        qtNAsc = +qtNAsc + (+hi.data().qtProdotto)
-    });
-
-    //verifica che non ci sia lo stesso nome del cliente nella Scaletta, quando vado ad inserire un nuovo cliente
-    const q = query(collection(db, "Scaletta"), where("nomeC", "==", nomeCli), where("dataScal", "==", dataSc));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-    if (doc.data().nomeC == nomeCli) {
-        notifyErrorCli()
-        toast.clearWaitingQueue(); 
-        bol=false
-    }
-    });
-    if(bol == true) {
-    await addDoc(collection(db, "Scaletta"), {  //aggiungo un nuovo cliente alla scaletta
-      nomeC: nomeCli,
-      numAsc: qtNAsc,
-      createdAt: serverTimestamp(),
-      dataScal: dataSc,
-      NumCartoni: nCart,
-      note: "",
-      quota: "",
-      debito: debTot,
-    });
-    }
-  };
     //_____________________________________________________________________________________
     const handleDelete = async (id) => {
       const colDoc = doc(db, "Scaletta", id); 
@@ -198,7 +159,14 @@ const contEffect = async () => {  //fa il conteggio
         <div className='row'> 
         <div className='col' style={{paddingRight: "0px"}} >
         <p className='colTextTitle'> Ordine Clienti</p>
-        <p className='textOrdRed'> Note non completate</p>
+        { !switChchecked ? <p className='textOrdRed'> Ordini da evadere</p> : <p className='textOrd'> Ordini evasi</p> }
+        
+        <div style={{height: "25px"}}>
+         <Switch sx={{ position: "relative", right: "75px", bottom: "15px" }}
+          checked={switChchecked}
+          onChange={handleChangeSwitch}
+          inputProps={{ 'aria-label': 'controlled' }}/>
+      </div>
         </div>
         <div className='col' style={{paddingLeft: "0px"}}>
         <Autocomplete
@@ -223,7 +191,7 @@ const contEffect = async () => {  //fa il conteggio
       <hr style={{margin: "0"}}/>
        {todos.map((todo) => (
           <div key={todo.id}>
-          {todo.data  === dataSc && todo.completa === "0" &&  (
+          {todo.data  === dataSc &&(!switChchecked ? todo.completa == "0" : todo.completa == "1") &&  (
       <>
     <div className='row'>
         <div className='col-1 diviCol'>

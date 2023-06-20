@@ -90,7 +90,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
 
     <hr style={{margin: "0"}}/>
 
-    <form  onSubmit={handleSubm}>
+
     <div className="row ">
 {/********************CLIENTE*********************************************************** */}
     <div className="col-2 diviCol" >
@@ -225,7 +225,6 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
         }
     </div>
     </div>
-    </form>
 
     </div>
   );

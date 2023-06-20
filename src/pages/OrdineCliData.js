@@ -19,6 +19,8 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import LockIcon from '@mui/icons-material/Lock';
+import { Timer3 } from '@mui/icons-material';
 
 export const AutoComp1 = [];
 
@@ -32,12 +34,11 @@ function OrdineCliData({ getOrdId }) {
     const today = new Date(timeElapsed);    //converte
     const [day, setday] = React.useState("");
     const [flagDelete, setFlagDelete] = useState(false); 
+    const [flagBlock, setFlagBlock] = useState(false); 
 
     const [popupActive, setPopupActive] = useState(true);  
 
     const [nome, setData] = useState("");
-
-
 
     moment.locale("it");
 
@@ -56,7 +57,6 @@ function OrdineCliData({ getOrdId }) {
       querySnapshot.forEach((doc) => {
       let car = { label: doc.data().nomeC }
       AutoComp1.push(car);
-
       for(var i=0; i<10; i++) {
       }
       });
@@ -65,9 +65,8 @@ function OrdineCliData({ getOrdId }) {
          const handleChangeDataSelect = (event) => {
           setday(event.target.value);      //prende il valore del select
           var ok= event.target.value
-          console.log({ok})
           today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo
-           localStorage.setItem("bho1", today.getTime())
+           localStorage.setItem("bho3", today.getTime())
         };
 
    //_________________________________________________________________________________________________________________
@@ -88,11 +87,42 @@ function OrdineCliData({ getOrdId }) {
 
       const Remove = () => {
           deleteCol(localStorage.getItem("ordId"), localStorage.getItem("ordDataEli") );
+      //    bloccaNota(localStorage.getItem("ordId"), localStorage.getItem("ordDataEli"));
           toast.clearWaitingQueue(); 
                }
 
     const displayMsg = () => {
       toast.warn(<Msg/>, {
+        position: "top-center",
+        autoClose: false,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        transition: Slide,
+        theme: "dark",
+        className: "rounded-4"
+        })}
+
+           //_________________________________________________________________________________________________________________
+     //confirmation notification to remove the collection
+    const MsgBlock = () => (
+      <div style={{fontSize: "16px"}}>
+        <p style={{marginBottom: "0px"}}>Sicuro di voler bloccare</p>
+        <p style={{marginBottom: "0px"}}>(non sarà più annullabile)</p>
+        <button className='buttonApply ms-4 mt-2 me-1 rounded-4' onClick={block}>Si</button>
+        <button className='buttonClose mt-2 rounded-4'>No</button>
+      </div>
+    )
+
+      const block = () => {
+        bloccaNota(localStorage.getItem("ordId"), localStorage.getItem("ordDataEli"), localStorage.getItem("ordNumeroNote"), localStorage.getItem("ordDataMilli"), localStorage.getItem("ordDataTotQuot"));
+          toast.clearWaitingQueue(); 
+               }
+
+    const displayMsgBlock = () => {
+      toast.warn(<MsgBlock/>, {
         position: "top-center",
         autoClose: false,
         hideProgressBar: false,
@@ -116,6 +146,8 @@ function OrdineCliData({ getOrdId }) {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
       setColle(todosArray);
+      today.setDate(today.getDate() - 8);   //fa la differenza rispetto al valore del select sottraendo
+      localStorage.setItem("bho3", today.getTime())
     });
     return () => unsub();
 
@@ -139,6 +171,52 @@ function OrdineCliData({ getOrdId }) {
         
         await deleteDoc(colDoc); //3 infine elimina la data
     }
+  //__________________________________________________________________________________________________________________________________________________
+    const bloccaNota = async (id, dat, numNot, dtMilli, TotQuot) => { //salva prima i dati su un altro database per poi cancellare i dati sul database in cui stavano
+      const colDoc = doc(db, "ordDat", id); 
+      const q = query(collection(db, "addNota"), where("data", "==", dat));
+      const querySnapshot = await getDocs(q);
+
+      querySnapshot.forEach(async (hi) => {
+        const p = query(collection(db, "Nota"), where("dataC", "==", dat), where("nomeC", "==", hi.data().nomeC));
+        const querySnapshotp = await getDocs(p);
+        querySnapshotp.forEach(async (hip) => {
+          await addDoc(collection(db, "NotaBloccata"), {   //vado prima a salvare questi dati su un db, e poi li cancello
+            dataC: hip.data().dataC,
+            qtProdotto: hip.data().qtProdotto,
+            nomeC: hip.data().nomeC,
+            prodottoC: hip.data().prodottoC,
+            prezzoUniProd: hip.data().prezzoUniProd,
+            prezzoTotProd: hip.data().prezzoTotProd,
+            simbolo: hip.data().simbolo,
+            flagTinte: hip.data().flagTinte,
+            t1: hip.data().t1,
+            t2: hip.data().t2,
+            t3: hip.data().t3,
+            t4: hip.data().t4,
+            t5: hip.data().t5,
+          });
+          await deleteDoc(doc(db, "Nota", hip.id));  //1 elimina tutti i prodotti nella lista nota, cosi libero memoria e farò meno query
+        })
+        await addDoc(collection(db, "addNotaBloccata"), {   //vado prima a salvare questi dati su un db, e poi li cancello
+          data: hi.data().data,
+          nomeC: hi.data().nomeC,
+          dataMilli: hi.data().dataMilli,
+          debitoRes: hi.data().debitoRes,
+          debitoTotale: hi.data().debitoTotale,
+          sommaTotale: hi.data().sommaTotale,
+          quota: hi.data().quota,
+        });
+      await deleteDoc(doc(db, "addNota", hi.id));  //2 elimina tutti i dati di addNota della stessa data
+      });
+      await addDoc(collection(db, "ordDatBloccata"), {   //mette il numero di note in questo db
+        data: dat,
+        dataMilli: dtMilli,
+        numeroNote: numNot,
+        totalQuota: TotQuot,
+      });
+      await deleteDoc(colDoc); //3 infine elimina la data
+  }
   //_________________________________________________________________________________________________________________
   const createCol = async (e) => {    
     e.preventDefault();  
@@ -149,23 +227,21 @@ function OrdineCliData({ getOrdId }) {
       toast.clearWaitingQueue(); 
       return
     }
-    const q = query(collection(db, "ordDat"), where("data", "==", formattedDate));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-  // doc.data() is never undefined for query doc snapshots
-    console.log(doc.id, " => ", doc.data().data);
-    if (doc.data().data == formattedDate) {
-         notifyErrorDat()
-         toast.clearWaitingQueue(); 
-        bol=false
-    }
-    });
+    colle.map(async (nice) => {    //va a fare il controllo e va a vedere se questa data già è stat inserita
+      if (formattedDate == nice.data) {   //va a prendere la trupla di questo cliente di questa data
+        notifyErrorDat()
+        toast.clearWaitingQueue(); 
+       bol=false
+      }
+    })
     if(bol == true) {
     await addDoc(colleCollectionRef, {
-      dataMilli: nome.getTime(),
+      numeroNote: 0,
       data: formattedDate,
       dataMilli: nome.getTime(),
       nome,
+      totalQuota:0,
+      totalAsc:0
     });
     setClear();
     }
@@ -179,7 +255,8 @@ function OrdineCliData({ getOrdId }) {
     <> 
         <div className='container' style={{padding: "0px"}}>
     <h1 className='title mt-3'> Ordine Clienti</h1>
-    <button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button>
+    <button onClick={() => {setFlagDelete(true); setFlagBlock(false)}}>elimina</button>
+    <button onClick={() => {setFlagBlock(true); setFlagDelete(false)}}>blocca</button>
 {/** inserimento Data *************************************************************/}
 {sup ===true && (
         <>    
@@ -243,14 +320,14 @@ function OrdineCliData({ getOrdId }) {
 
                 {colle.map((col) => (
                   <div key={col.id}>
-                  {col.dataMilli >= localStorage.getItem("bho1") && 
+                  {col.dataMilli >= localStorage.getItem("bho3") && 
                     <>
                     <div className="diviCol" > 
                       <div className="row">
 
                         <div className="col-9">
                         <h3 className='inpTab' onClick={() => {
-                            getOrdId(col.id, col.nome, col.data)
+                            getOrdId(col.id, col.nome, col.data, col.dataMilli)
                             navigate("/addnota");
                             auto();
                             AutoComp1.length = 0
@@ -271,6 +348,23 @@ function OrdineCliData({ getOrdId }) {
                             toast.clearWaitingQueue(); 
                             }}>
                           <DeleteIcon id="i" />
+                        </button>            
+                        </div>
+                        }
+                        { flagBlock &&
+                        <div className="col" style={{padding:"0px", marginTop:"-8px"}}>    
+                        <button
+                         className="button-delete"
+                         onClick={() => {
+                            localStorage.setItem("ordDataEli", col.data);
+                            localStorage.setItem("ordId", col.id);
+                            localStorage.setItem("ordNumeroNote", col.numeroNote);
+                            localStorage.setItem("ordDataMilli", col.dataMilli);
+                            localStorage.setItem("ordDataTotQuot", col.totalQuota);
+                            displayMsgBlock();
+                            toast.clearWaitingQueue(); 
+                            }}>
+                          <LockIcon id="i" />
                         </button>            
                         </div>
                         }

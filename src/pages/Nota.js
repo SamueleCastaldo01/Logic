@@ -5,6 +5,8 @@ import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
 import BeenhereIcon from '@mui/icons-material/Beenhere';
 import TodoNota from '../components/TodoNota';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from "@mui/icons-material/Delete";
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
@@ -14,7 +16,7 @@ import { supa, guid, tutti, flagStampa } from '../components/utenti';
 import { fontSize } from '@mui/system';
 
 
-function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNota, debit, debTo, indirizzo, tel, iva, completa }) {
+function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNota, debit, debTo, indirizzo, tel, iva, completa, idDebito }) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -22,9 +24,9 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
     const [todos, setTodos] = React.useState([]);
-    const [indirizzoC, setIndirizzoC] = React.useState("");
-    const [partitaIvaC, setPartitaIvaC] = React.useState("");
-    const [cellulareC, setCellulareC] = React.useState("");
+    const [todosInOrdine, setTodosInOrdine] = React.useState([]);
+    const [todosInSospeso, setTodosInSospeso] = React.useState([]);
+
     const [prodottoC, setProdottoC] = React.useState("");
     const [t1, setT1] = React.useState("");   //tinte, che dentro una trupla ci possono essere massimo 5
     const [t2, setT2] = React.useState("");
@@ -38,10 +40,14 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
 
     var FlagT=false;   //flag per le tinte, viene salvato nel database serve per far riconoscere ogni singola trupla
     const [flagStampa, setFlagStampa] = React.useState(false);  //quando è falso si vedono le icone,
+
+    const [flagInOrdine, setFlagInOrdine] = React.useState(false);  //quando è falso si vedono le icone
+    const [flagInSospeso, setFlagInSospeso] = React.useState(false);  //quando è falso si vedono le icone,
+
     const [NumCart, setNumCart] = React.useState(numCart);
     const [Completa, setCompleta] = useState(completa);
    
-    const [sumTot, setSumTot] =React.useState("");
+    const [sumTot, setSumTot] =React.useState(prezzoTotNota);
     const [debitoTot, setDebTot] = React.useState(debTo);
     const [debitoRes, setDebitoRes] = React.useState(debit);
 
@@ -62,7 +68,21 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
     )
 
       const Remove = () => {
+        console.log(localStorage.getItem("flagRemove"))
+        if(localStorage.getItem("flagRemove") == 0 ) {
+          console.log("sono entrato")
           handleDelete(localStorage.getItem("IDNOTa"));
+        }
+
+        else if(localStorage.getItem("flagRemove") == 1 ) {
+          console.log("sono entrato")
+          handleDeleteInOrdine(localStorage.getItem("IDNOTa"));
+        }
+
+        else if(localStorage.getItem("flagRemove")  == 2) {
+          handleDeleteInSospeso(localStorage.getItem("IDNOTa"));
+        }
+        else{ console.log("non sono entrato ")}
           toast.clearWaitingQueue(); 
                }
 
@@ -82,30 +102,18 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
 //_________________________________________________________________________________________________________________
 const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
   var sommaTot=0;
-  const q = query(collection(db, "Nota"), where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC));  //prende i prodotti di quel cliente di quella data che sono diversi da (NO)
-  const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      sommaTot=+doc.data().prezzoTotProd +sommaTot;
-      });
-      var somTrunc = sommaTot.toFixed(2);
-      setSumTot(somTrunc);
-      await updateDoc(doc(db, "addNota", notaId), { sommaTotale: somTrunc});  //aggiorna la somma totale nell'add nota
-}
+    todos.map((nice) => {
+      if (nomeCli == nice.nomeC && dataNotaC==nice.dataC) {   //se il nome della tinta è uguale ad un prodotto dell'array allora si prende il prezzo unitario
+         sommaTot=+nice.prezzoTotProd + sommaTot;   // va a fare la somma totale
+      }
+    })
+  var somTrunc = sommaTot.toFixed(2);
 
-//********************************************************************************** */
-    const cliEffect = async () => {  //funzione per l'anagrafica del cliente
-      const collectionRef = collection(db, "clin");
-        //aggiorna il contatore di tutti i dati di addNota della stessa data
-        const q = query(collectionRef, where("nomeC", "==", nomeCli));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (hi) => {
-          setIndirizzoC(hi.data().indirizzo);
-          setPartitaIvaC(hi.data().partitaIva);
-          setCellulareC(hi.data().cellulare);
-        });
-    }
-//********************************************************************************** */
-  
+  setSumTot(somTrunc);
+  localStorage.setItem("sumTotNota", somTrunc);
+  await updateDoc(doc(db, "addNota", notaId), { sommaTotale: somTrunc});  //aggiorna la somma totale nell'add nota
+}
+//********************************************************************************** */ 
      React.useEffect(() => {
         const collectionRef = collection(db, "Nota");
         const q = query(collectionRef, orderBy("createdAt"));
@@ -116,18 +124,44 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
           });
           setTodos(todosArray);
         });
-        cliEffect();
-        SommaTot();
         localStorage.removeItem("NotaId");
         return () => unsub();
       }, []);
+
+      React.useEffect(() => {
+        const collectionRef = collection(db, "inOrdine");
+        const q = query(collectionRef, orderBy("prodottoC"));
+        const unsub = onSnapshot(q, (querySnapshot) => {
+          let todosArray = [];
+          querySnapshot.forEach((doc) => {
+            todosArray.push({ ...doc.data(), id: doc.id });
+          });
+          setTodosInOrdine(todosArray);
+        });
+        return () => unsub();
+      }, []);
+
+      React.useEffect(() => {
+        const collectionRef = collection(db, "inSospeso");
+        const q = query(collectionRef, orderBy("prodottoC"));
+        const unsub = onSnapshot(q, (querySnapshot) => {
+          let todosArray = [];
+          querySnapshot.forEach((doc) => {
+            todosArray.push({ ...doc.data(), id: doc.id });
+          });
+          setTodosInSospeso(todosArray);
+        });
+        return () => unsub();
+      }, []);
+
+      React.useEffect(() => {
+      }, [todos]);
 //********************************************************************************** */
 const createCate = async () => {
-
   await addDoc(collection(db, "Nota"), {
     dataC: dataNotaC,
     nomeC: nomeCli,
-    qtProdotto,
+    qtProdotto: 1,
     prodottoC,
     complete: false,
     artPreso: false,
@@ -143,38 +177,51 @@ const createCate = async () => {
     prezzoTotProd,
     createdAt: serverTimestamp(),
   });
-  setQtProdotto("1");
-  setProdottoC("");
-  setnomTin("");
-  setprezzoTotProd("");
-  setprezzoUniProd("");
-  SommaTot();
 };
 //_________________________________________________________________________________________________________________
+//gestione degli ordini in sospeso e in ordine, si attivano quando si preme il pulsante conferma
+
 const handleInOrdine = async () => {  //Inserisce una nuova trupa nella tabella in ordine quando viene confermata la nota    si attiva quando premo il pulsante conferma
-  console.log("sono entrato")
-  //query per prendere tutti i prodotti di quel cliente in quella data che ha il simbolo (NO), per poi metterli nel database InOrdine
-  const q = query(collection(db, "Nota"),where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC), where("simbolo", "==", "(NO)"));  //prende i prodotti di quel cliente di quella data che ha il simbolo (NO)
-  const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (doc) => {
+  todos.map(async (nice) => {
+    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC && nice.simbolo == "(NO)") {   //va a prendere il prodotto con il no e inseriamo questo prodotto nel db inOrdine
       await addDoc(collection(db, "inOrdine"), {   //va a creare la nuova trupla nella tabella inOrdine
         nomeC: nomeCli,
         dataC: dataNotaC,
-        qtProdotto: doc.data().qtProdotto,
-        prodottoC: doc.data().prodottoC,
+        qtProdotto: nice.qtProdotto,
+        prodottoC: nice.prodottoC,
       });
+    }
+})
+}
+
+const handleInSospeso = async () => {  //Inserisce una nuova trupa nella tabella in sospeso quando viene confermata la nota    si attiva quando premo il pulsante conferma
+  todos.map(async (nice) => {
+    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC && nice.simbolo == "-") {   //va a prendere il prodotto con il no e inseriamo questo prodotto nel db inOrdine
+      await addDoc(collection(db, "inSospeso"), {   //va a creare la nuova trupla nella tabella inSospeso
+        nomeC: nomeCli,
+        dataC: dataNotaC,
+        qtProdotto: nice.qtProdotto,
+        prodottoC: nice.prodottoC,
       });
+    }
+})
 }
 
 const handleInOrdineRemove = async () => {  //Va ad eliminare i prodotti da InOrdine, quando viene annullata la conferma    si attiva quando premo il pulsante annulla conferma
-  //Devo andare a prendere tutti i proddotti nella tabella inOrdine dello stesso cliente e della stessa data e devo eliminare tutti i prodotti
-  const q = query(collection(db, "inOrdine"),where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC));  //prende i prodotti di quel cliente di quella data che ha il simbolo (NO)
-  const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (hi) => {
-      await deleteDoc(doc(db, "inOrdine", hi.id)); //elimina tutti i prodotti di quel cliente con quella data  quando viene annullata la conferma 
-      });
+  todosInOrdine.map(async (nice) => {
+    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC) {   //va a prendere la trupla di questo cliente di questa data
+      await deleteDoc(doc(db, "inOrdine", nice.id)); //elimina tutti i prodotti di quel cliente con quella data  quando viene annullata la conferma 
+    }
+  })
 }
 
+const handleInSospesoRemove = async () => {  //Va ad eliminare i prodotti da inSospeso, quando viene annullata la conferma    si attiva quando premo il pulsante annulla conferma
+  todosInSospeso.map(async (nice) => {
+    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC) {   //va a prendere il prodotto con il no e inseriamo questo prodotto nel db inOrdine
+      await deleteDoc(doc(db, "inSospeso", nice.id)); //elimina tutti i prodotti di quel cliente con quella data  quando viene annullata la conferma 
+    }
+  })
+}
 //_________________________________________________________________________________________________________________
 const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5, nomTinte) => {
   var conTinte=0;    //alogoritmo per le tinte
@@ -183,13 +230,14 @@ const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5
   if(tt3) {conTinte=conTinte+1}
   if(tt4) {conTinte=conTinte+1}
   if(tt5) {conTinte=conTinte+1}
-  if(!nomTinte){ 
+  if(todo.flagTinte == false){ 
     nomTinte=""
   conTinte=1 }
   var preT= (conTinte*qt)*prezU;  //qui va a fare il prezzo totale del prodotto in base alla quantità e al prezzo unitario
   if(todo.simbolo == "(NO)"){ preT=0;  }   //se il simbolo è no, non va a fare il suo prezzo totale
+  var somTrunc = preT.toFixed(2);
   await updateDoc(doc(db, "Nota", todo.id), 
-  { qtProdotto: qt, prodottoC:prod, prezzoUniProd:prezU, prezzoTotProd:preT, t1:tt1, t2:tt2, t3:tt3, t4:tt4, t5:tt5, nomeTinte:nomTinte});
+  { qtProdotto: qt, prodottoC:prod, prezzoUniProd:prezU, prezzoTotProd:somTrunc, t1:tt1, t2:tt2, t3:tt3, t4:tt4, t5:tt5});
   SommaTot();
   toast.clearWaitingQueue(); 
 };
@@ -217,32 +265,40 @@ const handleEditComp = async (e) => {  //completa
   await updateDoc(doc(db, "addNota", notaId), { completa: localStorage.getItem("completa")});
 };
 
-const handleEditDebitoRes = async (e) => {
+const handleEditDebitoRes = async (e) => {  //handle se nel caso si voglia modificare il debito residuo
   e.preventDefault();
   await updateDoc(doc(db, "addNota", notaId), { debitoRes:debitoRes});
   toast.clearWaitingQueue(); 
 };
 
 const handleConferma = async () => {
-  SommaTot();
-  var debTot= +sumTot+(+debitoRes);
-  var debTrunc = debTot.toFixed(2);
+  var sumNota;
+  SommaTot();   //va a rifare la somma totale dei prodotti
+  sumNota=localStorage.getItem("sumTotNota");
+  var debTot= +sumNota+(+debitoRes);   
+  console.log("sommaTot:", sumNota, "  debitoResiduo:" , debitoRes) 
+  var debTrunc = debTot.toFixed(2);   //somma tra la somma totale dei prodotti + il debito
   setDebTot(debTrunc);
-  await updateDoc(doc(db, "addNota", notaId), { debitoTotale:debTrunc});  //aggiorna la somma totale nell'add nota
-      //aggiorna ded1 nel database debito
-  const q = query(collection(db, "debito"), where("nomeC", "==", nomeCli));
-  const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(async (hi) => {
-      await updateDoc(doc(db, "debito", hi.id), { deb1:debTrunc});  //aggiorna deb1 nel database del debito
-      });
+  console.log(idDebito)
+  await updateDoc(doc(db, "addNota", notaId), { debitoTotale:debTrunc, completa: localStorage.getItem("completa")});  //aggiorna la somma totale del ddt con tutti i debiti nell'add nota
+      await updateDoc(doc(db, "debito", idDebito), { deb1:debTrunc});  //aggiorna deb1 nel database del debito
       toast.clearWaitingQueue(); 
 };
 //_________________________________________________________________________________________________________________
 const handleDelete = async (id) => {
   const colDoc = doc(db, "Nota", id); 
-  //infine elimina la data
   await deleteDoc(colDoc); 
   SommaTot();
+};
+
+const handleDeleteInOrdine = async (id) => {
+  const colDoc = doc(db, "inOrdine", id); 
+  await deleteDoc(colDoc); 
+};
+
+const handleDeleteInSospeso = async (id) => {
+  const colDoc = doc(db, "inSospeso", id); 
+  await deleteDoc(colDoc); 
 };
 //_________________________________________________________________________________________________________________
   //stampa
@@ -278,9 +334,129 @@ const print = async () => {
       FlagT=true
       createCate()
     }}>Aggiungi Tinte</button></span>
+        <span><button onClick={() => { setFlagInOrdine(true); setFlagInSospeso(false)
+    }}>In Ordine</button></span>
+        <span><button onClick={() => { setFlagInOrdine(false); setFlagInSospeso(true)
+
+    }}>In sospeso</button></span>
       </>}
 
-    <div>
+{/**********tabella in ordine********************** */}
+{flagInOrdine == true && 
+<div className='todo_containerInOrdine mt-5' style={{paddingTop: "0px"}}>
+<div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setFlagInOrdine(false); }}>
+              <CloseIcon id="i" />
+              </button> </div>
+<div className='row' > 
+<div className='col-8'>
+<p className='colTextTitle'> In ordine </p>
+</div>
+</div>
+<div className='row' style={{marginRight: "5px"}}>
+<div className='col-3' >
+<p className='coltext' >Cliente</p>
+</div>
+<div className='col-1' style={{padding: "0px"}}>
+<p className='coltext' >Qt</p>
+</div>
+<div className='col-4' style={{padding: "0px"}}>
+<p className='coltext' >Prodotto</p>
+</div>
+<div className='col-2' style={{padding: "0px"}}>
+<p className='coltext' >Data Inserimento</p>
+</div>
+    <hr style={{margin: "0"}}/>
+</div>
+
+{todosInOrdine.map((todo) => (
+    <div key={todo.id}>
+    { todo.nomeC === nomeCli && 
+    <div className='row' style={{padding: "0px", marginRight: "5px"}}>
+      <div className='col-3 diviCol'><p className='inpTab'>{todo.nomeC} </p> </div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.qtProdotto}</p></div>
+      <div className='col-4 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.prodottoC}</p></div>
+      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.dataC}</p></div>
+      {sup ===true && ( 
+        <>
+      <div className="col diviCol" style={{padding:"0px", marginTop:"-8px"}}>
+        <button className="button-delete" onClick={() =>{
+          localStorage.setItem("flagRemove", 1);
+           localStorage.setItem("IDNOTa", todo.id);
+           displayMsg();
+           toast.clearWaitingQueue(); }}>
+          <DeleteIcon id="i" />
+        </button>
+    </div>  
+        </>
+        )}
+      <hr style={{margin: "0"}}/>
+    </div>
+    }
+    </div>
+  ))}
+  </div>  
+  }
+
+{/**********tabella in sospeso********************** */}
+{flagInSospeso== true && 
+<div className='todo_containerInOrdine mt-5' style={{paddingTop:"0px"}}>
+<div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setFlagInSospeso(false); }}>
+              <CloseIcon id="i" />
+              </button> </div>
+<div className='row' > 
+<div className='col-8'>
+<p className='colTextTitle'> In sospeso </p>
+</div>
+</div>
+<div className='row' style={{marginRight: "5px"}}>
+<div className='col-3' >
+<p className='coltext' >Cliente</p>
+</div>
+<div className='col-1' style={{padding: "0px"}}>
+<p className='coltext' >Qt</p>
+</div>
+<div className='col-4' style={{padding: "0px"}}>
+<p className='coltext' >Prodotto</p>
+</div>
+<div className='col-2' style={{padding: "0px"}}>
+<p className='coltext' >Data Inserimento</p>
+</div>
+    <hr style={{margin: "0"}}/>
+</div>
+
+{todosInSospeso.map((todo) => (
+    <div key={todo.id}>
+    { todo.nomeC === nomeCli && 
+    <div className='row' style={{padding: "0px", marginRight: "5px"}}>
+      <div className='col-3 diviCol'><p className='inpTab'>{todo.nomeC} </p> </div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.qtProdotto}</p></div>
+      <div className='col-4 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.prodottoC}</p></div>
+      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.dataC}</p></div>
+      <div className="col diviCol" style={{padding:"0px", marginTop:"-8px"}}>
+        {sup ===true && (   
+          <>
+      <div className="col diviCol" style={{padding:"0px", marginTop:"-8px"}}>
+        <button className="button-delete" onClick={() =>{ 
+          localStorage.setItem("flagRemove", 2);
+            localStorage.setItem("IDNOTa", todo.id);
+            displayMsg();
+            toast.clearWaitingQueue(); }}>
+          <DeleteIcon id="i" />
+        </button>
+    </div>  
+        </>
+        )}
+    </div>
+      <hr style={{margin: "0"}}/>
+    </div>
+    }
+    </div>
+  ))}
+  </div>  
+  }
+
+{/*********************DDT***************************** */}
+<div>
     {Completa== 0 ? 
       <button type="button" className="button-delete" style={{padding: "0px", float: "left"}}>
         <BeenhereIcon sx={{ fontSize: 40 }}/>
@@ -289,9 +465,7 @@ const print = async () => {
         <BeenhereIcon sx={{ fontSize: 40 }}/>
         </button>
         }
-
-    </div>
-
+</div>
     <div ref={componentRef} className="foglioA4" style={{paddingLeft:"50px", paddingRight:"50px", paddingTop:"20px"}}>
     <div className='row rigaNota' >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
@@ -387,8 +561,8 @@ const print = async () => {
     </form>
     <h6>Debito Totale: {debitoTot} €</h6>
     {flagStampa == false && <>
-  {Completa==0 ?  <button onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1);  handleEditComp(); handleInOrdine();  handleConferma()}}>Conferma</button> :
-    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleEditComp(); }}>Annulla Conferma</button>
+  {Completa==0 ?  <button onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1); handleInOrdine(); handleInSospeso();  handleConferma()}}>Conferma</button> :
+    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleInSospesoRemove(); handleEditComp(); }}>Annulla Conferma</button>
      }
   </>}
 

@@ -26,7 +26,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 export const AutoProdCli = [];
 export const AutoDataScal = [];
 
-function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal }) {
+function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal, OrdDataMilli }) {
  
     const [todos, setTodos] = React.useState([]);
     const [nomeC, setNomeC] = React.useState("");
@@ -63,6 +63,7 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal }) {
       querySnapshot.forEach((doc) => {
 
       let car = { label: doc.data().nomeP,
+                  id: doc.id,
                   prezzoUni: doc.data().prezzoUnitario }
       AutoProdCli.push(car);
       });
@@ -102,41 +103,10 @@ const contEffect = async () => {
               });
       };
  //_________________________________________________________________________________________________________________   
-      const handleDebitoRes = async () => {   //funzione che viene richiamata quando si crea la nota
-        var debRes=0;
-        const q = query(collection(db, "debito"), where("nomeC", "==", nomeC));  //dobbiamo prendere d1, tramite nome del cliente
-        const querySnapshot = await getDocs(q);
-          querySnapshot.forEach((doc) => {
-            debRes=+doc.data().deb1 ;
-            });
-            localStorage.setItem("DebCli", debRes)
-            setDebitoRes(debRes);
-      }
-
-      const handleIndiTel = async () => {
-        var indiri;
-        var telefo;
-        var iva;
-        const p = query(collection(db, "clin"), where("nomeC", "==", nomeC));  //dobbiamo prendere l'indirizzo e il tel, tramite nome del cliente
-        const querySnapshotp = await getDocs(p);
-        querySnapshotp.forEach((doc) => {
-          indiri= doc.data().indirizzo;
-          telefo= doc.data().cellulare;
-          iva = doc.data().partitaIva;
-          });
-          localStorage.setItem("indiri", indiri);
-          localStorage.setItem("telefo", telefo);
-          localStorage.setItem("iva", iva);
-          console.log(localStorage.getItem("indiri"))
-          setIndirizzo(indiri);
-          setTelefono(telefo);
-      }
-
       const handleContaNote = async () => {   //funzione che viene richiamata quando si crea/elimina la nota    fa il conteggio delle note di quella data
         const coll = collection(db, "addNota");
         const q = query(coll, where("data", "==", dataOrdConf));
         const snapshot = await getCountFromServer(q);
-        console.log('count: ', snapshot.data().count);
         await updateDoc(doc(db, "ordDat", ordId), { numeroNote: snapshot.data().count});  //aggiorna il conteggio nel database
       }
 
@@ -204,19 +174,42 @@ const contEffect = async () => {
   /******************************************************************************* */
   const createCate = async (e) => {
     e.preventDefault(); 
-    handleDebitoRes();
-    handleIndiTel();
-    var bol= true
-    //verifica che non ci sia lo stesso nome del cliente
-    const q = query(collection(db, "addNota"), where("nomeC", "==", nomeC), where("data", "==", dataOrdConf));
+    var debRes=0;
+    var id=0;
+    var indiri;
+    var telefo;
+    var iva;
+//va a  prendere d1, tramite nome del cliente e anche il suo id
+    const q = query(collection(db, "debito"), where("nomeC", "==", nomeC));  
     const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-    if (doc.data().nomeC == nomeC) {
-        notifyErrorCli()
-        toast.clearWaitingQueue(); 
-        bol=false
-    }
-    });
+      querySnapshot.forEach((doc) => {
+        debRes=doc.data().deb1 ;
+        id= doc.id;
+        });
+        setDebitoRes(debRes);
+
+    //andiamo a  prendere l'indirizzo e il tel, tramite nome del cliente, viene richiamata quando si crea la nota
+        const p = query(collection(db, "clin"), where("nomeC", "==", nomeC));  
+        console.log("ciaao", nomeC)
+        const querySnapshotp = await getDocs(p);
+        querySnapshotp.forEach((doc) => {
+          indiri= doc.data().indirizzo;
+          telefo= doc.data().cellulare;
+          iva = doc.data().partitaIva;
+          });
+          setIndirizzo(indiri);
+          setTelefono(telefo);
+
+
+    var bol= true
+    todos.map(async (nice) => {    //controllo per verificare che questo cliente non è già presente la sua nota
+      if (nomeC == nice.nomeC && dataOrdConf ==nice.data) {   //va a prendere la trupla di questo cliente di questa data
+          notifyErrorCli()
+          toast.clearWaitingQueue(); 
+          bol=false
+      }
+    })
+
     if(!nomeC) {
       notifyErrorCliEm();
       toast.clearWaitingQueue(); 
@@ -227,35 +220,26 @@ const contEffect = async () => {
     await addDoc(collection(db, "addNota"), {
       cont,
       nomeC,
+      quota: 0,
       completa : "0",
       data: dataOrdConf,
       NumCartoni:"0",
+      dataMilli: OrdDataMilli,
       NumBuste:"0",
       sommaTotale:0,
       debitoTotale:0,
       createdAt: serverTimestamp(),
-      debitoRes: localStorage.getItem("DebCli"),
-      indirizzo: localStorage.getItem("indiri"),
-      tel: localStorage.getItem("telefo"),
-      partitaIva: localStorage.getItem("iva")
+      idDebito:  id,
+      debitoRes: debRes,
+      indirizzo: indiri,
+      tel: telefo,
+      partitaIva: iva
     });
-    setNomeC("");
-    setClear();
     handleContaNote();
     }
   };
 
-  //****************************************************************************************** */
-    const handleEdit = async (todo, nome, numA, not, deb, quot) => {
-      await updateDoc(doc(db, "addNota", todo.id), { nomeC: nome, numAsc:numA, note:not, debito:deb, quota:quot});
-      notifyUpdateCli();
-      toast.clearWaitingQueue(); 
-    };
-    const toggleComplete = async (todo) => {
-      await updateDoc(doc(db, "addNota", todo.id), { completed: !todo.completed });
-    };
-
-    //_____________________________________________________________________________________
+    //___________________________________________________________________________________________________
     const handleDelete = async (id, nomeCli, DataC) => {
       handleContRem();
 
@@ -394,7 +378,7 @@ const contEffect = async () => {
         </div>
          <div className='col-8 diviCol' 
           onClick={() => {
-                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa)
+                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito)
                 navigate("/nota");
                 auto(todo.nomeC);
                 AutoProdCli.length = 0
@@ -480,7 +464,7 @@ const contEffect = async () => {
         </div>
          <div className='col-8 diviCol' 
           onClick={() => {
-                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa)
+                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito)
                 navigate("/nota");
                 auto(todo.nomeC);
                 AutoProdCli.length = 0

@@ -132,7 +132,7 @@ const contEffect = async () => {
         return () => unsub();
       }, []);
   /******************************************************************************* */
-  const createCate = async ( nomeCli, nCart, nBt, debTot, dataAddNota) => {
+  const createCate = async ( nomeCli, nCart, nBt, debTot, dataAddNota, id) => {
     var bol= true
     var bol2= false
     var qtNAsc = ""
@@ -167,6 +167,7 @@ const contEffect = async () => {
     });
     if(bol == true) {
     await addDoc(collection(db, "Scaletta"), {  //aggiungo un nuovo cliente alla scaletta
+      idNota: id,
       nomeC: nomeCli,
       numAsc: qtNAsc,
       createdAt: serverTimestamp(),
@@ -251,7 +252,7 @@ const contEffect = async () => {
         </div>
         <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}>  
            <button onClick={ ()=> {
-            createCate(todo.nomeC, todo.NumCartoni, todo.NumBuste, todo.debitoTotale, todo.data)
+            createCate(todo.nomeC, todo.NumCartoni, todo.NumBuste, todo.debitoTotale, todo.data, todo.id)
            }}> Add </button>          
         </div>
     </div>

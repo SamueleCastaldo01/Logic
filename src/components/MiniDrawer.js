@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
@@ -378,6 +379,29 @@ export default function MiniDrawer( {signUserOut} ) {
                   <AdUnitsIcon sx={{ color: "white" }}/>
                 </ListItemIcon>
                 <ListItemText primary="Nota Dip" sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+          </ListItem>
+
+          <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/altro")}}>
+              <ListItemButton
+                selected={selectedIndex === 8}
+                 onClick={(event) => handleListItemClick(event, 8)}
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? 'initial' : 'center',
+                  px: 2.5,
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : 'auto',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <AssessmentIcon sx={{ color: "white" }}/>
+                </ListItemIcon>
+                <ListItemText primary="Altro" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
           </ListItem>
 

@@ -7,7 +7,7 @@ export const optionsNumCart = {
             },
       title: {
         display: true,
-        text: "Numero Note"
+        text: "Ordini"
     }
     },
   };
@@ -20,7 +20,7 @@ export const optionsNumCart = {
         },
       title: {
         display: true,
-        text: "Totale Quota"
+        text: "Vendite"
     }
     },
   };

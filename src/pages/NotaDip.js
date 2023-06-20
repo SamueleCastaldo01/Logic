@@ -162,14 +162,15 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
      //funzioni per la conferma della nota e per il calcolo del prezzo dei prodotti, e mettere nella lista inOrdine
      const SommaTot = async (id, nomeC ) => {  //fa la somma totale, di tutti i prezzi totali
       var sommaTot=0;
-      const q = query(collection(db, "Nota"), where("nomeC", "==", nomeC), where("dataC", "==", notaDipDataC),);  //prende i prodotti di quel cliente di quella data
-      const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-          sommaTot=+doc.data().prezzoTotProd +sommaTot;  //fa la somma Totale
-          });
-          var somTrunc = sommaTot.toFixed(2);
-          setSumTot(somTrunc);
-          await updateDoc(doc(db, "addNota", id), { sommaTotale:somTrunc});  //aggiorna la somma totale nell'add nota
+      todos.map((nice) => {
+        if (nomeC == nice.nomeC && notaDipDataC==nice.dataC) {   //se il nome della tinta è uguale ad un prodotto dell'array allora si prende il prezzo unitario
+           sommaTot=+nice.prezzoTotProd + sommaTot;   // va a fare la somma totale
+        }
+      })
+    var somTrunc = sommaTot.toFixed(2);
+  
+    setSumTot(somTrunc);
+    await updateDoc(doc(db, "addNota", id), { sommaTotale: somTrunc});  //aggiorna la somma totale nell'add nota
     }
 
   const handleEditComp = async (id) => {  //aggiorna lo stato nel database che è stata completata la nota, oppure annullata, tramite il localStorage
@@ -181,14 +182,11 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
   
   const handleConferma = async (id, nomeC, sommaTot, debitoRes, Nb, NCt) => {
     SommaTot(id, nomeC);  //va a fare la somma totale dei prodotti
-    if (Nb==0 && NCt==0) {    //va a controllare il numero di cartoni, e compare la notifica che ci mancano il numero di cartoni
-      notifyErrorNumCartoni();
-      return;
-    }
-    if (Nb>0 || NCt>0){ //condizione tramite il numero di cartoni
+
     setCompleta(1);
     handleEditComp(id);
     handleInOrdine(nomeC);
+    handleInSospeso(nomeC);
     var debTot= +sommaTot+(+debitoRes);   // va a fare il calcolo del debito totale
     var debTrunc = debTot.toFixed(2);   //va a troncare il risultato del debito, per non avere problemi di visualizzazione
     await updateDoc(doc(db, "addNota", id), { debitoTotale:debTrunc});  //aggiorna la somma totale nell'add nota
@@ -198,31 +196,56 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
         querySnapshot.forEach(async (hi) => {
         await updateDoc(doc(db, "debito", hi.id), { deb1:debTrunc});  //aggiorna deb1 nel database del debito
         });
-      }
+
         toast.clearWaitingQueue(); 
   };
 
   const handleInOrdine = async (nomeC) => {  //Inserisce una nuova trupa nella tabella in ordine quando viene confermata la nota    si attiva quando premo il pulsante conferma
-    //query per prendere tutti i prodotti di quel cliente in quella data che ha il simbolo (NO), per poi metterli nel database InOrdine
-    const q = query(collection(db, "Nota"),where("nomeC", "==", nomeC), where("dataC", "==", notaDipDataC), where("simbolo", "==", "(NO)"));  //prende i prodotti di quel cliente di quella data che ha il simbolo (NO)
-    const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(async (doc) => {
+    todos.map(async (nice) => {
+      if (nomeC == nice.nomeC && notaDipDataC==nice.dataC && nice.simbolo == "(NO)") {   //va a prendere il prodotto con il no e inseriamo questo prodotto nel db inOrdine
         await addDoc(collection(db, "inOrdine"), {   //va a creare la nuova trupla nella tabella inOrdine
           nomeC: nomeC,
           dataC: notaDipDataC,
-          qtProdotto: doc.data().qtProdotto,
-          prodottoC: doc.data().prodottoC,
+          qtProdotto: nice.qtProdotto,
+          prodottoC: nice.prodottoC,
         });
+      }
+  })
+  }
+
+  const handleInSospeso = async (nomeC) => {  //Inserisce una nuova trupa nella tabella in sospeso quando viene confermata la nota    si attiva quando premo il pulsante conferma
+    todos.map(async (nice) => {
+      if (nomeC == nice.nomeC && notaDipDataC==nice.dataC && nice.simbolo == "-") {   //va a prendere il prodotto con il no e inseriamo questo prodotto nel db inOrdine
+        await addDoc(collection(db, "inSospeso"), {   //va a creare la nuova trupla nella tabella inSospeso
+          nomeC: nomeC,
+          dataC: notaDipDataC,
+          qtProdotto: nice.qtProdotto,
+          prodottoC: nice.prodottoC,
         });
+      }
+  })
   }
 
   const handleInOrdineRemove = async (nomeC) => {  //Va ad eliminare i prodotti da InOrdine, quando viene annullata la conferma    si attiva quando premo il pulsante annulla conferma
+  var id;
     //Devo andare a prendere tutti i proddotti nella tabella inOrdine dello stesso cliente e della stessa data e devo eliminare tutti i prodotti
     const q = query(collection(db, "inOrdine"),where("nomeC", "==", nomeC), where("dataC", "==", notaDipDataC));  //prende i prodotti di quel cliente di quella data che ha il simbolo (NO)
     const querySnapshot = await getDocs(q);
       querySnapshot.forEach(async (hi) => {
-        await deleteDoc(doc(db, "inOrdine", hi.id)); //elimina tutti i prodotti di quel cliente con quella data  quando viene annullata la conferma 
+       id= hi.id;
         });
+        await deleteDoc(doc(db, "inOrdine", id)); //elimina tutti i prodotti di quel cliente con quella data  quando viene annullata la conferma 
+  }
+
+  const handleInSospesoRemove = async (nomeC) => {  //Va ad eliminare i prodotti da InOrdine, quando viene annullata la conferma    si attiva quando premo il pulsante annulla conferma
+    var id;
+    //Devo andare a prendere tutti i proddotti nella tabella inOrdine dello stesso cliente e della stessa data e devo eliminare tutti i prodotti
+    const q = query(collection(db, "inSospeso"),where("nomeC", "==", nomeC), where("dataC", "==", notaDipDataC));  //prende i prodotti di quel cliente di quella data che ha il simbolo (NO)
+    const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async (hi) => {
+        id= hi.id;
+        });
+        await deleteDoc(doc(db, "inSospeso", id)); //elimina tutti i prodotti di quel cliente con quella data  quando viene annullata la conferma 
   }
 
   //************************************************************************************************* */
@@ -371,7 +394,8 @@ const print = async () => {
       localStorage.setItem("completa", 0);
        setCompleta(0);
        handleEditComp(todo.id);
-       handleInOrdineRemove(todo.nomeC)  }}><ClearIcon sx={{ fontSize: 29 }}/>  Annulla Conferma</button>
+       handleInOrdineRemove(todo.nomeC)
+       handleInSospesoRemove(todo.nomeC)  }}><ClearIcon sx={{ fontSize: 29 }}/>  Annulla Conferma</button>
      }
   </>}
   {/*******************Tasti per passare da una nota ad un altra*************************************************************** */}

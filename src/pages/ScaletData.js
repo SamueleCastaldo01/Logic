@@ -63,7 +63,7 @@ function ScaletData({ getColId }) {
         setday(event.target.value);      //prende il valore del select
         var ok= event.target.value
         today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo, il risultato sarà in millisecondi
-         localStorage.setItem("bho", today.getTime())
+         localStorage.setItem("bho2", today.getTime())
       };
    //_________________________________________________________________________________________________________________
     const setClear = () => {
@@ -100,7 +100,7 @@ function ScaletData({ getColId }) {
         className: "rounded-4"
         })}
 
-    //********************************************************************************** */
+//********************************************************************************** */
   React.useEffect(() => {
     const collectionRef = collection(db, "scalDat");
     const q = query(collectionRef, orderBy("nome", "desc"));
@@ -111,6 +111,8 @@ function ScaletData({ getColId }) {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
       setColle(todosArray);
+      today.setDate(today.getDate() - 8);   //fa la differenza rispetto al valore del select sottraendo, il risultato sarà in millisecondi
+      localStorage.setItem("bho2", today.getTime())
     });
     return () => unsub();
   }, []);
@@ -157,8 +159,9 @@ function ScaletData({ getColId }) {
     await addDoc(colleCollectionRef, {
       data: formattedDate,
       nome,
+      totalQuota: 0,
+      TotalAsc: 0,
       dataMilli: nome.getTime(),
-      author: { name: auth.currentUser.displayName, id: auth.currentUser.uid }
     });
     setClear();
     }
@@ -170,8 +173,6 @@ function ScaletData({ getColId }) {
 //************************************************************** */
     return ( 
     <> 
-
-
     <h1 className='title mt-3'> Scaletta</h1>
 
     <button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button>
@@ -240,7 +241,7 @@ function ScaletData({ getColId }) {
 
                 {colle.map((col) => (
                   <div key={col.id}>
-                  {col.dataMilli >= localStorage.getItem("bho") && 
+                  {col.dataMilli >= localStorage.getItem("bho2") && 
                     <>
                     <div className="diviCol"  > 
                       <div className="row">

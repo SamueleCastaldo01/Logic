@@ -29,6 +29,7 @@ import NotaForni from './pages/NotaForni';
 import DashClienti from './pages/DashboardClienti';
 import DashFornitori from './pages/DashboardFornitori';
 import Scorta from './pages/Scorta';
+import Altro from './pages/Altro';
 import { BrowserRouter as Router, Routes, Route, Link} from "react-router-dom";
 import {PrivateRoutes, PrivateCate, PrivatePerm, PrivateDashCli, PrivateOrd, PrivateOrdForn, PrivateNota, PrivateNotaForni, PrivateDashForn, PrivateAddClientiScalet, PrivateRoutesDipen, PrivateRoutesSup, PrivateRoutesGuid} from './components/PrivateRoutes';
 import { styled } from "@mui/material/styles";
@@ -47,6 +48,7 @@ import moment from 'moment/moment';
 import { getDatabase, ref, onValue  } from "firebase/database";
 import 'moment/locale/it'
 import { guid, supa, tutti, dipen } from './components/utenti';
+import { addDoc, collection } from 'firebase/firestore';
 
 /*  elimina tutti i dati di una collezione
 const elimDb = async () => {
@@ -78,17 +80,6 @@ function App() {
   localStorage.setItem("today", formattedDate);
   const [todayC, setTodayC] = useState(localStorage.getItem("today"));  //variabile che andiamo ad utilizzare
 
-  const db = getDatabase();
-  //stato della connessione con il database
-  const connectedRef = ref(db, ".info/connected");
-  onValue(connectedRef, (snap) => {
-    if (snap.val() === true) {
-      console.log("connected");
-    } else {
-      console.log("not connected");
-    }
-  });
-
   const matches = useMediaQuery('(max-width:920px)');  //media query true se è un dispositivo più piccolo del value
 
   const [uid, setUid] = useState(localStorage.getItem("uid"));
@@ -105,6 +96,7 @@ function App() {
   const [ordId, setOrdId] = useState(localStorage.getItem("OrdId")); 
   const [dataOrd, setDataOrd] = useState(localStorage.getItem("dataOrd")); 
   const [dataOrdConf, setDataOrdConf] = useState(localStorage.getItem("dataOrdConfronto"));
+  const [OrdDataMilli, setOrdDataMilli] = useState(localStorage.getItem("OrdDataMilli"));
 
   const [ordFornId, setOrdFornId] = useState(localStorage.getItem("OrdFornId")); 
   const [dataOrdForn, setDataOrdForn] = useState(localStorage.getItem("dataOrdForn")); 
@@ -122,6 +114,7 @@ function App() {
   const [notaIndi, setNotaIndi] = useState(localStorage.getItem("notaIndi"));
   const [notaTel, setNotaTel] = useState(localStorage.getItem("notaTel"));
   const [notaIva, setNotaIva] = useState(localStorage.getItem("notaIva"));
+  const [IdDebNota, setIdDebNota] = useState(localStorage.getItem("idDebNot"));
   const [notaCompleta, setNotaCompleta] = useState(localStorage.getItem("notaCompleta"));
 
   const [notaDipId, setNotaDipId] = useState(localStorage.getItem("notaDipId"));
@@ -154,10 +147,6 @@ function App() {
     }
   });
 
-  function refreshPage() {
-    window.location.reload(false);
-  }
-
   const getColIdHandler = (id, data, datEl) => {
     localStorage.setItem("scalId", id); //save the value locally
     localStorage.setItem("dataScal", data); 
@@ -181,13 +170,15 @@ function App() {
     setNomeForn(nome);
   }
 
-  const getOrderIdHandler = (id, nome, data) => {
+  const getOrderIdHandler = (id, nome, data, dtMilli) => {
     localStorage.setItem("OrdId", id); //save the value locally
     localStorage.setItem("dataOrd", nome); 
     localStorage.setItem("dataOrdConfronto", data); 
+    localStorage.setItem("OrdDataMilli", dtMilli); 
     setOrdId(id);
     setDataOrd(nome);
     setDataOrdConf(data);
+    setOrdDataMilli(dtMilli);
   };
 
   const getOrderFornIdHandler = (id, nome, data) => {
@@ -199,7 +190,7 @@ function App() {
     setDataOrdFornConf(data);
   };
 
-  const getNotadHandler = (id, cont, nome, datav, datac, numCart, sommaTot, debiResi, debiTot, indi, tel, iva, comp) => {
+  const getNotadHandler = (id, cont, nome, datav, datac, numCart, sommaTot, debiResi, debiTot, indi, tel, iva, comp, idDebito) => {
     localStorage.setItem("NotaId", id); 
     localStorage.setItem("NotaCon", cont); //save the value locally
     localStorage.setItem("NotaNomeC", nome); 
@@ -213,6 +204,7 @@ function App() {
     localStorage.setItem("notaTel", tel); 
     localStorage.setItem("notaIva", iva); 
     localStorage.setItem("notaCompleta", comp);
+    localStorage.setItem("idDebNot", idDebito);
     console.log({comp})
     setNotaId(id);
     setNotaCont(cont);
@@ -226,6 +218,7 @@ function App() {
     setNotaIndi(indi);
     setNotaTel(tel);
     setNotaIva(iva);
+    setIdDebNota(idDebito)
     setNotaCompleta(comp)
   };
 
@@ -301,6 +294,7 @@ function App() {
 
   <Route element={<PrivateRoutesSup/>}>
   <Route path="/" element={<HomePage />} />
+  <Route path="/altro" element={<Altro />} />
   <Route path="/listafornitori" element={<AddFornitori getFornId={getFornIdHandler}/>} />
   <Route path="/scorta" element={<Scorta />} />
   <Route path="/scalettadata" element={<ScaletData getColId={getColIdHandler}/>} />
@@ -331,7 +325,7 @@ function App() {
     </Route>
 
     <Route element={<PrivateOrd ordId={ordId}/>}>
-      <Route path="/addnota" element={<AddNota ordId={ordId} dataOrd={dataOrd} dataOrdConf={dataOrdConf} getNotaId={getNotadHandler} getNotaDataScal={getNotaDataScalHandler}/>} />
+      <Route path="/addnota" element={<AddNota ordId={ordId} dataOrd={dataOrd} dataOrdConf={dataOrdConf} getNotaId={getNotadHandler} getNotaDataScal={getNotaDataScalHandler} OrdDataMilli={OrdDataMilli}/>} />
     </Route>
 
     <Route element={<PrivateOrdForn ordFornId={ordFornId}/>}>
@@ -339,7 +333,7 @@ function App() {
     </Route>
 
     <Route element={<PrivateNota notaId={notaId}/>}>
-    <Route path="/nota" element={<Nota notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta}/>} />
+    <Route path="/nota" element={<Nota notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
     </Route>
 
     <Route element={<PrivateNotaForni notaFornId={notaFornId}/>}>
