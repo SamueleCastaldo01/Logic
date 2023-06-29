@@ -18,6 +18,7 @@ import { supa } from '../components/utenti';
 import { guid } from '../components/utenti';
 import { tutti } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
+import Autocomplete from '@mui/material/Autocomplete';
 import SearchIcon from '@mui/icons-material/Search';
 import { Bar } from 'react-chartjs-2';
 import { optionsNumCart, optionsTotQuota, optionsNumAsc } from '../components/OptionsGrafici';
@@ -33,6 +34,7 @@ import {
   Filler,
   Legend,
 } from 'chart.js';
+import { motion } from 'framer-motion';
 
 ChartJS.register(
   CategoryScale,
@@ -49,6 +51,7 @@ function HomePage(  ) {
 
   const [todosNumNote, setTodosNumNote] = React.useState([]);
   const [todosScaletta, setTodosScaletta] = React.useState([]);
+  const [todosScalettaBlock, setTodosScalettaBlock] = React.useState([]);
   
 
   const [dataNumNot, setDataNumNot] = useState({
@@ -81,9 +84,12 @@ function HomePage(  ) {
   const [day, setday] = React.useState("");
   const [day1, setday1] = React.useState("");  //primo flitro dei giorni
 
+  const [dataSc, setDataSc] = React.useState("");
+  const [quotaTot, setQuotaTot] = React.useState(0);
+
   const [searchTerm, setSearchTerm] = useState("");  //search
   const inputRef= useRef();
-
+  const [popupActive, setPopupActive] = useState(false);  
 
   //permessi utente
   let sup= supa.includes(localStorage.getItem("uid"))
@@ -91,6 +97,18 @@ function HomePage(  ) {
   let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
   let navigate = useNavigate();
+
+
+  function handleInputChange(event, value) {
+    var quTot;
+    setDataSc(value)
+    todosScaletta.map((nice) => {  //qui va a prendere la quota totale da parte dell'array scaldatBlock
+      if (value == nice.data) {
+        quTot= nice.totalQuota;
+      }
+  })
+  setQuotaTot(quTot);
+}
 
   const handleChangeDataSelect = (event) => {
     setday(event.target.value);      //prende il valore del select
@@ -141,7 +159,7 @@ function HomePage(  ) {
 //******************Per il grafico Ordini********************************************************************* */
   React.useEffect(() => {    //si va a prendere il numero di note nelle varie date solo le
     const collectionRef = collection(db, "ordDatBloccata");
-    const q = query(collectionRef, orderBy("dataMilli"), limit(30));
+    const q = query(collectionRef, orderBy("dataMilli"));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
@@ -158,8 +176,45 @@ function HomePage(  ) {
 
   React.useEffect(() => {    //se la variabile cambia allora viene eseguita questa funzione
     handleNumNot();
-    handleTotQuota();
   }, [todosNumNote]);
+
+//******************Per il grafico Vendite********************************************************************* */
+  React.useEffect(() => {    //va a prendere la quota totale dalla scalettaDat quella bloccata
+    const collectionRef = collection(db, "scalDatBloccata");
+    const q = query(collectionRef, orderBy("dataMilli"));
+
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let todosArray = [];
+      querySnapshot.forEach((doc) => {
+        if(doc.data().dataMilli >= localStorage.getItem("bho1")) {
+          let car = { data: doc.data().data,  totalQuota: doc.data().totalQuota}
+          todosArray.push(car);
+        }
+      });
+      setTodosScaletta(todosArray);
+    });
+    return () => unsub();
+  }, [day]);
+
+  React.useEffect(() => {    //se la variabile cambia allora viene eseguita questa funzione
+    handleTotQuota();
+  }, [todosScaletta]);
+
+  
+//******************Per la tabella scaletta chiusa********************************************************************* */
+React.useEffect(() => {
+  const collectionRef = collection(db, "scalettaBloccata");
+  const q = query(collectionRef, orderBy("nomeC"));
+
+  const unsub = onSnapshot(q, (querySnapshot) => {
+    let todosArray = [];
+    querySnapshot.forEach((doc) => {
+      todosArray.push({ ...doc.data(), id: doc.id });
+    });
+    setTodosScalettaBlock(todosArray);
+  });
+  return () => unsub();
+}, [popupActive == true]);
 
 
 //**************************************************************************** */
@@ -178,10 +233,10 @@ const handleNumNot = async () => {
 
 const handleTotQuota = async () => {
   setDataTotQuota({
-    labels: todosNumNote.map((dati) => dati.data ),
+    labels: todosScaletta.map((dati) => dati.data ),
     datasets: [{
-      label: "Totale Quota",
-      data: todosNumNote.map((dati) => dati.totalQuota ),
+      label: "Vendite",
+      data: todosScaletta.map((dati) => dati.totalQuota ),
       backgroundColor: ["#CCB497"],
       borderColor: ["#CCB497"],
       tension: 0.4,
@@ -202,9 +257,13 @@ const handleTotQuota = async () => {
 //********************************************************************************** */
     return ( 
     <>  
+    <motion.div
+        initial= {{opacity: 0}}
+        animate= {{opacity: 1}}
+        transition={{ duration: 0.7 }}>
     <h1 className='title mt-3'> HomePage Supervisore</h1>
     <div>
-        <span><button>In ordine</button></span>
+        <span><button onClick={() => {setPopupActive(!popupActive)}}>Scalette Chiuse</button></span>
         <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
       </div>
 
@@ -216,11 +275,9 @@ const handleTotQuota = async () => {
         <Select sx={{height:39, marginLeft:-1, width: 200}}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          defaultValue={31}
+          defaultValue={91}
           onChange={handleChangeDataSelect1}
         >
-          <MenuItem value={8}>Ultimi 7 giorni</MenuItem>
-          <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
           <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
           <MenuItem value={366}>Ultimi 365 giorni</MenuItem>
         </Select>
@@ -235,11 +292,9 @@ const handleTotQuota = async () => {
         <Select sx={{height:39, marginLeft:-1, width: 200}}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          defaultValue={31}
+          defaultValue={91}
           onChange={handleChangeDataSelect}
         >
-          <MenuItem value={8}>Ultimi 7 giorni</MenuItem>
-          <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
           <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
           <MenuItem value={366}>Ultimi 365 giorni</MenuItem>
         </Select>
@@ -249,6 +304,53 @@ const handleTotQuota = async () => {
   </div>
 </div>
 
+{/***********Tabella scalette chiuse filtro tramite le date di scal Dat*************************** */}
+{popupActive &&
+<div className='todo_containerScalet mt-5'>
+  <div className='row'> 
+  <div className='col'><p className='colTextTitle'> Scalette chiuse</p>
+  <p style={{textAlign: "left"}}>Quota Totale: {quotaTot}€</p>
+  </div>
+  <div className='col' style={{paddingLeft: "0px"}}>
+        <Autocomplete
+        freeSolo
+      value={dataSc}
+      options={todosScaletta.map((option) => option.data)}
+      onInputChange={handleInputChange}
+      componentsProps={{ popper: { style: { width: 'fit-content' } } }}
+      renderInput={(params) => <TextField {...params} label="Seleziona la data" />}/>
+  </div>
+
+
+</div>
+  <div className='row' style={{marginRight: "5px"}}>
+      <div className='col-3'><p className='coltext' >Cliente</p> </div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Debito</p></div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Vendita</p></div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>quota</p></div>
+      <div className='col-3' style={{padding: "0px"}}><p className='coltext'>note</p></div>
+      <hr style={{margin: "0"}}/>
+    </div>
+    <div className="scroll">
+  {todosScalettaBlock.map((col) => (
+    <div key={col.id}>
+    { dataSc == col.dataScal &&
+    <div className='row' style={{padding: "0px"}}>
+      <div className='col-3 diviCol'><p className='inpTab'>{col.nomeC} </p> </div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.debito}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.sommaTotale}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quota}</p></div>
+      <div className='col-3 diviCol' style={{padding: "0px"}}><textarea style={{textAlign: "left", width:"500px", margin: "0px"}} className='inpTab'>{col.note}</textarea></div>
+      <hr style={{margin: "0"}}/>
+    </div>
+    }
+    </div>
+    ))}
+  </div>
+  </div>
+ }
+
+  </motion.div>
     </>
       )
 }

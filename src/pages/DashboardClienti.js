@@ -27,8 +27,10 @@ import MenuItem from '@mui/material/MenuItem';
 import TodoProdClin from '../components/TodoProdClin';
 import ShareIcon from '@mui/icons-material/Share';
 import SearchIcon from '@mui/icons-material/Search';
+import { WhatsappShareButton, WhatsappIcon } from 'react-share';
+import { motion } from 'framer-motion';
 
-function DashClienti({ clientId, nomeCli }) {
+function DashClienti({ clientId, nomeCli, getNotaDash }) {
 
   const [todos, setTodos] = React.useState([]);
   const [todosOrdChiu, setTodosOrdChiu] = React.useState([]);
@@ -41,6 +43,7 @@ function DashClienti({ clientId, nomeCli }) {
   const [sommaTotVendita, setSommaTotVendita] = React.useState(0);
 
   const componentRef = useRef();  //serve per la stampa
+  let navigate = useNavigate();
 
   const [flagTabellaProdotti, setFlagTabellaProdotti] = useState(false);  
   const [FlagStampa, setFlagStampa] = useState(false);
@@ -151,10 +154,20 @@ const print = async () => {
 //*********************************************************************************** */
 
       return ( 
-      <>  
+      <> 
+      <motion.div
+        initial= {{x: "-100vw"}}
+        animate= {{x: 0}}
+        transition={{ duration: 0.4 }}
+       >
         <h1 className='title mt-3'> Dashboard Clienti</h1>
         <h4 className='mt-3'>Nome Cliente: {nomeCli} </h4>
 
+{/*********************** Icona Share
+        <WhatsappShareButton url={"https://github.com/nygardk/react-share"}>
+        <WhatsappIcon type="button" size={40} round={true} />
+    </WhatsappShareButton>
+*/}
         {!matches &&
       <div>
         <span><button >Debito </button></span>
@@ -215,7 +228,11 @@ const print = async () => {
 {todosOrdChiu.map((todo) => (
     <div key={todo.id}>
     { todo.nomeC == nomeCli && todo.dataMilli >= localStorage.getItem("bho4") && 
-    <div className='row' style={{padding: "0px"}}>
+    <div className='row' style={{padding: "0px"}}   
+                  onClick={() => {
+                  getNotaDash(todo.id, todo.nomeC, todo.data)
+                navigate("/notadashcliente");
+                         }}>
       <div className='col diviCol'><p className='inpTab'>{todo.data} </p> </div>
       <div className='col diviCol'><p className='inpTab'> {todo.quota} </p> </div>
       <div className='col diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.sommaTotale}</p></div>
@@ -225,7 +242,7 @@ const print = async () => {
     </div>
   ))}
   </div>
-
+  </motion.div> 
       </>
         )
   }

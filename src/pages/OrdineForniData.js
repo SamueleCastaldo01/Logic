@@ -19,6 +19,7 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import { motion } from 'framer-motion';
 
 export const AutoComp2 = [];
 
@@ -33,7 +34,7 @@ function OrdineForniData({ getOrdFornId }) {
     const [day, setday] = React.useState("");
     const [flagDelete, setFlagDelete] = useState(false); 
 
-    const [popupActive, setPopupActive] = useState(true);  
+    const [popupActive, setPopupActive] = useState(false);  
 
     const [nome, setData] = useState("");
 
@@ -181,6 +182,10 @@ function OrdineForniData({ getOrdFornId }) {
 //************************************************************** */
     return ( 
     <> 
+    <motion.div
+        initial= {{x: "-100vw"}}
+        animate= {{x: 0}}
+        transition={{ duration: 0.4 }}>
     <h1 className='title mt-3'> Ordine Fornitori</h1>
     <button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button>
 {/** inserimento Data *************************************************************/}
@@ -287,6 +292,7 @@ function OrdineForniData({ getOrdFornId }) {
                   ))}
               </div>
             </div>
+            </motion.div>
            </>
       )
 }

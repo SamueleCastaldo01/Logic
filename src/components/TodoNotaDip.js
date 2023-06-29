@@ -2,7 +2,6 @@ import React from "react";
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
 import EditIcon from '@mui/icons-material/Edit';
 import { auth, db } from "../firebase-config";
-import Checkbox from '@mui/material/Checkbox';
 import DeleteIcon from "@mui/icons-material/Delete";
 import { supa, guid, tutti } from '../components/utenti';
 import { useNavigate } from "react-router-dom";
@@ -51,16 +50,29 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
     setChecked(!checked);
   };
 //***************************************************************************************** */
-  const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodotto, e il suo prezzo totale diventa 0, in questo modo non va a fare la somma con il resto
+async function sommaTotChange() {
+  var conTinte=0;    //alogoritmo per le tinte
+  if(todo.t1) {conTinte=conTinte+1}
+  if(todo.t2) {conTinte=conTinte+1}
+  if(todo.t3) {conTinte=conTinte+1}
+  if(todo.t4) {conTinte=conTinte+1}
+  if(todo.t5) {conTinte=conTinte+1}
+  if(todo.flagTinte == false){ 
+  conTinte=1 }
+  var preT= (conTinte*todo.qtProdotto)*todo.prezzoUniProd;  //qui va a fare il prezzo totale del prodotto in base alla quantità e al prezzo unitario
+  var somTrunc = preT.toFixed(2);
+  await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:somTrunc});
+}   
+
+const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodotto, e il suo prezzo totale diventa 0, in questo modo non va a fare la somma con il resto
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:"(NO)", prezzoTotProd:0});
     SommaTot();
     handleClose()
   };
 
   const handleChangeEvi = async (event) => {
-    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
-      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
-      await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:preT});
+    if(todo.simbolo=="(NO)" && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      sommaTotChange()
     }
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:" "});
     SommaTot();
@@ -68,9 +80,8 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
   };
 
   const handleChangeInterro = async (event) => {
-    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
-      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
-      await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:preT});
+    if(todo.simbolo=="(NO)" && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      sommaTotChange();
     }
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:"?"});
     SommaTot();
@@ -78,9 +89,8 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
   };
 
   const handleChangeRemMenu = async (event) => {
-    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
-      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
-      await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:preT});
+    if(todo.simbolo=="(NO)" && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      sommaTotChange();
     }
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:""}); //infine aggiorna il simbolo
     SommaTot();

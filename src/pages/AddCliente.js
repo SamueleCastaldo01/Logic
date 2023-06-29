@@ -18,8 +18,7 @@ import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
 import TodoDebiCli from '../components/TodoDebiCli';
 import SearchIcon from '@mui/icons-material/Search';
 import moment from 'moment';
-import MiniDrawer from '../components/MiniDrawer';
-import Box from '@mui/material/Box';
+import { motion } from 'framer-motion';
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyAygsHvhG251qZ7-N9oR8A-q1ls9yhNkOQ';
 
@@ -39,6 +38,13 @@ function AddCliente( {getCliId} ) {
   const [deb2, setDeb2] = React.useState("");
   const [deb3, setDeb3] = React.useState("");
   const [deb4, setDeb4] = React.useState("");
+  const [debitoTot, setDebitoTot] = React.useState("");
+
+  const [Totdeb1, setTotDeb1] = React.useState("");
+  const [Totdeb2, setTotDeb2] = React.useState("");
+  const [Totdeb3, setTotDeb3] = React.useState("");
+  const [Totdeb4, setTotDeb4] = React.useState("");
+  const [TotdebitoTot, setTotDebitoTot] = React.useState("");
 
   const [popupActive, setPopupActive] = useState(false);
   const [flagAnaCli, setFlagAnaCli] = useState(true);   
@@ -87,7 +93,7 @@ function AddCliente( {getCliId} ) {
         })}
 
 //********************************************************************************** */
-      //Anagrafiche
+      //Anagrafiche cliente
 React.useEffect(() => {
     const collectionRef = collection(db, "clin");
     const q = query(collectionRef, orderBy("nomeC"));
@@ -101,8 +107,9 @@ React.useEffect(() => {
     });
     return () => unsub();
 
-  }, []);
-            //debito
+  }, [flagAnaCli == true]);
+  
+  //debito
   React.useEffect(() => {
     const collectionRef = collection(db, "debito");
     const q = query(collectionRef, orderBy("nomeC"));
@@ -115,9 +122,16 @@ React.useEffect(() => {
       setTodosDebi(todosArray);
     });
     return () => unsub();
+  }, [flagDebiCli == true]);
 
-  }, []);
-                  //cronologia
+
+  //somma totale debito
+    React.useEffect(() => {
+    sommaTotDebito();
+  }, [todosDebi]);
+
+
+                  //cronologia debito
   React.useEffect(() => {
     const collectionRef = collection(db, "cronologiaDeb");
     const q = query(collectionRef, orderBy("createdAt", "desc"));
@@ -130,8 +144,7 @@ React.useEffect(() => {
       setCrono(todosArray);
     });
     return () => unsub();
-
-  }, []);
+  }, [popupActiveCrono == true]);
  //******************************************************************************* */
   //speed
   function handleButtonDebito() {
@@ -154,7 +167,6 @@ React.useEffect(() => {
  //******************************************************************************* */
     //funzione che permette il caricamento automatico dell'aggiunta del prodotto personalizzato
  const handleProdClien = async () => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
-  console.log("ciaaao");
   const q = query(collection(db, "prodotto"));  //prendo tutti i prodotti che si trovano in scorta
   const querySnapshot = await getDocs(q);
     querySnapshot.forEach(async (doc) => {
@@ -199,6 +211,7 @@ React.useEffect(() => {
         deb2,
         deb3,
         deb4,
+        debitoTot,
       });
       setNomeC("");
       setIndirizzo("");
@@ -213,7 +226,37 @@ React.useEffect(() => {
     toast.clearWaitingQueue(); 
   };
 //****************************************************************************************** */
-  const handleEditDeb = async ( todo, nome, dd1, dd2, dd3, dd4) => {
+const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni cliente, questa operazione è costosa in scrittura, e anche la somma per colonne
+  var sommaTot=0;
+  var totD1=0;
+  var totD2=0;
+  var totD3=0;
+  var totD4=0;
+  var totDebTot=0;
+  todosDebi.map(async (nice) => {
+       sommaTot=+nice.deb1 + (+nice.deb2) + (+nice.deb3) + (+nice.deb4);   // va a fare la somma totale dei debiti di quel id debito per cliente
+       totD1= +nice.deb1 + (+totD1);   //va a fare la somma di tutti i debiti1
+       totD2= +nice.deb2 + (+totD2);   //va a fare la somma di tutti i debiti2
+       totD3= +nice.deb3 + (+totD3);   //va a fare la somma di tutti i debiti3
+       totD4= +nice.deb4 + (+totD4);   //va a fare la somma di tutti i debiti4
+       totDebTot= +nice.debitoTot + (+totDebTot);   //va a fare la somma di tutti i debitiTotale dei clienti
+       var somTrunc = sommaTot.toFixed(2);    //fa la conversione per ottenere i due numeri dopo la virgola
+       await updateDoc(doc(db, "debito", nice.id), { debitoTot: somTrunc});  //va ad aggiornare il debito totale nel database per cliente
+       sommaTot=0;  //riazzera la sommaTot, anche se di norma non serve
+  })  
+  var somTrunc1 = totD1.toFixed(2);  //convesione per i numeri dopo la virgola, per non avere problemi
+  var somTrunc2 = totD2.toFixed(2);
+  var somTrunc3 = totD3.toFixed(2);
+  var somTrunc4 = totD4.toFixed(2);   
+  var somTruncTotDeb = totDebTot.toFixed(2);
+      setTotDeb1(somTrunc1);
+      setTotDeb2(somTrunc2);
+      setTotDeb3(somTrunc3);
+      setTotDeb4(somTrunc4);
+      setTotDebitoTot(somTruncTotDeb);
+};
+
+  const handleEditDeb = async ( todo, nome, dd1, dd2, dd3, dd4) => {  //edit debito
     var debV
     const q = query(collection(db, "debito"), where("nomeC", "==", todo.nomeC));  //vado a trovare il deb1 vecchio tramite query
     const querySnapshot = await getDocs(q);
@@ -247,7 +290,7 @@ React.useEffect(() => {
     }
 };
 
-  const handleDelete = async (id, nomeCli) => {
+  const handleDelete = async (id, nomeCli) => { //per cancellare un cliente dal db
     const colDoc = doc(db, "clin", id); 
      
   //elimina tutti i dati di prodottoClin con lo stesso nome del Cliente     elimina tutti gli articoli di quel cliente
@@ -273,6 +316,10 @@ React.useEffect(() => {
 //********************************************************************************** */
     return ( 
     <>  
+    <motion.div 
+        initial= {{opacity: 0}}
+        animate= {{opacity: 1}}
+        transition={{ duration: 0.7 }}>
     <h1 className='title mt-3'> Lista Clienti</h1>
     <div>
         <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Cliente </button></span>
@@ -397,7 +444,7 @@ React.useEffect(() => {
   </div>
   </div>
   }
-{/********************tabella Debito************************************************************************/}
+{/********************tabella Debito***********************************************************************************************/}
 {flagDebiCli &&
 <div className='todo_containerDebCli mt-5'>
 <div className='row' > 
@@ -421,8 +468,52 @@ React.useEffect(() => {
        variant="outlined"/>
   </div>
 </div>
+{/**********Totale debiti**************************************** */}
 <div className='row' style={{marginRight: "5px"}}>
+<div className='col-4' >
+<p className='coltext' ></p>
+</div>
+<div className='col' style={{padding: "0px"}}>
+<p className='coltext' >Tot.Debito1</p>
+</div>
+<div className='col' style={{padding: "0px"}}>
+<p className='coltext' >Tot.Debito2</p>
+</div>
+<div className='col' style={{padding: "0px"}}>
+<p className='coltext' >Tot.Debito3</p>
+</div>
+<div className='col' style={{padding: "0px"}}>
+<p className='coltext' >Tot.Debito4</p>
+</div>
+<div className='col' style={{padding: "0px"}}>
+<p className='coltext' >Tot.Debito Tot</p>
+</div>
+<hr style={{margin: "0"}}/>
+</div>
 
+<div className='row' style={{marginRight: "5px"}}>
+<div className='col-4 diviCol' >
+<p className='inpTab' ></p>
+</div>
+<div className='col diviCol' style={{padding: "0px"}}>
+<p className='inpTab' >{Totdeb1}</p>
+</div>
+<div className='col diviCol' style={{padding: "0px"}}>
+<p className='inpTab' >{Totdeb2}</p>
+</div>
+<div className='col diviCol' style={{padding: "0px"}}>
+<p className='inpTab' >{Totdeb3}</p>
+</div>
+<div className='col diviCol' style={{padding: "0px"}}>
+<p className='inpTab' >{Totdeb4}</p>
+</div>
+<div className='col diviCol' style={{padding: "0px"}}>
+<p className='inpTab' >{TotdebitoTot}</p>
+</div>
+<hr style={{margin: "0"}}/>
+</div>
+{/**********Debito clienti**************************************** */}
+<div className='row' style={{marginRight: "5px"}}>
 <div className='col-4' >
 <p className='coltext' >Cliente</p>
 </div>
@@ -437,6 +528,9 @@ React.useEffect(() => {
 </div>
 <div className='col' style={{padding: "0px"}}>
 <p className='coltext' >Debito4</p>
+</div>
+<div className='col' style={{padding: "0px"}}>
+<p className='coltext' >Debito Tot</p>
 </div>
 <hr style={{margin: "0"}}/>
 </div>
@@ -495,7 +589,7 @@ React.useEffect(() => {
   </div>
   </div>
 }
-   
+</motion.div>
     </>
       )
 }

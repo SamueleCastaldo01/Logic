@@ -168,6 +168,16 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
       />
     )}
     </div>
+  {/*******************Debito totale********************************************************************************** */}
+  <div className="col diviCol" style={{padding: "0px"}}>
+    {sup ===true && ( 
+      <h5
+      style={{ textDecoration: todo.completed && "line-through"  }}
+        type="text"
+        className="inpTab"
+        >  {todo.debitoTot}  </h5>
+    )}
+    </div>
     </div>
 
 </form>

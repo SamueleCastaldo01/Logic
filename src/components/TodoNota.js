@@ -96,49 +96,77 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
     setAnchorEl(event.currentTarget);
   };
   //***************************************************************************************** */
+  async function sommaTotChange() {
+    var conTinte=0;    //alogoritmo per le tinte
+    if(todo.t1) {conTinte=conTinte+1}
+    if(todo.t2) {conTinte=conTinte+1}
+    if(todo.t3) {conTinte=conTinte+1}
+    if(todo.t4) {conTinte=conTinte+1}
+    if(todo.t5) {conTinte=conTinte+1}
+    if(todo.flagTinte == false){ 
+    conTinte=1 }
+    var preT= (conTinte*todo.qtProdotto)*todo.prezzoUniProd;  //qui va a fare il prezzo totale del prodotto in base alla quantità e al prezzo unitario
+    var somTrunc = preT.toFixed(2);
+    await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:somTrunc});
+  } 
+  
   const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodotto, e il suo prezzo totale diventa 0, in questo modo non va a fare la somma con il resto
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:"(NO)", prezzoTotProd:0});
     handleClose()
   };
 
   const handleChangeEvi = async (event) => {  //si attiva quando vado ad evidenziare
-    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
-      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
-      await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:preT});
+    if(todo.simbolo=="(NO)" && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      sommaTotChange();
     }
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:" "});
     handleClose()
   };
 
   const handleChangeInterro = async (event) => {
-    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
-      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
-      await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:preT});
+    if(todo.simbolo=="(NO)"  && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      sommaTotChange();
     }
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:"?"});
     handleClose()
   };
 
   const handleChangeX = async (event) => {
-    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
-      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
-      await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:preT});
+    if(todo.simbolo=="(NO)"  && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      sommaTotChange();
     }
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:"X"});
     handleClose()
   };
 
   const handleChangeRemMenu = async (event) => {
-    if(todo.simbolo=="(NO)") {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
-      var preT= todo.prezzoUniProd * todo.qtProdotto;  //qui va a fare il prezzo del prodotto in base alla quantità e al prezzo unitario
-      await updateDoc(doc(db, "Nota", todo.id), { prezzoTotProd:preT});
+    if(todo.simbolo =="(NO)" && !todo.simbolo2) {   //se il simbolo è no e simbolo2 non è presente, allora va a fare il prezzo qt* prezzo unitario
+      sommaTotChange();
     }
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:""});
     handleClose();
   };
 
-  const handleChangeSospe = async (event) => {
-    await updateDoc(doc(db, "Nota", todo.id), { prezzoTotProd:0, simbolo:"-"});
+  const handleChangeSospe = async (event) => {   // il prezzo totale deve essere zero perche non deve fare il calcolo, e cambiare il simbolo 2, perché puo sempre essere evidenziato e altro
+    await updateDoc(doc(db, "Nota", todo.id), { prezzoTotProd:0, simbolo2:"-"});
+    handleClose();
+  };
+
+  const handleChangeInOmaggio = async (event) => {
+    await updateDoc(doc(db, "Nota", todo.id), { prezzoTotProd:0, simbolo2:"In Omaggio"});
+    handleClose();
+  };
+
+  const handleChangeGP = async (event) => {
+    await updateDoc(doc(db, "Nota", todo.id), { prezzoTotProd:0, simbolo2:"G. P."});
+    handleClose();
+  };
+
+  const handleChangeRem2 = async (event) => {
+    if((todo.simbolo2=="-" || todo.simbolo2 == "In Omaggio" || todo.simbolo2 == "G. P.") && todo.simbolo!="(NO)" ) {   //se è vero va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      sommaTotChange();
+    }
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo2:""});
     handleClose();
   };
  //******************************************************************** */ 
@@ -258,7 +286,7 @@ const handleChangeAge = (event) => {
       renderInput={(params) => <TextField {...params}  size="small"/>}
     />
     {/*********Simboli****************** */}
-      { todo.simbolo != "-" &&
+      { todo.simbolo &&
       <h3 className="simboloNota" style={{color: "red", fontSize: "16px"}}>{todo.simbolo}</h3>
        }
     </>
@@ -266,11 +294,9 @@ const handleChangeAge = (event) => {
 
     {sup ===true && todo.flagTinte===false && Completa == 1 &&( 
       <>
-      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> <span style={{background: todo.simbolo == " " && "#FFFF00"}}>{todo.prodottoC}</span> </h3>
-      { todo.simbolo == "X" &&
-      <h3 className="simboloNota" style={{color: "red", fontSize: "16px"}}>{todo.simbolo}</h3>
-       }
-
+      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> <span style={{background: todo.simbolo == " " && "#FFFF00"}}>{todo.prodottoC}</span>
+         {todo.simbolo=="X" && <span style={{color: "red", fontSize: "16px"}}> {todo.simbolo} </span> } 
+       </h3>
       </>
     )}
 
@@ -331,6 +357,9 @@ const handleChangeAge = (event) => {
         onBlur={handleSubm}
       />
         </div>
+        { todo.simbolo &&
+      <h3 className="simboloNota" style={{color: "red", fontSize: "16px"}}>{todo.simbolo}</h3>
+       }
       </>
     )}
     {sup ===true && todo.flagTinte===true && Completa == 1 &&(
@@ -340,6 +369,7 @@ const handleChangeAge = (event) => {
       {todo.t2 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t2} </span>  </> }
       {todo.t3 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t3} </span> </> }
       {todo.t4 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t4} </span> </> }
+      {todo.simbolo=="X" && <span style={{color: "red", fontSize: "16px"}}> {todo.simbolo} </span> } 
       </h3>
       </>
     )}
@@ -347,7 +377,7 @@ const handleChangeAge = (event) => {
 {/************************Prezzo Uni***************************************************************************** */}
 <div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px" }}>
 
-    {sup ===true && Completa == 0 && todo.simbolo != "-"  && ( 
+    {sup ===true && Completa == 0 && (todo.simbolo2 != "-" && todo.simbolo2 != "In Omaggio" && todo.simbolo2 != "G. P." )  && ( 
       <span style={{ padding: "0px", marginLeft:"5px" }}>€&nbsp;
       <input
        style={{textAlign:"left", padding: "0px", width:"95px", marginTop:"0px"}}
@@ -359,14 +389,14 @@ const handleChangeAge = (event) => {
       /> </span>
     )}
 
-    {sup ===true && Completa == 0 && todo.simbolo == "-"  && ( 
-      <h3 className="inpTabNota" style={{ marginLeft: "20px"}}> {todo.simbolo} </h3>
+    {(sup ===true && Completa == 0 && (todo.simbolo2 == "-" || todo.simbolo2 == "In Omaggio" || todo.simbolo2 == "G. P."))  && ( 
+      <h3 className="inpTabNota" style={{ textAlign: "center"}}> {todo.simbolo2} </h3>
     )}
 
     {sup ===true && Completa == 1 &&( 
       <>
-      { todo.simbolo == "-" ?  
-      <h3 className="inpTabNota" style={{ marginLeft: "20px"}}> {todo.simbolo} </h3>  :
+      { (todo.simbolo2 == "-" || todo.simbolo2 == "In Omaggio" || todo.simbolo2 == "G. P.") ?  
+      <h3 className="inpTabNota" style={{ marginLeft: "20px"}}> {todo.simbolo2} </h3>  :
       <h3 className="inpTabNota" style={{ marginLeft: "20px"}}> {todo.prezzoUniProd} €</h3> }
       </>
     )}
@@ -416,8 +446,11 @@ const handleChangeAge = (event) => {
                 <MenuItem onClick={handleChangeNo}>(NO)</MenuItem>
                 <MenuItem onClick={handleChangeInterro}>?</MenuItem>
                 <MenuItem onClick={handleChangeX}>X</MenuItem>
-                <MenuItem onClick={handleChangeSospe}>-</MenuItem>
                 <MenuItem onClick={handleChangeRemMenu}>Rimuovi</MenuItem>
+                <MenuItem onClick={handleChangeSospe}>-</MenuItem>
+                <MenuItem onClick={handleChangeInOmaggio}>In Omaggio</MenuItem>
+                <MenuItem onClick={handleChangeGP}>G. P.</MenuItem>
+                <MenuItem onClick={handleChangeRem2}>Rimuovi2</MenuItem>
                 <MenuItem onClick={() => {
                 localStorage.setItem("flagRemove", 0);
                 localStorage.setItem("IDNOTa", todo.id);

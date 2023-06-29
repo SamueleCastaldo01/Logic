@@ -1,26 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
 import TextField from '@mui/material/TextField';
-import { Input } from '@mui/material';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { notifyErrorCliEm, notifyUpdateCli, notifyErrorCliList } from '../components/Notify';
 import CloseIcon from '@mui/icons-material/Close';
-import TodoClient from '../components/TodoClient';
 import Button from '@mui/material/Button';
 import { supa } from '../components/utenti';
 import { guid } from '../components/utenti';
 import { tutti } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
-import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
-import TodoDebiCli from '../components/TodoDebiCli';
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from '@mui/icons-material/Search';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import MiniDrawer from '../components/MiniDrawer';
-import Box from '@mui/material/Box';
+import { motion } from 'framer-motion';
 
 export const AutoCompScorta = [];
 
@@ -200,6 +194,10 @@ React.useEffect(() => {
 //********************************************************************************** */
     return ( 
     <>  
+    <motion.div
+        initial= {{opacity: 0}}
+        animate= {{opacity: 1}}
+        transition={{ duration: 0.7 }}>
     <h1 className='title mt-3'> Lista Fornitori</h1>
     <div>
         <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Fornitore</button></span>
@@ -317,10 +315,8 @@ React.useEffect(() => {
 
   </div>
   }
-
+  </motion.div>
     </>
       )
 }
 export default AddFornitori;
-
-//questo file sta combinato insieme a 

@@ -23,10 +23,7 @@ import RestoreIcon from '@mui/icons-material/Restore';
 import PrintIcon from '@mui/icons-material/Print';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import AddIcon from '@mui/icons-material/Add';
-import Sidebar from '../Sidebar';
-import Navbar from '../Navbar';
-import MiniDrawer from '../components/MiniDrawer';
-import Box from '@mui/material/Box';
+import { motion } from 'framer-motion';
 
 function Scorta() {
 
@@ -332,23 +329,10 @@ function handlePopUp(image, nota) {
 //********************************************************************************************************************************* */
     return ( 
     <>  
-   
-          <SpeedDial
-        ariaLabel="SpeedDial basic example"
-        hidden={!matches}
-        opne={open}
-        sx={{ position: 'absolute', bottom: 120, right: 36 }}
-        icon={<SpeedDialIcon />}
-      >
-        {actions.map((action) => (
-          <SpeedDialAction
-            key={action.name}
-            icon={action.icon}
-            tooltipTitle={action.name}
-            onClick={action.action}
-          />
-        ))}
-      </SpeedDial>
+   <motion.div
+           initial= {{opacity: 0}}
+        animate= {{opacity: 1}}
+        transition={{ duration: 0.7 }}>
 
       <h1 className='title mt-3'>Magazzino</h1>
     {!matches &&
@@ -520,6 +504,7 @@ function handlePopUp(image, nota) {
     
 {/*******************************************************************************************************************/}
 
+</motion.div>
     </>
       )
 }

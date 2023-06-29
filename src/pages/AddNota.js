@@ -22,6 +22,7 @@ import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import InputAdornment from '@mui/material/InputAdornment';
+import { motion } from 'framer-motion';
 
 export const AutoProdCli = [];
 export const AutoDataScal = [];
@@ -264,21 +265,11 @@ const contEffect = async () => {
   //********************************************************************************** */
       return ( 
       <>  
-        <SpeedDial
-          ariaLabel="SpeedDial basic example"
-          hidden={!matches}
-          sx={{ position: 'absolute', bottom: 120, right: 36 }}
-          icon={<SpeedDialIcon />}
-        >
-          {actions.map((action) => (
-            <SpeedDialAction
-              key={action.name}
-              icon={action.icon}
-              tooltipTitle={action.name}
-              onClick={action.action}
-            />
-          ))}
-        </SpeedDial>
+        <motion.div 
+        initial= {{x: "-100vw"}}
+        animate= {{x: 0}}
+        transition={{ duration: 0.4 }}>
+
           <h1 className='title mt-3'>Ordine Clienti</h1>
           <h3 style={{fontSize: "20px"}}>{moment(dataOrd.toDate()).format("L")}</h3>
   
@@ -499,6 +490,7 @@ const contEffect = async () => {
         </div>
         </div>
       </div>
+      </motion.div>
       </>
         )
   }

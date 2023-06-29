@@ -14,6 +14,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
 import { fontSize } from '@mui/system';
+import { motion } from 'framer-motion';
 
 
 function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNota, debit, debTo, indirizzo, tel, iva, completa, idDebito }) {
@@ -155,7 +156,8 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
       }, []);
 
       React.useEffect(() => {
-      }, [todos]);
+        SommaTot()
+      }, [todos, sumTot]);
 //********************************************************************************** */
 const createCate = async () => {
   await addDoc(collection(db, "Nota"), {
@@ -166,6 +168,7 @@ const createCate = async () => {
     complete: false,
     artPreso: false,
     simbolo: "",
+    simbolo2: "",
     t1,
     t2,
     t3,
@@ -196,7 +199,7 @@ const handleInOrdine = async () => {  //Inserisce una nuova trupa nella tabella 
 
 const handleInSospeso = async () => {  //Inserisce una nuova trupa nella tabella in sospeso quando viene confermata la nota    si attiva quando premo il pulsante conferma
   todos.map(async (nice) => {
-    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC && nice.simbolo == "-") {   //va a prendere il prodotto con il no e inseriamo questo prodotto nel db inOrdine
+    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC && nice.simbolo2 == "-") {   //va a prendere il prodotto con il no e inseriamo questo prodotto nel db inOrdine
       await addDoc(collection(db, "inSospeso"), {   //va a creare la nuova trupla nella tabella inSospeso
         nomeC: nomeCli,
         dataC: dataNotaC,
@@ -238,8 +241,8 @@ const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5
   var somTrunc = preT.toFixed(2);
   await updateDoc(doc(db, "Nota", todo.id), 
   { qtProdotto: qt, prodottoC:prod, prezzoUniProd:prezU, prezzoTotProd:somTrunc, t1:tt1, t2:tt2, t3:tt3, t4:tt4, t5:tt5});
-  SommaTot();
   toast.clearWaitingQueue(); 
+  SommaTot();
 };
 //_________________________________________________________________________________________________________________
 const handleAddNumCart = async (e) => {  //funzione aggiungere i cartoni
@@ -261,8 +264,10 @@ const handleRemoveNumCart = async (e) => {  //quando si preme il pulsante per ri
   await updateDoc(doc(db, "addNota", notaId), { NumCartoni:nuCut});
 }
 
-const handleEditComp = async (e) => {  //completa
-  await updateDoc(doc(db, "addNota", notaId), { completa: localStorage.getItem("completa")});
+const handleEditCompAnn = async (e) => {  //completa
+  setDebTot(0)
+  await updateDoc(doc(db, "addNota", notaId), { completa: localStorage.getItem("completa"), debitoTotale: 0}) ;
+  await updateDoc(doc(db, "debito", idDebito), { deb1:debitoRes});  //aggiorna deb1 nel database del debito
 };
 
 const handleEditDebitoRes = async (e) => {  //handle se nel caso si voglia modificare il debito residuo
@@ -320,6 +325,10 @@ const print = async () => {
 //************************************************************** */
     return (  
         <>
+        <motion.div
+        initial= {{opacity: 0}}
+        animate= {{opacity: 1}}
+        transition={{ duration: 0.7 }}>
     <h1 className='title mt-3'>Nota</h1>
 
     <span><button onClick={print}>Stampa </button></span>
@@ -562,7 +571,7 @@ const print = async () => {
     <h6>Debito Totale: {debitoTot} €</h6>
     {flagStampa == false && <>
   {Completa==0 ?  <button onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1); handleInOrdine(); handleInSospeso();  handleConferma()}}>Conferma</button> :
-    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleInSospesoRemove(); handleEditComp(); }}>Annulla Conferma</button>
+    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleInSospesoRemove(); handleEditCompAnn(); }}>Annulla Conferma</button>
      }
   </>}
 
@@ -572,7 +581,7 @@ const print = async () => {
   </div>
 
     </div>
-
+</motion.div>
     </>
       )
 }

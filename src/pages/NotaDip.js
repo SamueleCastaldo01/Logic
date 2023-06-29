@@ -125,6 +125,9 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
         return () => unsub();
       }, []);
 
+      React.useEffect(() => {
+        SommaTot()
+      }, [todos, sumTot]);
   //************************************************************************************************* */
       const handleAddNumCart = async (id, nct) => {  //funzione aggiungere i cartoni
         var nuCut
@@ -170,6 +173,7 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
     var somTrunc = sommaTot.toFixed(2);
   
     setSumTot(somTrunc);
+    localStorage.setItem("sumTotNota", somTrunc);
     await updateDoc(doc(db, "addNota", id), { sommaTotale: somTrunc});  //aggiorna la somma totale nell'add nota
     }
 
@@ -177,17 +181,29 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
     setTimeout(async function(){
       await updateDoc(doc(db, "addNota", id), { completa: localStorage.getItem("completa")});
     },50);
-    
+  };
+
+  const handleEditCompAnn = async (id, dbRes, nomeC) => {  //aggiorna lo stato nel database che è stata completata la nota, oppure annullata, tramite il localStorage
+    setTimeout(async function(){
+      await updateDoc(doc(db, "addNota", id), { completa: localStorage.getItem("completa"), debitoTotale: 0});
+              //aggiorna ded1 nel database debito
+    const q = query(collection(db, "debito"), where("nomeC", "==", nomeC));
+    const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (hi) => {
+        await updateDoc(doc(db, "debito", hi.id), { deb1:dbRes});  //aggiorna deb1 nel database del debito
+        });
+    },50);
   };
   
   const handleConferma = async (id, nomeC, sommaTot, debitoRes, Nb, NCt) => {
+    var sumNota;
     SommaTot(id, nomeC);  //va a fare la somma totale dei prodotti
-
-    setCompleta(1);
+    setCompleta(1);  
     handleEditComp(id);
     handleInOrdine(nomeC);
     handleInSospeso(nomeC);
-    var debTot= +sommaTot+(+debitoRes);   // va a fare il calcolo del debito totale
+    sumNota=localStorage.getItem("sumTotNota");
+    var debTot= +sumNota+(+debitoRes);   // va a fare il calcolo del debito totale
     var debTrunc = debTot.toFixed(2);   //va a troncare il risultato del debito, per non avere problemi di visualizzazione
     await updateDoc(doc(db, "addNota", id), { debitoTotale:debTrunc});  //aggiorna la somma totale nell'add nota
         //aggiorna ded1 nel database debito
@@ -199,7 +215,7 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
 
         toast.clearWaitingQueue(); 
   };
-
+  //*************************IN ORDINE E IN SOSPESO************************************************************************ */
   const handleInOrdine = async (nomeC) => {  //Inserisce una nuova trupa nella tabella in ordine quando viene confermata la nota    si attiva quando premo il pulsante conferma
     todos.map(async (nice) => {
       if (nomeC == nice.nomeC && notaDipDataC==nice.dataC && nice.simbolo == "(NO)") {   //va a prendere il prodotto con il no e inseriamo questo prodotto nel db inOrdine
@@ -393,7 +409,7 @@ const print = async () => {
     <button className='button-clear' onClick={ ()=> {
       localStorage.setItem("completa", 0);
        setCompleta(0);
-       handleEditComp(todo.id);
+       handleEditCompAnn(todo.id, todo.debitoRes, todo.nomeC);
        handleInOrdineRemove(todo.nomeC)
        handleInSospesoRemove(todo.nomeC)  }}><ClearIcon sx={{ fontSize: 29 }}/>  Annulla Conferma</button>
      }

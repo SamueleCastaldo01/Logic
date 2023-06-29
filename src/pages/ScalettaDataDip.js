@@ -63,7 +63,7 @@ function Row(props) {
 
     const handleEditQuota = async (id) => {  //handler quando cambio la quota, aggiorna sia add nota, che mi serve per gli ordini chiusi
         await updateDoc(doc(db, "Scaletta", id), { quota:Quota});   //Aggiorna la quota nella scaletta
-        await updateDoc(doc(db, "addNota", idnote), { quota:Quota});  //aggiorna addNota, questa quota mi serve perché poi va nella dashClienti
+        await updateDoc(doc(db, "addNota", idnote), { quota:Quota});  //aggiorna addNota, questa quota mi serve perché poi va nella dashClienti (ordini chiusi)
         toast.clearWaitingQueue(); 
         SomAsc();
       };
@@ -89,7 +89,7 @@ function Row(props) {
           <TableCell component="th" scope="row">
             {row.nomeC}
           </TableCell>
-          <TableCell align="right">{row.debito}</TableCell>
+          <TableCell align="right">{row.sommaTotale}</TableCell>
           <TableCell align="right"><input value={Quota}  onBlur={ handleEditQuota(row.id)} style={{textAlign:"center", padding: "0px", width:"50px", border:"none"}} 
       onChange={(event) => {
       setQuota(event.target.value);}}
@@ -255,7 +255,7 @@ function ScalettaDataDip({notaDat, getNotaDip }) {
           <TableRow>
           <TableCell />
             <TableCell><span className='coltext'>Cliente</span></TableCell>
-            <TableCell align="right"><span className='coltext'>Debito(€)</span></TableCell>
+            <TableCell align="right"><span className='coltext'>Prezzo(€)</span></TableCell>
             <TableCell align="right"><span className='coltext'>Quota(€)</span></TableCell>
           </TableRow>
         </TableHead>

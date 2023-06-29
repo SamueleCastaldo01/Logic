@@ -14,6 +14,7 @@ import { supa, guid, tutti } from '../components/utenti';
 import PrintIcon from '@mui/icons-material/Print';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import Switch from '@mui/material/Switch';
+import { motion } from 'framer-motion';
 
 export const AutoProdCli = [];
 
@@ -44,7 +45,6 @@ function NotaDipData({notaDat, getNotaDip }) {
     let navigate = useNavigate();
   
     function handleInputChange(event, value) {
-      console.log({todosDataAuto});
         setDataSc(value)
     }
 
@@ -141,6 +141,7 @@ const contEffect = async () => {  //fa il conteggio
   //********************************************************************************** */
       return ( 
       <>  
+      <motion.div>
     {/**************NAVBAR MOBILE*************************************** */}
     <div className='navMobile row'>
       <div className='col-2'>
@@ -218,6 +219,7 @@ const contEffect = async () => {  //fa il conteggio
       </div>
 
       </div>
+      </motion.div>
       </>
         )
   }

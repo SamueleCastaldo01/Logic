@@ -382,29 +382,6 @@ export default function MiniDrawer( {signUserOut} ) {
               </ListItemButton>
           </ListItem>
 
-          <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/altro")}}>
-              <ListItemButton
-                selected={selectedIndex === 8}
-                 onClick={(event) => handleListItemClick(event, 8)}
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <AssessmentIcon sx={{ color: "white" }}/>
-                </ListItemIcon>
-                <ListItemText primary="Altro" sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-          </ListItem>
-
         </List>
 
       </Drawer>

@@ -473,7 +473,6 @@ width: 110%;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
 
-.todo_containerDebCli,
 .todo_containerInOrdine,
 .todo_containerCli,
 .todo_containerScorta,
@@ -503,7 +502,7 @@ width: 110%;
   width: 1000px;
 }
 .todo_containerDebCli{
-  width: 800px;
+  width: 1000px;
 }
 .todo_container {
   width: 1200px;

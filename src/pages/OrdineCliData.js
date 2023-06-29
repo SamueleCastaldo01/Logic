@@ -20,8 +20,8 @@ import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import LockIcon from '@mui/icons-material/Lock';
-import { Timer3 } from '@mui/icons-material';
-
+import { Opacity, Timer3 } from '@mui/icons-material';
+import { motion } from 'framer-motion';
 export const AutoComp1 = [];
 
 
@@ -36,7 +36,7 @@ function OrdineCliData({ getOrdId }) {
     const [flagDelete, setFlagDelete] = useState(false); 
     const [flagBlock, setFlagBlock] = useState(false); 
 
-    const [popupActive, setPopupActive] = useState(true);  
+    const [popupActive, setPopupActive] = useState(false);  
 
     const [nome, setData] = useState("");
 
@@ -105,7 +105,7 @@ function OrdineCliData({ getOrdId }) {
         className: "rounded-4"
         })}
 
-           //_________________________________________________________________________________________________________________
+//_________________________________________________________________________________________________________________
      //confirmation notification to remove the collection
     const MsgBlock = () => (
       <div style={{fontSize: "16px"}}>
@@ -253,7 +253,11 @@ function OrdineCliData({ getOrdId }) {
 //************************************************************** */
     return ( 
     <> 
-        <div className='container' style={{padding: "0px"}}>
+        <motion.div className='container' style={{padding: "0px"}}
+        initial= {{x: "-100vw"}}
+        animate= {{x: 0}}
+        transition={{ duration: 0.4 }}
+        >
     <h1 className='title mt-3'> Ordine Clienti</h1>
     <button onClick={() => {setFlagDelete(true); setFlagBlock(false)}}>elimina</button>
     <button onClick={() => {setFlagBlock(true); setFlagDelete(false)}}>blocca</button>
@@ -378,7 +382,7 @@ function OrdineCliData({ getOrdId }) {
                   ))}
               </div>
             </div>
-            </div>
+            </motion.div>
            </>
       )
 }

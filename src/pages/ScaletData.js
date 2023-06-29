@@ -20,6 +20,8 @@ import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
+import { motion } from 'framer-motion';
+import LockIcon from '@mui/icons-material/Lock';
 
 export const AutoComp = [];
 
@@ -28,8 +30,9 @@ function ScaletData({ getColId }) {
     const[colle, setColle] = useState([]); 
     const colleCollectionRef = collection(db, "scalDat"); 
 
-    const [popupActive, setPopupActive] = useState(true); 
+    const [popupActive, setPopupActive] = useState(false); 
     const [flagDelete, setFlagDelete] = useState(false); 
+    const [flagBlock, setFlagBlock] = useState(false); 
 
 
     const [nome, setData] = useState("");
@@ -100,6 +103,37 @@ function ScaletData({ getColId }) {
         className: "rounded-4"
         })}
 
+  
+//_________________________________________________________________________________________________________________
+     //confirmation notification to remove the collection
+     const MsgBlock = () => (
+      <div style={{fontSize: "16px"}}>
+        <p style={{marginBottom: "0px"}}>Sicuro di voler bloccare</p>
+        <p style={{marginBottom: "0px"}}>(non sarà più annullabile)</p>
+        <button className='buttonApply ms-4 mt-2 me-1 rounded-4' onClick={block}>Si</button>
+        <button className='buttonClose mt-2 rounded-4'>No</button>
+      </div>
+    )
+
+      const block = () => {
+        bloccaNota(localStorage.getItem("scalId"), localStorage.getItem("dataEli"), localStorage.getItem("scalDataMilli"), localStorage.getItem("ScaltotalQuota"));
+          toast.clearWaitingQueue(); 
+               }
+
+    const displayMsgBlock = () => {
+      toast.warn(<MsgBlock/>, {
+        position: "top-center",
+        autoClose: false,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        transition: Slide,
+        theme: "dark",
+        className: "rounded-4"
+        })}
+
 //********************************************************************************** */
   React.useEffect(() => {
     const collectionRef = collection(db, "scalDat");
@@ -117,10 +151,34 @@ function ScaletData({ getColId }) {
     return () => unsub();
   }, []);
   //_________________________________________________________________________________________________________________
+  const bloccaNota = async (id, dat, dtMilli, sQuot) => { //salva prima i dati su un altro database per poi cancellare i dati sul database in cui stavano
+    const colDoc = doc(db, "scalDat", id);  
+     
+    //vado prima a inserire i dati nella scalettaBloccata, e dopo elimino tutti i dati della scaletta in base a quella data
+    const q = query(collection(db, "Scaletta"), where("dataScal", "==", localStorage.getItem("dataEli")));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (hi) => {
+      await addDoc(collection(db, "scalettaBloccata"), {   //va ad inserire delle nuove truple nella scalettaBloccata
+        dataScal: hi.data().dataScal,
+        debito: hi.data().debito,
+        nomeC: hi.data().nomeC,
+        note: hi.data().note,
+        quota: hi.data().quota,
+        sommaTotale: hi.data().sommaTotale,
+      });
+    await deleteDoc(doc(db, "Scaletta", hi.id));  //elimina le truple da scaletta
+    });
+    await addDoc(collection(db, "scalDatBloccata"), {   //va ad aggiungere i dati nella scalDatBloccata
+      data: dat,
+      dataMilli: dtMilli,
+      totalQuota: sQuot,
+    });
+    await deleteDoc(colDoc);      //infine elimina la data scalDat
+}
+  //_________________________________________________________________________________________________________________
 
-    const deleteCol = async (id) => { 
+    const deleteCol = async (id) => { // va ad eliminare prima i dati di scaletta, e poi quelli di scalDat
         const colDoc = doc(db, "scalDat", id); 
-        console.log(localStorage.getItem("scalDat"), "wewi");
          
       //elimina tutti i dati di scaletta della stessa data
         const q = query(collection(db, "Scaletta"), where("dataScal", "==", localStorage.getItem("dataEli")));
@@ -173,9 +231,15 @@ function ScaletData({ getColId }) {
 //************************************************************** */
     return ( 
     <> 
+    <motion.div
+        initial= {{x: "-100vw"}}
+        animate= {{x: 0}}
+        transition={{ duration: 0.4 }}>
+
     <h1 className='title mt-3'> Scaletta</h1>
 
-    <button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button>
+    <button onClick={() => {setFlagDelete(true); setFlagBlock(false)}}>elimina</button>
+    <button onClick={() => {setFlagBlock(true); setFlagDelete(false)}}>blocca</button>
     
 {/** inserimento Data *************************************************************/}
 {sup ===true && (
@@ -270,7 +334,22 @@ function ScaletData({ getColId }) {
                           <DeleteIcon id="i" />
                         </button>  
                         </div>}
-
+                        { flagBlock &&
+                        <div className="col" style={{padding:"0px", marginTop:"-8px"}}>    
+                        <button
+                         className="button-delete"
+                         onClick={() => {
+                            localStorage.setItem("dataEli", col.data);
+                            localStorage.setItem("scalId", col.id);
+                            localStorage.setItem("ScaltotalQuota", col.totalQuota);
+                            localStorage.setItem("scalDataMilli", col.dataMilli);
+                            displayMsgBlock();
+                            toast.clearWaitingQueue(); 
+                            }}>
+                          <LockIcon id="i" />
+                        </button>            
+                        </div>
+                        }
                       </div>
                     </div>
                     <hr style={{margin: "0"}}/>
@@ -281,7 +360,7 @@ function ScaletData({ getColId }) {
 
             </div>
             </div>
-
+    </motion.div>
            </>
       )
 }

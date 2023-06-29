@@ -123,7 +123,7 @@ function HandleSpeedAddScalClien() {
 const createCate = async (e) => {
   e.preventDefault(); 
   var bol= true
-  const q = query(collection(db, "Scaletta"), where("nomeC", "==", nomeC), where("dataScal", "==", dateEli));
+  const q = query(collection(db, "Scaletta"), where("nomeC", "==", nomeC), where("dataScal", "==", dateEli)); //va a verificare che questo cliente non è stato già inserito
   const querySnapshot = await getDocs(q);
   querySnapshot.forEach((doc) => {
   if (doc.data().nomeC == nomeC) {
@@ -166,11 +166,13 @@ const createCate = async (e) => {
 };
 
 //****************************************************************************************** */
-  const handleEdit = async (todo, nome, numA, not, deb, quot, ncart) => {
+  const handleEdit = async (todo, nome, numA, not, deb, quot, ncart) => {  // va ad aggiornare gli attributi di Scaletta
     await updateDoc(doc(db, "Scaletta", todo.id), { nomeC: nome, numAsc:numA, note:not, debito:deb, quota:quot, NumCartoni:ncart});
+    await updateDoc(doc(db, "addNota", todo.idNota), { quota:quot});  //aggiorna addNota, questa quota mi serve perché poi va nella dashClienti (ordini chiusi)
     SomAsc();
     toast.clearWaitingQueue(); 
   };
+
   const handleDelete = async (id) => {
     await deleteDoc(doc(db, "Scaletta", id));
     SomAsc();
