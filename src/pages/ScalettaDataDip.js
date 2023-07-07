@@ -36,36 +36,62 @@ function Row(props) {
     const {dataSc} = props;
     const {quot} = props;
     const {noti} = props;
+    const {quotVec} = props;
     const {idnote} = props;
+    const {nomeC} = props;
     const [open, setOpen] = React.useState(false);
     const [Quota, setQuota] = React.useState(quot);
+    const [nomC, setnomC] = React.useState(nomeC);
+    const [QuotaVec, setQuotaVec] = React.useState(quotVec);
     const [nota, setNota] = React.useState(noti);
 
     const SomAsc = async () => {  //qui fa sia la somma degli asc che della quota, tramite query
         var somma=0;
         var sommaQ=0;
+        var sommaSommaTot=0;
         var id="";
         const q = query(collection(db, "Scaletta"), where("dataScal", "==", dataSc));  //query per fare la somma quota e ASC
         const querySnapshot = await getDocs(q);
           querySnapshot.forEach((doc) => {
             somma =+doc.data().numAsc + somma;
             sommaQ=+doc.data().quota +sommaQ;
+            sommaSommaTot= +doc.data().sommaTotale +sommaSommaTot;
             });
-        
+            var somTrunc = sommaQ.toFixed(2);  //conversione della quota
+            var somTruncTot = sommaSommaTot.toFixed(2);  //conversione della sommaTotale
         const p = query(collection(db, "scalDat"), where("data", "==", dataSc));  //query per aggiornare la quota totale e gli asc, va a trovare l'id
         const querySnapshotp = await getDocs(p);
               querySnapshotp.forEach(async (hi) => {
                id = hi.id;
                 });
-        await updateDoc(doc(db, "scalDat", id), { totalQuota: sommaQ, totalAsc:somma });
+        await updateDoc(doc(db, "scalDat", id), { totalQuota: somTrunc, totalAsc:somma, totalSommaTotale:somTruncTot });
       }
+//******************************************************************************************************************** */
+    const handleEditQuota = async (id, quo, quoV) => {  //handler quando cambio la quota, aggiorna sia add nota, che mi serve per gli ordini chiusi
+      var qui =quo;
+      var quotDiff = +quo- (+quoV);
+      var debTot;
+      if (Quota != qui) {
+        const q = query(collection(db, "debito"), where("nomeC", "==", nomC));  //serve per aggiornare il debito 1
+        const querySnapshot = await getDocs(q);
+            querySnapshot.forEach(async (hi) => {
 
+            debTot = (+hi.data().deb1 +(+quotDiff)) -(+Quota);   //qui va ad ggiornare il debito1 con la quota va a fare la differenza
+            var debTrunc = debTot.toFixed(2);   //va a troncare il risultato del debito, per non avere problemi di visualizzazione
 
-    const handleEditQuota = async (id) => {  //handler quando cambio la quota, aggiorna sia add nota, che mi serve per gli ordini chiusi
-        await updateDoc(doc(db, "Scaletta", id), { quota:Quota});   //Aggiorna la quota nella scaletta
-        await updateDoc(doc(db, "addNota", idnote), { quota:Quota});  //aggiorna addNota, questa quota mi serve perché poi va nella dashClienti (ordini chiusi)
-        toast.clearWaitingQueue(); 
-        SomAsc();
+            if(debTrunc<0) {
+              qui= (+debTrunc *(-1))  //converte il numero negativo in positivo, per poi fare la sottrazione andando ad aggiornare la quota vecchia
+              debTrunc="0.00"  //poi si azzera per aggiornare 
+            }
+            else { qui="0" }
+            await updateDoc(doc(db, "debito", hi.id), { deb1:debTrunc});  //aggiorna deb1 nel database del debito
+            });
+
+            await updateDoc(doc(db, "Scaletta", id), { quota:Quota, quotaV:qui});   //Aggiorna la quota nella scaletta
+            SomAsc();  //somma della quota totale che viene messata nella scalettaDat
+            await updateDoc(doc(db, "addNota", idnote), { quota:Quota});  //aggiorna addNota, questa quota mi serve perché poi va nella dashClienti (ordini chiusi)
+            toast.clearWaitingQueue(); 
+      }
       };
     
     const handleEditNota = async (id) => {
@@ -90,7 +116,8 @@ function Row(props) {
             {row.nomeC}
           </TableCell>
           <TableCell align="right">{row.sommaTotale}</TableCell>
-          <TableCell align="right"><input value={Quota}  onBlur={ handleEditQuota(row.id)} style={{textAlign:"center", padding: "0px", width:"50px", border:"none"}} 
+          <TableCell align="right">
+          <input value={Quota} style={{textAlign:"center", padding: "0px", width:"50px", border:"none"}} 
       onChange={(event) => {
       setQuota(event.target.value);}}
     /></TableCell>
@@ -103,21 +130,18 @@ function Row(props) {
                 <Table size="small" aria-label="purchases">
                   <TableHead>
                     <TableRow>
-                      <TableCell>N.Ct</TableCell>
-                      <TableCell>N. Bt</TableCell>
-                      <TableCell>Asc</TableCell>
                       <TableCell>Note</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                       <TableRow >
-                        <TableCell component="th" scope="row">{row.NumCartoni}</TableCell>
-                        <TableCell>{row.NumBuste}</TableCell>
-                        <TableCell>{row.numAsc}</TableCell>
-                        <TableCell style={{padding: "0px"}}> <textarea value={nota}  onBlur={ handleEditNota(row.id)} style={{ padding: "0px", width:"145px", border:"none"}} 
+                        <TableCell style={{padding: "0px"}}> <textarea value={nota}  style={{ padding: "0px", width:"220px", border:"none"}} 
       onChange={(event) => {
       setNota(event.target.value);}}></textarea></TableCell>
+                      <TableCell><button onClick={()=> {handleEditNota(row.id); handleEditQuota(row.id, row.quota, row.quotaV)}}>conferma</button></TableCell>
                       </TableRow>
+
+
 
                   </TableBody>
                 </Table>
@@ -261,7 +285,7 @@ function ScalettaDataDip({notaDat, getNotaDip }) {
         </TableHead>
         <TableBody>
           {todos.map((row) => (
-            <Row key={row.id} row={row} dataSc={dataSc} quot={row.quota} noti={row.note} idnote={row.idNota} />
+            <Row key={row.id} row={row} dataSc={dataSc} quot={row.quota} noti={row.note} idnote={row.idNota} quotVec={row.quotaV} nomeC={row.nomeC}/>
           ))}
         </TableBody>
       </Table>

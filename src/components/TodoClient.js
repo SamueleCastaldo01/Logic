@@ -79,7 +79,7 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
 <form  onSubmit={handleSubm}>
     <div className="row ">
 {/*********************NomeC************************************************************************ */}
-    <div className="col-3 diviCol" >
+    <div className="col-4 diviCol" >
     <h5
       style={{ textDecoration: todo.completed && "line-through"  }}
         type="text"
@@ -100,11 +100,11 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
         href={ newIndirizzoLink }
         target="_blank"
         className="linkTab"
-        >{ newIndirizzo }</a> </p>
+        >{ newIndirizzo.substr(0, 35)}...</a> </p>
     </div>
 
 {/************************partita Iva***************************************************************************** */}
-<div className="col-2 diviCol" style={{padding: "0px"}}>
+<div className="col-1 diviCol" style={{padding: "0px", width: "100px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px"}}

@@ -19,6 +19,7 @@ import { AutoComp } from './ScaletData';
 import { supa } from '../components/utenti';
 import { guid } from '../components/utenti';
 import { tutti } from '../components/utenti';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TodoProdForn from '../components/todoProdForn';
 
 function DashFornitori({ fornId, nomeForn }) {
@@ -36,7 +37,7 @@ function DashFornitori({ fornId, nomeForn }) {
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
-
+    let navigate = useNavigate();
 
     function handleInputChange(event, value) {
       setNomeP(value)
@@ -134,6 +135,9 @@ function DashFornitori({ fornId, nomeForn }) {
 
       return ( 
       <>  
+      <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate("/listafornitori")}}>
+      <ArrowBackIcon id="i" /></button> 
         <h1 className='title mt-3'> Dashboard Fornitori</h1>
         <h2 className='mt-4'>Nome Fornitore: {nomeForn} </h2>
 

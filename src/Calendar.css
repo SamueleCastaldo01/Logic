@@ -36,6 +36,11 @@
     outline: none;
   }
   
+  .highlight {
+    color:blue;
+    border-radius: 50%;
+  }
+
   .react-calendar button:enabled:hover {
     cursor: pointer;
   }
@@ -102,6 +107,7 @@
     background: none;
     text-align: center;
     line-height: 16px;
+    border-radius: 50%;
   }
   
   .react-calendar__tile:disabled {

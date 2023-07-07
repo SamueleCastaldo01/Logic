@@ -32,6 +32,7 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
   const [newProdotto, setNewProdotto] = React.useState(todo.prodottoC);
   const [newPrezzoUni, setPrezzoUni] = React.useState(todo.prezzoUniProd);
   const [newPrezzoTot, setnewPrezzoTot] = React.useState(todo.prezzoTotProd);
+  const [meno, setMeno] = React.useState(todo.meno);
   const [newT1, setT1] = React.useState(todo.t1);
   const [newT2, setT2] = React.useState(todo.t2);
   const [newT3, setT3] = React.useState(todo.t3);
@@ -96,8 +97,12 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
     setAnchorEl(event.currentTarget);
   };
   //***************************************************************************************** */
-  async function sommaTotChange() {
+  async function sommaTotChange(meno) {
     var conTinte=0;    //alogoritmo per le tinte
+    var man= meno
+    if (man<= 0 || !man) {
+      man = 0;
+    }
     if(todo.t1) {conTinte=conTinte+1}
     if(todo.t2) {conTinte=conTinte+1}
     if(todo.t3) {conTinte=conTinte+1}
@@ -105,46 +110,62 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
     if(todo.t5) {conTinte=conTinte+1}
     if(todo.flagTinte == false){ 
     conTinte=1 }
-    var preT= (conTinte*todo.qtProdotto)*todo.prezzoUniProd;  //qui va a fare il prezzo totale del prodotto in base alla quantità e al prezzo unitario
+    var preT= (conTinte*(todo.qtProdotto - man))*todo.prezzoUniProd;  //qui va a fare il prezzo totale del prodotto in base alla quantità e al prezzo unitario
     var somTrunc = preT.toFixed(2);
     await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:somTrunc});
   } 
   
   const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodotto, e il suo prezzo totale diventa 0, in questo modo non va a fare la somma con il resto
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"(NO)", prezzoTotProd:0});
+    setMeno(0);
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"(NO)", prezzoTotProd:0, meno:0});
+    handleClose()
+  };
+
+  const handleChangeMeno = async (event) => {   //aggiorna sia il simbolo del prodotto, e il suo prezzo totale diventa 0, in questo modo non va a fare la somma con il resto
+    if((todo.simbolo=="(NO)" && !todo.simbolo2) || (todo.simbolo=="1"  && !todo.simbolo2)) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      sommaTotChange()
+      setMeno(0);
+    }
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"1"});
+    SommaTot();
     handleClose()
   };
 
   const handleChangeEvi = async (event) => {  //si attiva quando vado ad evidenziare
-    if(todo.simbolo=="(NO)" && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+    if(todo.simbolo=="(NO)" && !todo.simbolo2 || (todo.simbolo=="1"  && !todo.simbolo2)) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
       sommaTotChange();
     }
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:" "});
+    setMeno(0);
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:" ", meno:0});
     handleClose()
   };
 
   const handleChangeInterro = async (event) => {
-    if(todo.simbolo=="(NO)"  && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+    if(todo.simbolo=="(NO)"  && !todo.simbolo2 || (todo.simbolo=="1"  && !todo.simbolo2)) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
       sommaTotChange();
     }
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"?"});
+    setMeno(0);
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"?", meno:0});
     handleClose()
   };
 
   const handleChangeX = async (event) => {
-    if(todo.simbolo=="(NO)"  && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+    if(todo.simbolo=="(NO)"  && !todo.simbolo2 || (todo.simbolo=="1"  && !todo.simbolo2)) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
       sommaTotChange();
     }
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"X"});
+    setMeno(0);
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"X", meno:0});
     handleClose()
   };
 
   const handleChangeRemMenu = async (event) => {
-    if(todo.simbolo =="(NO)" && !todo.simbolo2) {   //se il simbolo è no e simbolo2 non è presente, allora va a fare il prezzo qt* prezzo unitario
+    if(todo.simbolo =="(NO)" && !todo.simbolo2 || (todo.simbolo=="1"  && !todo.simbolo2)) {   //se il simbolo è no e simbolo2 non è presente, allora va a fare il prezzo qt* prezzo unitario
       sommaTotChange();
     }
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:""});
+    setMeno(0);
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"", meno:0});
     handleClose();
+    setMeno(0);
   };
 
   const handleChangeSospe = async (event) => {   // il prezzo totale deve essere zero perche non deve fare il calcolo, e cambiare il simbolo 2, perché puo sempre essere evidenziato e altro
@@ -164,10 +185,25 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
 
   const handleChangeRem2 = async (event) => {
     if((todo.simbolo2=="-" || todo.simbolo2 == "In Omaggio" || todo.simbolo2 == "G. P.") && todo.simbolo!="(NO)" ) {   //se è vero va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
-      sommaTotChange();
+      sommaTotChange(todo.meno);
     }
     await updateDoc(doc(db, "Nota", todo.id), { simbolo2:""});
     handleClose();
+  };
+
+  const handleChangeMenDb = async (value) => {
+    var cia = value;
+    console.log(todo.qtProdotto,"<", cia)
+    if( +cia<=0 || +todo.qtProdotto<(+cia))  //controllo che la qt sia maggiore del valore inserito, altrimenti lo riazzera, oppure anche nel caso in cui si mette un valore negativo
+    {
+      cia=0
+    }
+   await updateDoc(doc(db, "Nota", todo.id), { meno: cia});  //va ad aggiornare il db il simbolo meno
+   if(!todo.simbolo2) {   //se esiste il simbolo2 allora va a fare la somma, altrimenti non fai nulla
+    sommaTotChange(cia);
+   }
+   setMeno(cia)
+   SommaTot();
   };
  //******************************************************************** */ 
 
@@ -231,15 +267,7 @@ const handleChangeAge = (event) => {
       setT4(e.target.value);
     }
   };
-  const handleT5 = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setT5(todo.t5);
-    } else {
-      todo.t5 = "";
-      setT5(e.target.value);
-    }
-  };
+
 //INTERFACCIA ***************************************************************************************************************
 //*************************************************************************************************************************** */
   return (
@@ -266,9 +294,14 @@ const handleChangeAge = (event) => {
     </>
     )}
 
-    {sup ===true && Completa == 1 &&  ( 
-      <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: todo.simbolo == " " && "#FFFF00"}}>{todo.qtProdotto}</span></h3>
-    )}
+    {sup ===true && Completa == 1 &&   
+      <>
+      {todo.simbolo== "1" ?
+    <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: todo.simbolo == " " && "#FFFF00"}}>{+todo.qtProdotto-(+todo.meno)}</span></h3> :
+    <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: todo.simbolo == " " && "#FFFF00"}}>{todo.qtProdotto}</span></h3>
+      }
+      </>
+    }
     </div>
 
 {/*******************Prodotto********************************************************************************** */}
@@ -277,6 +310,7 @@ const handleChangeAge = (event) => {
     {sup ===true && todo.flagTinte===false && Completa == 0 &&( 
       <>
       <Autocomplete
+      clearIcon
       freeSolo
       value={newProdotto}
       options={AutoProdCli}
@@ -286,9 +320,15 @@ const handleChangeAge = (event) => {
       renderInput={(params) => <TextField {...params}  size="small"/>}
     />
     {/*********Simboli****************** */}
-      { todo.simbolo &&
+      { todo.simbolo != "1" &&
       <h3 className="simboloNota" style={{color: "red", fontSize: "16px"}}>{todo.simbolo}</h3>
        }
+       {(todo.simbolo== "1" && Completa == 0) && <h3 className="simboloNota" style={{color: "red", fontSize: "16px", textAlign: "center", left:"150px"}}> (-
+                        <input
+                         onChange={(e) => setMeno(e.target.value)}
+                         onBlur={(e) => handleChangeMenDb(e.target.value)}
+                          type="number" value={meno} style={{border: "1px solid", width:"35px"}}></input> ) </h3> 
+}
     </>
     )}
 
@@ -313,6 +353,7 @@ const handleChangeAge = (event) => {
           onChange={handleChangeTintSelect}
           onBlur={handleSubm}
         >
+          <MenuItem value={"TECH"}>TECH</MenuItem>
           <MenuItem value={"KF"}>KF</MenuItem>
           <MenuItem value={"KR"}>KR</MenuItem>
           <MenuItem value={"KG"}>KG</MenuItem>
@@ -321,6 +362,8 @@ const handleChangeAge = (event) => {
           <MenuItem value={"NUAGE"}>NUAGE</MenuItem>
           <MenuItem value={"ROIAL"}>ROIAL</MenuItem>
           <MenuItem value={"VIBRANCE"}>VIB</MenuItem>
+          <MenuItem value={"EXTREMO"}>EXTREMO</MenuItem>
+          <MenuItem value={"NATIVE"}>NATIVE</MenuItem>
         </Select>
       </FormControl>
          </span> 
@@ -444,6 +487,7 @@ const handleChangeAge = (event) => {
               >
                 <MenuItem onClick={handleChangeEvi}>Evidenzia</MenuItem>
                 <MenuItem onClick={handleChangeNo}>(NO)</MenuItem>
+                <MenuItem onClick={handleChangeMeno}>(- )</MenuItem>
                 <MenuItem onClick={handleChangeInterro}>?</MenuItem>
                 <MenuItem onClick={handleChangeX}>X</MenuItem>
                 <MenuItem onClick={handleChangeRemMenu}>Rimuovi</MenuItem>

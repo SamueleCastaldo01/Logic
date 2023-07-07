@@ -33,7 +33,7 @@ import FormControl from '@mui/material/FormControl';
 
 import { color, motion } from 'framer-motion';
 
-function Scorta() {
+function ScortaTinte() {
 
   const [todos, setTodos] = React.useState([]);
   const [crono, setCrono] = React.useState([]);
@@ -43,16 +43,12 @@ function Scorta() {
 
   const [anchorEl, setAnchorEl] = React.useState(null);
 
-  const [tipologia, setTipologia] = React.useState("");
-  const [brand, setBrand] = React.useState("");
+  const [brand, setBrand] = React.useState("TECH");
   const [nomeP, setNomeP] = React.useState("");
   const [quantita, setQuantita] = React.useState("");
-  const [image, setImage] = React.useState("");
-  const [prezzoIndi, setPrezzoIndi] = React.useState("");
   const [reparto, setReparto] = React.useState(1);
   const [sottoScorta, setSottoScorta] = React.useState("");
   const [quantitaOrdinabile, setquantitaOrdinabile] = React.useState("");
-  const [nota, setNota] = React.useState("");
 
   const [imageSer, setImageSer] = React.useState(localStorage.getItem("imageProd"));
   const [notaSer, setNotaSer] = React.useState(localStorage.getItem("NotaProd"));
@@ -63,7 +59,7 @@ function Scorta() {
   const [popupActiveCrono, setPopupActiveCrono] = useState(false);  
   const [FlagFilter, setFlagFilter] = useState("0");
   const [FlagEdit, setFlagEdit] = useState("0");
-  const [FlagRep, setFlagRep] = useState("2");   //incominciamo con il reparto maschile
+  const [flagTinte, setflagTinte] = useState("TECH");
 
   const [open, setOpen] = React.useState(false); //serve per lo speedDial
   const handleOpen = () => setOpen(true);
@@ -118,16 +114,15 @@ function Scorta() {
 
 //********************************************************************************** */
 React.useEffect(() => {
-    const collectionRef = collection(db, "prodotto");
+    const collectionRef = collection(db, "scortaTinte");
     var q;
     q = query(collectionRef, orderBy("nomeP"));  //questa se flagFilter è diverso da 1 e 2
     if(FlagFilter === "1") {   //quantità crescente
-      q = query(collectionRef, orderBy("quantita"),  orderBy("nomeP"));
-   }
+        q = query(collectionRef, orderBy("quantita"),  orderBy("nomeP"));
+     }
     else if(FlagFilter === "2") {  //quantita descrescente
-       q = query(collectionRef, orderBy("quantita", "desc"),  orderBy("nomeP"));
-    }
-
+        q = query(collectionRef, orderBy("quantita", "desc"),  orderBy("nomeP"));
+      }
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
       querySnapshot.forEach((doc) => {
@@ -191,12 +186,9 @@ const print = async () => {
     setOpen(false)
   }
  //******************************************************************************* */
- function handleInputChangeBrand(event, value) {
-  setBrand(value)
-}
 
-const handleChangeDataSelect = (event) => {
-  setReparto(event.target.value);      //prende il valore del select
+const handleChangeBrand = (event) => {
+  setBrand(event.target.value);      //prende il valore del select
 };
 
 const handleMenu = (event) => {
@@ -206,11 +198,54 @@ const handleMenu = (event) => {
 const handleClosi = () => {  //chiude il menu
   setAnchorEl(null);
 };
-
 const handleQuant = () => {  //ordinamento decrescente
   setFlagFilter("2");
   handleClosi();
 };
+const handleTech = () => {  //ordinamento decrescente
+    setflagTinte("TECH");
+    handleClosi();
+  };
+const handleKf = () => {  //ordinamento decrescente
+    setflagTinte("KF");
+    handleClosi();
+  };
+const handleKr = () => {  //ordinamento decrescente
+    setflagTinte("KR");
+    handleClosi();
+  };
+const handleKG = () => {  //ordinamento decrescente
+    setflagTinte("KG");
+    handleClosi();
+  };
+const handleK10 = () => {  //ordinamento decrescente
+    setflagTinte("K10");
+    handleClosi();
+  };
+const handleCb = () => {  //ordinamento decrescente
+    setflagTinte("CB");
+    handleClosi();
+  };
+const handleNuage = () => {  //ordinamento decrescente
+    setflagTinte("NUAGE");
+    handleClosi();
+  };
+const handleRoial = () => {  //ordinamento decrescente
+    setflagTinte("ROIAL");
+    handleClosi();
+  };
+const handleVibrance = () => {  //ordinamento decrescente
+    setflagTinte("VIBRANCE");
+    handleClosi();
+  };
+const handleNative = () => {  //ordinamento decrescente
+    setflagTinte("NATIVE");
+    handleClosi();
+  };
+const handleExtremo = () => {  //ordinamento decrescente
+    setflagTinte("EXTREMO");
+    handleClosi();
+  };
 
 const handleQuantCre = () => {  //va a fare l'ordinamento della qt in modo crescente
   setFlagFilter("1");
@@ -222,48 +257,13 @@ const handleNome = () => {  //va a fare l'ordinamento della qt in modo crescente
   handleClosi();
 };
 
-const handleRepTutti= () => {  //va a fare l'ordinamento della qt in modo crescente
-  setFlagRep(0);
-  handleClosi();
-};
-
-const handleRepFemm = () => {  //va a fare l'ordinamento della qt in modo crescente
-  setFlagRep(1);
-  handleClosi();
-};
-
-const handleRepMasch = () => {  //va a fare l'ordinamento della qt in modo crescente
-  setFlagRep(2);
-  handleClosi();
-};
-
 function handlePopUp(image, nota) {
   setImageSer(image)
   setNotaSer(nota)
   setPopupActiveSearch(true);
 }
  //******************************************************************************* */
- const handleProdClien = async () => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
-  const q = query(collection(db, "clin"));  //prendo tutti i clienti, va ad aggiungere i prodotti personalizzati, quando si aggiuge un nuovo prodotto
-  const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (doc) => {
-      await addDoc(collection(db, "prodottoClin"), {
-        author: { name: doc.data().nomeC, id: doc.id },
-        nomeP: nomeP,
-        prezzoUnitario: prezzoIndi
-      })
-      });
- } 
- /**    Funzione per eliminare tutti i campi di una tabella del database
- const provaEli = async () => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
-  console.log("ciaaao");
-  const q = query(collection(db, "prodottoClin"));  //prendo tutti i clienti
-  const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (hi) => {
-      await deleteDoc(doc(db, "prodottoClin", hi.id));
-      });
- }  */
-  
+
  const handleSubmit = async (e) => {   //creazione prdotto
     var bol= true
     e.preventDefault();
@@ -272,15 +272,11 @@ function handlePopUp(image, nota) {
       toast.clearWaitingQueue(); 
       return
     }
-    if(!prezzoIndi) {         //controllo che il prezzo sia inserito   
-      notifyErrorPrezzoProd();
-      return
-    }
-    // verifica che il prodotto sia univoco
-    const q = query(collection(db, "prodotto"), where("nomeP", "==", nomeP));
+    // verifica che il prodotto sia univoco per quel brand
+    const q = query(collection(db, "scortaTinte"), where("nomeP", "==", nomeP),  where("brand", "==", brand));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-    if (doc.data().nomeP == nomeP) {
+    if (doc.data().nomeP == nomeP && doc.data().brand == brand) {
         notifyErrorProdList()
          toast.clearWaitingQueue(); 
         bol=false
@@ -288,57 +284,21 @@ function handlePopUp(image, nota) {
     });
 
     if(bol == true) {
-      await addDoc(collection(db, "prodotto"), {
+      await addDoc(collection(db, "scortaTinte"), {
         nomeP,
         quantita: 0,
         brand,
-        nota,
         sottoScorta,
-        prezzoIndi,
-        image,
-        reparto,      //se è 0 è femminile, se è 1 è maschile
         quantitaOrdinabile,
       });
-      handleProdClien();
       }
       setNomeP("");
-      setTipologia("");
-      setBrand("");
-      setQuantita("");
-      setImage("");
-      setPrezzoIndi("");
-      setNota("");
-      setSottoScorta("");
-      setquantitaOrdinabile("");
       setFlagEdit(+FlagEdit+1);
   };
- //******************************************************************************************************** */
-  const handleCronologia = async (todo, ag, somma, flag) => {   //aggiunta della trupla cronologia
-    if (flag === "true") { var quant= "+"+ag }
-    else { var quant= "-"+ag }
-      await addDoc(collection(db, "cronologia"), {
-        autore: auth.currentUser.displayName,
-        createdAt: serverTimestamp(),
-        nomeP: todo.nomeP,
-        quantIni: todo.quantita,
-        quantAgg: quant,
-        quantFin: somma,
-      });
-      //rimuove in modo automatico una volta arrivata a 50 e cancella quello più vecchio
-      const coll = collection(db, "cronologia");  
-      const snapshot = await getCountFromServer(coll);  //va a verificare quante trupe ne sono
-      if(snapshot.data().count>50) {  //se supera i 50, deve eliminare la trupla più vecchia (quindi la prima dato che è già ordinata)
-        const q = query(collection(db, "cronologia"), orderBy("createdAt"), limit(1));  //prende solo la prima trupla
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (hi) => {
-        await deleteDoc(doc(db, "cronologia", hi.id)); //elimina la trupla (quindi quella più vecchia)
-        });
-      }
 
-  };
 //****************************************************************************************** */
   const handleEdit = async ( todo, nome, SotSco, quaOrd) => {
-    await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd});
+    await updateDoc(doc(db, "scortaTinte", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd});
     setFlagEdit(+FlagEdit+1);
     toast.clearWaitingQueue(); 
   };
@@ -351,10 +311,7 @@ function handlePopUp(image, nota) {
       return
     }
     var somma = +todo.quantita+(+ag)
-    await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, quantita:somma});
-    if(ag) {
-       handleCronologia(todo, ag, somma, flag);
-    }
+    await updateDoc(doc(db, "scortaTinte", todo.id), { nomeP: nome, quantita:somma});
     setFlagEdit(+FlagEdit+1);
   };
 
@@ -369,44 +326,26 @@ function handlePopUp(image, nota) {
     if(somma<0) {      //nel caso si la somma è negativa, viene azzerata
       somma=0;  
     }
-    await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, quantita:somma});
-    if(ag) {
-      handleCronologia(todo, ag, somma, flag);
-    }
+    await updateDoc(doc(db, "scortaTinte", todo.id), { nomeP: nome, quantita:somma});
     setFlagEdit(+FlagEdit+1);
   };
 
 //**************************************************************************** */
-  const handleDelete = async (id, nomeProd) => {
-    console.log({nomeProd})
-        // se si elimina il prodotto dalla scorta, questo prodotto viene eliminato per tutti i clienti
-        const q = query(collection(db, "prodottoClin"), where("nomeP", "==", nomeProd));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (hi) => {
-          await deleteDoc(doc(db, "prodottoClin", hi.id));  
-        });
-
-
-    await deleteDoc(doc(db, "prodotto", id));
+  const handleDelete = async (id) => {
+    await deleteDoc(doc(db, "scortaTinte", id)); //elimino la tinta
   };
-//**************************************************************************** */
-  const actions = [     //speedDial
-    { icon: <InventoryIcon />, name: 'Scorta', action:handleSpeedScorta },
-    { icon: <RestoreIcon />, name: 'Cronologia', action: handleSpeedCronologia },
-    { icon: <PrintIcon />, name: 'Stampa', action: print},
-    { icon: <AddIcon />, name: 'Aggiungi Prodotto', action: handleSpeedAddProd },
-  ];
+
 //******************************************************************************************************************************** */
 //                              NICE
 //********************************************************************************************************************************* */
     return ( 
     <>  
-{/**************NAVBAR MOBILE*************************************** */}
+    {/**************NAVBAR MOBILE*************************************** */}
   <div className='navMobile row'>
   <div className='col-2'>
   </div>
   <div className='col' style={{padding: 0}}>
-  <p className='navText'> Magazzino </p>
+  <p className='navText'> Scorta Tinte </p>
   </div>
   </div>
    <motion.div
@@ -414,53 +353,54 @@ function handlePopUp(image, nota) {
         animate= {{opacity: 1}}
         transition={{ duration: 0.7 }}>
 
-{!matches ? <h1 className='title mt-3'> Magazzino</h1> : <div style={{marginBottom:"60px"}}></div>} 
+{!matches ? <h1 className='title mt-3'> Scorta Tinte</h1> : <div style={{marginBottom:"60px"}}></div>} 
       
+
       <div>
-    {sup == true &&  <span><button onClick={handleSpeedAddProd}>Aggiungi Prodotto </button></span>}   
-        <span><button onClick={handleSpeedScorta}>Scorta </button></span>
-        <span><button onClick={() => {navigate("/scortatinte")}}>Scorta Tinte</button></span>
+      {sup == true && <span><button onClick={handleSpeedAddProd}>Aggiungi Tinta </button></span>}  
+        <span><button onClick={() => {navigate("/scorta")}}>Magazzino</button></span>
+        <span><button onClick={handleSpeedScorta}>Scorta Tinte</button></span>
         <span><button onClick={handleSpeedCronologia}>Cronologia </button></span>
         <span><button onClick={print}>Stampa </button></span>
-    {sup == true && <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>}   
+        {sup == true && <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>}   
       </div>
 
     {sup ===true && (
         <>    
-{/** Aggiungi Prodotto **************************************************************************/}
+{/** Aggiungi Tinte **************************************************************************/}
 {popupActive &&
       <div> 
-      <form className='formScort' onSubmit={handleSubmit}>
+      <form className='formScortTinte' onSubmit={handleSubmit}>
       <div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); }}>
               <CloseIcon id="i" />
               </button> </div>
       <div className="input_container">
-      <TextField className='inp mt-2' id="filled-basic" label="Nome Prodotto" variant="outlined" autoComplete='off' value={nomeP} 
+      <TextField className='inp mt-2' id="filled-basic" label="Nuance" variant="outlined" autoComplete='off' value={nomeP} 
         onChange={(e) => setNomeP(e.target.value)}/>
-      <TextField className='inp mt-2' type="number"                 
-        inputProps={{
-                  step: 0.01,
-                }} id="filled-basic" label="Prezzo" variant="outlined" autoComplete='off' value={prezzoIndi} 
-        onChange={(e) => setPrezzoIndi(e.target.value)}
-        InputProps={{
-            startAdornment: <InputAdornment position="start">€</InputAdornment>,
-          }}
-        />
           <FormControl >
         <InputLabel id="demo-simple-select-label"></InputLabel>
         <Select sx={{height:39, marginLeft:-1, width: 200, marginTop: "10px"}}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          defaultValue={1}
-          onChange={handleChangeDataSelect}
+          defaultValue={"TECH"}
+          onChange={handleChangeBrand}
         >
-          <MenuItem value={1}>Reparto Femminile</MenuItem>
-          <MenuItem value={2}>Reparto Maschile</MenuItem>
+          <MenuItem value={"TECH"}>TECH</MenuItem>
+          <MenuItem value={"KF"}>KF</MenuItem>
+          <MenuItem value={"KR"}>KR</MenuItem>
+          <MenuItem value={"KG"}>KG</MenuItem>
+          <MenuItem value={"K10"}>K10</MenuItem>
+          <MenuItem value={"CB"}>CB</MenuItem>
+          <MenuItem value={"NUAGE"}>NUAGE</MenuItem>
+          <MenuItem value={"ROIAL"}>ROIAL</MenuItem>
+          <MenuItem value={"VIBRANCE"}>VIBRANCE</MenuItem>
+          <MenuItem value={"EXTREMO"}>EXTREMO</MenuItem>
+          <MenuItem value={"NATIVE"}>NATIVE</MenuItem>
         </Select>
       </FormControl>
       </div>
       <div className="btn_container">
-      <Button  type='submit' variant="outlined" >Aggiungi Prodotto </Button>
+      <Button  type='submit' variant="outlined" >Aggiungi Tinta </Button>
       </div>
     </form>
     </div>
@@ -468,18 +408,26 @@ function handlePopUp(image, nota) {
     </>
     )}
 
-{/** tabella prodotti nel magazzino *****************************************************************************************************************/}
+{/** tabella tinte scorta *****************************************************************************************************************/}
 {popupActiveScorta &&
 <>
 <div ref={componentRef} className='todo_containerScorta mt-5'>
 <div className='row' > 
-<div className='col-2'>
-<p className='colTextTitle'> Magazzino</p>
+<div className='col-3'>
+<p className='colTextTitle'> Scorta Tinte</p>
 </div>
-<div className='col-4'>
-{FlagRep ==0 && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> Tutti i prodotti</p>}
-{FlagRep ==1 && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> Reparto Femminile</p>}
-{FlagRep ==2 && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> Reparto Maschile</p>}
+<div className='col-3'>
+{flagTinte == "TECH" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> TECH</p>}
+{flagTinte == "KF" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> KF</p>}
+{flagTinte == "KR" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> KR</p>}
+{flagTinte == "KG" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> KG</p>}
+{flagTinte == "K10" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> K10</p>}
+{flagTinte == "CB" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> CB</p>}
+{flagTinte == "NUAGE" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> NUAGE</p>}
+{flagTinte == "ROIAL" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> ROIAL</p>}
+{flagTinte == "VIBRANCE" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> VIBRANCE</p>}
+{flagTinte == "EXTREMO" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> EXTREMO</p>}
+{flagTinte == "NATIVE" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> NATIVE</p>}
 </div>
 <div className='col'>
 <TextField
@@ -487,7 +435,7 @@ function handlePopUp(image, nota) {
       className="inputSearch"
       onChange={event => {setSearchTerm(event.target.value)}}
       type="text"
-      placeholder="Ricerca Prodotto"
+      placeholder="Ricerca Tinte"
       InputProps={{
       startAdornment: (
       <InputAdornment position="start">
@@ -520,12 +468,20 @@ function handlePopUp(image, nota) {
                 open={Boolean(anchorEl)}
                 onClose={handleClosi}
               >
-                <MenuItem onClick={handleNome}>Nome</MenuItem>
-                <MenuItem onClick={handleQuantCre}>Quantità Crescente</MenuItem>
-                <MenuItem onClick={handleQuant}>Quantità Decrescente</MenuItem>
-                <MenuItem onClick={handleRepTutti}>Tutti i Prodotti</MenuItem>
-                <MenuItem onClick={handleRepFemm}>Reparto Femminile</MenuItem>
-                <MenuItem onClick={handleRepMasch}>Reparto Maschile</MenuItem>
+                <MenuItem onClick={handleNome}>Ord. per Nome</MenuItem>
+                <MenuItem onClick={handleQuantCre}>Ord. Quantità Crescente</MenuItem>
+                <MenuItem onClick={handleQuant}>Ord. Quantità Decrescente</MenuItem>
+                <MenuItem onClick={handleTech}>TECH</MenuItem>
+                <MenuItem onClick={handleKf}>KF</MenuItem>
+                <MenuItem onClick={handleKr}>KR</MenuItem>
+                <MenuItem onClick={handleKG}>KG</MenuItem>
+                <MenuItem onClick={handleK10}>K10</MenuItem>
+                <MenuItem onClick={handleCb}>CB</MenuItem>
+                <MenuItem onClick={handleNuage}>NUAGE</MenuItem>
+                <MenuItem onClick={handleRoial}>ROIAL</MenuItem>
+                <MenuItem onClick={handleVibrance}>VIBRANCE</MenuItem>
+                <MenuItem onClick={handleExtremo}>EXTREMO</MenuItem>
+                <MenuItem onClick={handleNative}>NATIVE</MenuItem>
               </Menu>
         </button>
   </div>
@@ -534,7 +490,7 @@ function handlePopUp(image, nota) {
 
 <div className='row' style={{marginRight: "5px"}}>
 <div className='col-5' >
-<p className='coltext'>Prodotto</p>
+<p className='coltext'>Nuance</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
 <p className='coltext'>Qt</p>
@@ -565,7 +521,7 @@ function handlePopUp(image, nota) {
                 }
             }).map((todo) => (
     <div key={todo.id}>
-    { FlagRep == 0 &&(
+    { flagTinte == todo.brand &&(
     <TodoScorta
       key={todo.id}
       todo={todo}
@@ -578,42 +534,6 @@ function handlePopUp(image, nota) {
       FlagStampa={FlagStampa}
       flagDelete= {flagDelete}
     />
-     )}
-     { FlagRep == 1 &&(
-      <>
-      {todo.reparto == 1 && 
-      <TodoScorta
-      key={todo.id}
-      todo={todo}
-      handleDelete={handleDelete}
-      handleEdit={handleEdit}
-      handleAddQuant={handleAddQuant}
-      handleRemQuant= {handleRemQuant}
-      handlePopUp={handlePopUp}
-      displayMsg={displayMsg}
-      FlagStampa={FlagStampa}
-      flagDelete= {flagDelete}
-    />
-      }
-    </>
-     )}
-     { FlagRep == 2 &&(
-      <>
-      {todo.reparto == 2 && 
-      <TodoScorta
-      key={todo.id}
-      todo={todo}
-      handleDelete={handleDelete}
-      handleEdit={handleEdit}
-      handleAddQuant={handleAddQuant}
-      handleRemQuant= {handleRemQuant}
-      handlePopUp={handlePopUp}
-      displayMsg={displayMsg}
-      FlagStampa={FlagStampa}
-      flagDelete= {flagDelete}
-    />
-      }
-    </>
      )}
     </div>
   ))}
@@ -681,4 +601,4 @@ function handlePopUp(image, nota) {
     </>
       )
 }
-export default Scorta;
+export default ScortaTinte;

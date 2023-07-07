@@ -20,12 +20,12 @@ export const optionsNumCart = {
         },
       title: {
         display: true,
-        text: "Vendite"
+        text: "Incasso"
     }
     },
   };
 
-  export const optionsNumAsc = {
+  export const optionsVendite = {
     responsive: true,
     plugins: {
     legend: {
@@ -33,7 +33,7 @@ export const optionsNumCart = {
             },
       title: {
         display: true,
-        text: "Numero Asciugamani"
+        text: "Vendite"
     }
     },
   };

@@ -20,8 +20,12 @@ import SpeedDialAction from '@mui/material/SpeedDialAction';
 import PrintIcon from '@mui/icons-material/Print';
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from '@mui/icons-material/Add';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DescriptionIcon from '@mui/icons-material/Description';
+import IconButton from '@mui/material/IconButton';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import { motion } from 'framer-motion';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export const AutoProdCli = [];
 
@@ -40,7 +44,8 @@ function AddClienteScalet({notaDat, getDataScal }) {
 
     const [dataSc, setDataSc] = React.useState("");
 
-    const [popupActive, setPopupActive] = useState(true);  
+    const [popupActive, setPopupActive] = useState(true); 
+    const [Progress, setProgress] = React.useState(false); 
   
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))   //confronto con uid corrente
@@ -48,7 +53,7 @@ function AddClienteScalet({notaDat, getDataScal }) {
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
   
     const scalCollectionRef = collection(db, "addNota"); 
-    const matches = useMediaQuery('(max-width:600px)');  //media query true se è uno smartphone
+    const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
   
     let navigate = useNavigate();
   
@@ -94,10 +99,14 @@ const contEffect = async () => {
           className: "rounded-4"
           })}
   
-    const setClear = () => {
-        setNomeC("");
-        toast.dismiss();
-        toast.clearWaitingQueue();}
+
+    const handleNaviScaletta = () => {
+      AutoDataScal.map((nice) => {   //se la data inserita è uguale ad una data della scaletta, allora lo fa navigare
+        if(dataSc == nice.label) {
+          navigate("/scaletta")
+        }
+      })
+          toast.clearWaitingQueue();}
   
   //********************************************************************************** */  
     React.useEffect(() => {
@@ -110,6 +119,7 @@ const contEffect = async () => {
           todosArray.push({ ...doc.data(), id: doc.id });
         });
         setTodos(todosArray);
+        setProgress(true);
       });
       contEffect();
       localStorage.removeItem("OrdId");
@@ -176,6 +186,7 @@ const contEffect = async () => {
       NumBuste: nBt,
       note: "",
       quota: "",
+      quotaV: "",
       sommaTotale: somTot,
       debito: debTot,
     });
@@ -196,48 +207,71 @@ const contEffect = async () => {
   //********************************************************************************** */
       return ( 
       <>  
-        <SpeedDial
-          ariaLabel="SpeedDial basic example"
-          hidden={!matches}
-          sx={{ position: 'absolute', bottom: 120, right: 36 }}
-          icon={<SpeedDialIcon />}
-        >
-          {actions.map((action) => (
-            <SpeedDialAction
-              key={action.name}
-              icon={action.icon}
-              tooltipTitle={action.name}
-              onClick={action.action}
-            />
-          ))}
-        </SpeedDial>
-          <h1 className='title mt-3'>Aggiungi Cliente alla Scaletta</h1>
-          {!matches &&
+  {/**************NAVBAR MOBILE*************************************** */}
+    <div className='navMobile row'>
+      <div className='col-2'>
+        <IconButton className="buttonArrow" aria-label="delete" sx={{ color: "#f6f6f6", marginTop: "7px" }}
+        onClick={ ()=> {navigate("/addnota"); }}>
+        <ArrowBackIcon sx={{ fontSize: 30 }}/>
+      </IconButton>
+      </div>
+      <div className='col' style={{padding: 0}}>
+      <p className='navText'> Aggiungi Clienti alla Scaletta </p>
+      </div>
+      </div>
+
+
+        <motion.div 
+        initial= {{x: "-100vw"}}
+        animate= {{x: 0}}
+        transition={{ duration: 0.4 }}>
+
+    {!matches && 
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate("/addnota")}}>
+      <ArrowBackIcon id="i" /></button> 
+    }
+
+      {!matches ? <h1 className='title mt-3'>Aggiungi Cliente alla Scaletta</h1> : <div style={{marginBottom:"60px"}}></div>} 
+
         <div>
           <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
         </div>
-      }
+
   
   {/**************tabella********************************************************************************************************/}
-      <div className='row'>
-        <div className='col'>
+      <div className='containerTabNote'>
+
         {/***********tabella note completate********************************************************************************** */}
         <div  className='todo_containerOrdCli mt-5'>
+
         <div className='row'> 
-        <p className='colTextTitle'> Ordine Clienti &ensp; &ensp;&ensp;  {notaDat}</p>
-        <p className='textOrd'> Note Completate</p>
+          <div className='col'>
+            <p className='colTextTitle'> Ordine Clienti</p>
+            <p className='textOrd'> Note Completate</p>
+          </div>
+          <div className='col' style={{paddingRight: "25px"}}>
+            <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> {notaDat}</p>
+          </div>
         </div>
+
         <div className='row'>
-        <div className='col-1' >
-        <p className='coltext'>N</p>
-        </div>
-        <div className='col-8' >
-        <p className='coltext'>Cliente</p>
-        </div>
-        
+          <div className='col-1' >
+            <p className='coltext'>N.</p>
+          </div>
+          <div className='col-8' >
+              <p className='coltext'>Cliente</p>
+          </div>
       </div>
+
       <hr style={{margin: "0"}}/>
-       {todos.map((todo) => (
+      <div className="scrollOrdCli">
+      {Progress == false && 
+        <div style={{marginTop: "14px"}}>
+          <CircularProgress />
+        </div>
+      }
+  {todos.map((todo) => (
           <div key={todo.id}>
           {todo.data  === notaDat && todo.completa === "1" &&  (
       <>
@@ -261,20 +295,20 @@ const contEffect = async () => {
              </>
                   )}
           </div>
-        ))} 
+  ))} 
         </div>
         </div>
-        <div className='col'> 
+
 {/**********Tabella Scaletta********************************************************************** */}
-<div  className='todo_containerOrdCli mt-5'>
+<div  className='todo_containerOrdCli mt-5' style={{width: "350px"}}>
         <div className='row'> 
         <div className='col-4'>
             <p className='colTextTitle' onClick={ ()=> {
             getDataScal(dataSc)
-                navigate("/scaletta");
+                handleNaviScaletta()
             }}> <u>Scaletta</u></p>                
         </div>
-        <div className='col'>
+        <div className='col' style={{paddingRight: "25px"}}>
         <Autocomplete
       value={dataSc}
       options={AutoDataScal}
@@ -290,6 +324,12 @@ const contEffect = async () => {
         
       </div>
       <hr style={{margin: "0"}}/>
+      <div className="scrollOrdCli">
+      {Progress == false && 
+        <div style={{marginTop: "14px"}}>
+          <CircularProgress />
+        </div>
+      }
        {todosScalet.map((todo) => (
           <div key={todo.id}>
           {todo.dataScal  === dataSc  &&  (
@@ -319,9 +359,11 @@ const contEffect = async () => {
           </div>
         ))} 
         </div>
-
         </div>
+
+
       </div>
+      </motion.div>
       </>
         )
   }

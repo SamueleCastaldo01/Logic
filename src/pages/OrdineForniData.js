@@ -227,15 +227,15 @@ function OrdineForniData({ getOrdFornId }) {
                 </div>
               </div>
 
-          <div className='todo_container' style={{width: "400px"}}>
+          <div className='todo_container' style={{width: "350px"}}>
               <div className='row'>
                       <div className='col colTextTitle'>
-                       Ordine Forn
+                       Ordine Fornitore
                       </div>
                       <div className='col'>
                         <FormControl >
                         <InputLabel id="demo-simple-select-label"></InputLabel>
-                        <Select sx={{height:39, marginLeft:-1, width: 200}}
+                        <Select sx={{height:39, marginLeft:-1, width: 150}}
                          labelId="demo-simple-select-label"
                         id="demo-simple-select"
                         defaultValue={8}

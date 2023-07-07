@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, serverTimestamp, getCountFromServer, limit, where, getDocs} from 'firebase/firestore';
 import TextField from '@mui/material/TextField';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { Input } from '@mui/material';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from "../firebase-config";
@@ -19,6 +20,7 @@ import TodoDebiCli from '../components/TodoDebiCli';
 import SearchIcon from '@mui/icons-material/Search';
 import moment from 'moment';
 import { motion } from 'framer-motion';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyAygsHvhG251qZ7-N9oR8A-q1ls9yhNkOQ';
 
@@ -34,11 +36,16 @@ function AddCliente( {getCliId} ) {
   const [partitaIva, setPartitaIva] = React.useState("");
   const [cellulare, setCellulare] = React.useState("");
 
+  const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
+
   const [deb1, setDeb1] = React.useState("");
   const [deb2, setDeb2] = React.useState("");
   const [deb3, setDeb3] = React.useState("");
   const [deb4, setDeb4] = React.useState("");
   const [debitoTot, setDebitoTot] = React.useState("");
+
+  const [Progress, setProgress] = React.useState(false);
+  const [ProgressDebi, setProgressDebi] = React.useState(false);
 
   const [Totdeb1, setTotDeb1] = React.useState("");
   const [Totdeb2, setTotDeb2] = React.useState("");
@@ -104,6 +111,7 @@ React.useEffect(() => {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
       setTodos(todosArray);
+      setProgress(true);
     });
     return () => unsub();
 
@@ -120,6 +128,7 @@ React.useEffect(() => {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
       setTodosDebi(todosArray);
+      setProgressDebi(true)
     });
     return () => unsub();
   }, [flagDebiCli == true]);
@@ -316,11 +325,20 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 //********************************************************************************** */
     return ( 
     <>  
+{/**************NAVBAR MOBILE*************************************** */}
+<div className='navMobile row'>
+      <div className='col-2'>
+      </div>
+      <div className='col' style={{padding: 0}}>
+      <p className='navText'> Lista Clienti </p>
+      </div>
+      </div>
+
     <motion.div 
         initial= {{opacity: 0}}
         animate= {{opacity: 1}}
         transition={{ duration: 0.7 }}>
-    <h1 className='title mt-3'> Lista Clienti</h1>
+          {!matches ? <h1 className='title mt-3'> Lista Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
     <div>
         <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Cliente </button></span>
         <span><button onClick={handleButtonAna}>Anagrafiche Clienti</button></span>
@@ -386,7 +404,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 {flagAnaCli &&
 <div className='todo_containerCli mt-5'>
 <div className='row' > 
-<div className='col-8'>
+<div className='col-7'>
 <p className='colTextTitle'> Lista Clienti </p>
 </div>
 <div className='col'>
@@ -407,7 +425,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 </div>
 </div>
 <div className='row' style={{marginRight: "5px"}}>
-<div className='col-3' >
+<div className='col-4' >
 <p className='coltext' >Cliente</p>
 </div>
 <div className='col-5' style={{padding: "0px"}}>
@@ -420,6 +438,11 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 </div>
 
 <div className="scroll">
+{Progress == false && 
+  <div style={{marginTop: "14px"}}>
+      <CircularProgress />
+  </div>
+      }
 {todos.filter((val)=> {
         if(searchTerm === ""){
           return val
@@ -535,7 +558,12 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 <hr style={{margin: "0"}}/>
 </div>
 
-<div className="scroll">
+<div className="scroll" style={{maxHeight: "790px"}}>
+{ProgressDebi == false && 
+  <div style={{marginTop: "14px"}}>
+      <CircularProgress />
+  </div>
+      }
 {todosDebi.filter((val)=> {
         if(searchTerm === ""){
           return val
@@ -563,14 +591,14 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 {popupActiveCrono &&
   <div className='todo_containerCli mt-3'>
   <div className='row'> 
-<p className='colTextTitle'> Cronologia</p>
+<p className='colTextTitle'> Cronologia Debito</p>
 </div>
   <div className='row' style={{marginRight: "5px"}}>
       <div className='col-3'><p className='coltext' >DataModifica</p></div>
       <div className='col-3' style={{padding: "0px"}}><p className='coltext' >Cliente</p> </div>
       <div className='col-2' style={{padding: "0px"}}><p className='coltext'>Autore</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Deb1V</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Deb1N</p></div>
+      <div className='col-2' style={{padding: "0px"}}><p className='coltext'>Deb1V</p></div>
+      <div className='col-2' style={{padding: "0px"}}><p className='coltext'>Deb1N</p></div>
       <hr style={{margin: "0"}}/>
     </div>
     <div className="scroll">
@@ -578,10 +606,10 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
     <div key={col.id}>
     <div className='row' style={{padding: "0px"}}>
       <div className='col-3 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
-      <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeC} </p> </div>
-      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.autore}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.debv}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.deb1}</p></div>
+      <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeC.substr(0, 18)} </p> </div>
+      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.autore.substr(0, 10)}...</p></div>
+      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.debv}</p></div>
+      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.deb1}</p></div>
       <hr style={{margin: "0"}}/>
     </div>
     </div>

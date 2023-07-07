@@ -159,7 +159,7 @@ const print = async () => {
       <div className='navMobile row'>
       <div className='col-2'>
         <IconButton className="buttonArrow" aria-label="delete" sx={{ color: "#f6f6f6", marginTop: "7px" }}
-        onClick={ ()=> {navigate("/notadipdata"); }}>
+        onClick={ ()=> {navigate("/dashclienti"); }}>
         <ArrowBackIcon sx={{ fontSize: 30 }}/>
       </IconButton>
       </div>
@@ -168,6 +168,12 @@ const print = async () => {
       </div>
       </div>
 
+  {!matches &&
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate("/dashclienti")}}>
+      <ArrowBackIcon id="i" /></button> 
+  }
+
       <span><button onClick={print}>Stampa </button></span>
 
 {/****Nota*****************/}
@@ -175,7 +181,7 @@ const print = async () => {
   <div className='container' style={{paddingLeft: "24px", paddingRight: "24px"}}>
     {todosAddNot.map((todo) => (
     <div key={todo.id}>
-    { todo.data == notaDataC  &&  (
+    { todo.data == notaDataC  && notaNomeC == todo.nomeC &&  (
       <>
       <div className='row' style={{marginTop: "40px"}} >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>

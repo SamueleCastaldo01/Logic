@@ -24,6 +24,7 @@ import AdUnitsIcon from '@mui/icons-material/AdUnits';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ContactPageIcon from '@mui/icons-material/ContactPage';
+import InvertColorsIcon from '@mui/icons-material/InvertColors';
 import { useNavigate } from 'react-router-dom';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
@@ -239,6 +240,29 @@ export default function MiniDrawer( {signUserOut} ) {
                   }}
                 >
                   <InventoryIcon sx={{ color: "white" }}/>
+                </ListItemIcon>
+                <ListItemText primary="Magazzino" sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+          </ListItem>
+
+          <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/scortatinte")}}>
+              <ListItemButton
+          selected={selectedIndex === 8}
+          onClick={(event) => handleListItemClick(event, 8)}
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? 'initial' : 'center',
+                  px: 2.5,
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : 'auto',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <InvertColorsIcon sx={{ color: "white" }}/>
                 </ListItemIcon>
                 <ListItemText primary="Magazzino" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>

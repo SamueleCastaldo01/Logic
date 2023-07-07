@@ -20,8 +20,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
   const [newNote, setNote] = React.useState(todo.note);
   const [newNumCartoni, setNumCartoni] = React.useState(todo.NumCartoni);
 
-  const handleSubm = (e) => {
-    e.preventDefault();
+  const handleSubm = () => {
     handleEdit(todo, newNomeC, newNumAsc, newNote, newDebito, newQuota, newNumCartoni);
   };
 
@@ -56,13 +55,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
   };
 
   const handleChangeQ = (e) => {
-    e.preventDefault();
-    if (todo.quota === true) {
-      setQuota(todo.quota);
-    } else {
-      todo.quota = "";
-      setQuota(e.target.value);
-    }
+    setQuota(e.target.value)
   };
 
   const handleChangeNT = (e) => {
@@ -93,7 +86,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
 
     <div className="row ">
 {/********************CLIENTE*********************************************************** */}
-    <div className="col-2 diviCol" >
+    <div className="col-4 diviCol" style={{paddingRight: "0px"}} >
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -114,7 +107,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
     </div>
 {/******************DEBITO************************************************************* */}
 
-<div className="col-1 diviCol" style={{padding: "0px"}}>
+<div className="col-2 diviCol" style={{padding: "0px", width:"120px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -153,34 +146,15 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
       >{ newNumAsc}</h4>
     )}
     </div>
-  {/***********************Numero cartoni************************************************************ */}
-  <div className="col-1 diviCol" style={{padding: "0px"}}>
-    {sup ===true && ( 
-    <input
-      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
-        type="text"
-        onBlur={handleSubm}
-        value={todo.NumCartoni === "" ? newNumCartoni : todo.NumCartoni}
-        className="inpNumb"
-        onChange={handleChangeNC}
-      />
-    )}
-    {gui ===true && ( 
-    <h4
-      style={{ textDecoration: todo.completed && "line-through" }}
-        type="text"
-        className="inpTab"
-      >{ newNumCartoni}</h4>
-    )}
-    </div>
+
 {/************************QUOTA*********************************************************** */}
-<div className="col-1 diviCol" style={{padding: "0px"}}>
+<div className="col-2 diviCol" style={{padding: "0px", width:"120px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
         onBlur={handleSubm}
-        value={todo.quota === "" ? newQuota : todo.quota}
+        value={ newQuota}
         className="inpNumb"
         onChange={handleChangeQ}
       />
@@ -196,7 +170,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
 {/********************NOTE*************************************************************** */}
     <div className="col diviCol" style={{padding: "0px"}}> 
     <textarea
-        style={{textAlign: "left", width:"500px"}}
+        style={{textAlign: "left", width:"130px"}}
         type="text"
         onBlur={handleSubm}
         value={todo.note === "" ? newNote : todo.note}

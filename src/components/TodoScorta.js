@@ -65,7 +65,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     <form  onSubmit={handleSubm}>
     <div className="row ">
 {/*********************PRODOTTO********************************************************** */}
-    <div className="col-4 diviCol" >
+    <div className="col-5 diviCol" >
     { /*
           {sup ===true && ( 
     <input
@@ -161,7 +161,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
 { flagDelete &&
   <>
 { FlagStampa==false &&
-    <div className="col-2 diviCol" style={{padding:"0px", marginTop:"-8px"}}>
+    <div className="col-1 diviCol" style={{padding:"0px", marginTop:"-8px"}}>
 
 { /*
         <button

@@ -15,6 +15,7 @@ import PrintIcon from '@mui/icons-material/Print';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import Switch from '@mui/material/Switch';
 import { motion } from 'framer-motion';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export const AutoProdCli = [];
 
@@ -33,6 +34,7 @@ function NotaDipData({notaDat, getNotaDip }) {
     const [dataSc, setDataSc] = React.useState(notaDat);
 
     const [popupActive, setPopupActive] = useState(true);  
+    const [Progress, setProgress] = React.useState(false);
   
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))   //confronto con uid corrente
@@ -106,6 +108,7 @@ const contEffect = async () => {  //fa il conteggio
           todosArray.push({ ...doc.data(), id: doc.id });
         });
         setTodos(todosArray);
+        setProgress(true);
       });
       contEffect();
       localStorage.removeItem("OrdId");
@@ -155,7 +158,7 @@ const contEffect = async () => {  //fa il conteggio
   {/**************tabelle********************************************************************************************************/}
       <div className='row' style={{marginTop: "40px"}}>
         <div className='col'>
-    {/***********tabella note Non completate********************************************************************************** */}
+    {/***********tabella note********************************************************************************** */}
         <div  className='todo_containerOrdCli'>
         <div className='row'> 
         <div className='col' style={{paddingRight: "0px"}} >
@@ -169,7 +172,7 @@ const contEffect = async () => {  //fa il conteggio
           inputProps={{ 'aria-label': 'controlled' }}/>
       </div>
         </div>
-        <div className='col' style={{paddingLeft: "0px"}}>
+        <div className='col' style={{paddingLeft: "0px", paddingRight: "25px"}}>
         <Autocomplete
         freeSolo
       value={dataSc}
@@ -190,19 +193,26 @@ const contEffect = async () => {  //fa il conteggio
         
       </div>
       <hr style={{margin: "0"}}/>
+      <div className="scrollOrdCli">
+      {Progress == false && 
+        <div style={{marginTop: "14px"}}>
+          <CircularProgress />
+        </div>
+      }
        {todos.map((todo) => (
           <div key={todo.id}>
           {todo.data  === dataSc &&(!switChchecked ? todo.completa == "0" : todo.completa == "1") &&  (
       <>
-    <div className='row'>
-        <div className='col-1 diviCol'>
+    <div className='row diviCol' onClick={() => {
+            getNotaDip(todo.id, todo.cont, todo.nomeC, dataSc, todo.NumCartoni)
+            setTimeout(function(){
+              navigate("/notadip");
+                            },10);
+                         }}>
+        <div className='col-1'>
             <p className="inpTab" style={{textAlign: "left"}}>{todo.cont}</p>
         </div>
-         <div className='col-8 diviCol' 
-          onClick={() => {
-            getNotaDip(todo.id, todo.cont, todo.nomeC, dataSc, todo.NumCartoni)
-                navigate("/notadip");
-                         }}>
+         <div className='col-8'>
              <p className="inpTab"  style={{textAlign: "left"}}>{todo.nomeC}</p>
         </div>
         <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}>  
@@ -214,6 +224,7 @@ const contEffect = async () => {  //fa il conteggio
                   )}
           </div>
         ))}  
+        </div>
         </div>
         </div>
       </div>

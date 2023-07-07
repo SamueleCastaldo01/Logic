@@ -38,6 +38,8 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
   const [newT4, setT4] = React.useState(todo.t4);
   const [newT5, setT5] = React.useState(todo.t5);
 
+  const [meno, setMeno] = React.useState(todo.meno);
+
   const [checked, setChecked] = React.useState(todo.artPreso);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -50,8 +52,12 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
     setChecked(!checked);
   };
 //***************************************************************************************** */
-async function sommaTotChange() {
+async function sommaTotChange( meno) {  //qui va a fare il prezzo totale del prodotto
   var conTinte=0;    //alogoritmo per le tinte
+  var man= meno
+  if (man<= 0 || !man) {
+    man = 0;
+  }
   if(todo.t1) {conTinte=conTinte+1}
   if(todo.t2) {conTinte=conTinte+1}
   if(todo.t3) {conTinte=conTinte+1}
@@ -59,40 +65,54 @@ async function sommaTotChange() {
   if(todo.t5) {conTinte=conTinte+1}
   if(todo.flagTinte == false){ 
   conTinte=1 }
-  var preT= (conTinte*todo.qtProdotto)*todo.prezzoUniProd;  //qui va a fare il prezzo totale del prodotto in base alla quantità e al prezzo unitario
+  var preT= (conTinte* (todo.qtProdotto - man))*todo.prezzoUniProd;  //qui va a fare il prezzo totale del prodotto in base alla quantità e al prezzo unitario
   var somTrunc = preT.toFixed(2);
   await updateDoc(doc(db, "Nota", todo.id), {prezzoTotProd:somTrunc});
 }   
 
 const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodotto, e il suo prezzo totale diventa 0, in questo modo non va a fare la somma con il resto
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"(NO)", prezzoTotProd:0});
+  setMeno(0);  
+  await updateDoc(doc(db, "Nota", todo.id), { simbolo:"(NO)", prezzoTotProd:0, meno: 0});
+    SommaTot();    //somma totale dei prezzi totali dei prodotti
+    handleClose()
+  };
+
+  const handleChangeMeno = async (event) => {   //aggiorna sia il simbolo del prodotto, e il suo prezzo totale diventa 0, in questo modo non va a fare la somma con il resto
+    if((todo.simbolo=="(NO)" && !todo.simbolo2) || (todo.simbolo=="1"  && !todo.simbolo2)) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+      sommaTotChange()
+      setMeno(0);
+    }
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"1"});
     SommaTot();
     handleClose()
   };
 
   const handleChangeEvi = async (event) => {
-    if(todo.simbolo=="(NO)" && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+    if((todo.simbolo=="(NO)" && !todo.simbolo2) || (todo.simbolo=="1"  && !todo.simbolo2)) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
       sommaTotChange()
     }
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:" "});
+    setMeno(0);
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:" ", meno: 0});
     SommaTot();
     handleClose()
   };
 
   const handleChangeInterro = async (event) => {
-    if(todo.simbolo=="(NO)" && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+    if((todo.simbolo=="(NO)" && !todo.simbolo2) || (todo.simbolo=="1"  && !todo.simbolo2)) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
       sommaTotChange();
     }
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"?"});
+    setMeno(0);
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"?", meno: 0});
     SommaTot();
     handleClose()
   };
 
   const handleChangeRemMenu = async (event) => {
-    if(todo.simbolo=="(NO)" && !todo.simbolo2) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
+    if((todo.simbolo=="(NO)" && !todo.simbolo2) || (todo.simbolo=="1"  && !todo.simbolo2)) {   //se il simbolo è no, va a calcolarsi prima il suo prezzo totale del prodotto e poi aggiorna il simbolo e il prezzo
       sommaTotChange();
     }
-    await updateDoc(doc(db, "Nota", todo.id), { simbolo:""}); //infine aggiorna il simbolo
+    setMeno(0);
+    await updateDoc(doc(db, "Nota", todo.id), { simbolo:"", meno: 0}); //infine aggiorna il simbolo
     SommaTot();
     handleClose();
   };
@@ -111,80 +131,23 @@ const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodot
     setAnchorEl(event.currentTarget);
   };
 
+  const handleChangeMenDb = async (value) => {
+    var cia = value;
+    if( +cia<=0 || +todo.qtProdotto<(+cia))  //controllo che la qt sia maggiore del valore inserito, altrimenti lo riazzera, oppure anche nel caso in cui si mette un valore negativo
+    {
+      cia=0
+    }
+
+   await updateDoc(doc(db, "Nota", todo.id), { meno: cia});  //va ad aggiornare il db il simbolo meno
+   sommaTotChange(cia);
+   setMeno(cia)
+   SommaTot();
+  };
+
 //******************************************************************** */
 //handle change
 
-const handleChangeTintSelect = (event) => {
-  setNomeTinte(event.target.value);
-};
 
-const handleChangeAge = (event) => {
-  setAge(event.target.value);
-};
-
-  const handleChange = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setQtProdotto(todo.qtProdotto);
-    } else {
-      todo.qtProdotto = "";
-      setQtProdotto(e.target.value);
-    }
-  };
-  const handleChangePrezzoUni = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setPrezzoUni(todo.prezzoUniProd);
-    } else {
-      todo.prezzoUniProd = "";
-      setPrezzoUni(e.target.value);
-    }
-  };
-  const handleT1 = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setT1(todo.t1);
-    } else {
-      todo.t1 = "";
-      setT1(e.target.value);
-    }
-  };
-  const handleT2 = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setT2(todo.t2);
-    } else {
-      todo.t2 = "";
-      setT2(e.target.value);
-    }
-  };
-  const handleT3 = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setT3(todo.t3);
-    } else {
-      todo.t3 = "";
-      setT3(e.target.value);
-    }
-  };
-  const handleT4 = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setT4(todo.t4);
-    } else {
-      todo.t4 = "";
-      setT4(e.target.value);
-    }
-  };
-  const handleT5 = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setT5(todo.t5);
-    } else {
-      todo.t5 = "";
-      setT5(e.target.value);
-    }
-  };
 //INTERFACCIA ***************************************************************************************************************
 //*************************************************************************************************************************** */
   return (
@@ -205,7 +168,7 @@ const handleChangeAge = (event) => {
     </div>
 
 {/*******************Prodotto********************************************************************************** */}
-<div className="col-8" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px", background: todo.simbolo == " " && "#FFFF00"}}>
+<div className="col-7" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px", background: todo.simbolo == " " && "#FFFF00"}}>
       {/***Prodotti********************** */}
 
     { todo.flagTinte===false &&( 
@@ -225,8 +188,17 @@ const handleChangeAge = (event) => {
     )}
     </div>
 {/*****************Simbolo************************************************************************************ */}
-<div className="col-1" style={{padding: "0px", background: todo.simbolo == " " && "#FFFF00"}}>
-<h3 className="inpTabNota" style={{color: "red", fontSize: "16px", textAlign: "center"}}>{todo.simbolo}</h3>
+<div className="col-2" style={{padding: "0px", background: todo.simbolo == " " && "#FFFF00", position: "relative", left: "10px"}}>
+{(todo.simbolo== "1" && Completa == 0) && <h3 className="inpTabNota" style={{color: "red", fontSize: "13px", textAlign: "center"}}> (-
+                        <input
+                         onChange={(e) => setMeno(e.target.value)}
+                         onBlur={(e) => handleChangeMenDb(e.target.value)}
+                          type="number" value={meno} style={{border: "1px solid", width:"35px"}}></input> ) </h3> 
+}
+{(todo.simbolo== "1" && Completa == 1) && <h3 className="inpTabNota" style={{color: "red", fontSize: "16px", textAlign: "center"}}> (-{todo.meno}) </h3> }
+
+{todo.simbolo!= "1" && <h3 className="inpTabNota" style={{color: "red", fontSize: "16px", textAlign: "center"}}>{todo.simbolo}</h3>}
+   
 </div>
 {/*****************button************************************************************************************ */}
 
@@ -274,6 +246,7 @@ const handleChangeAge = (event) => {
               >
                 <MenuItem onClick={handleChangeEvi}>Evidenzia</MenuItem>
                 <MenuItem onClick={handleChangeNo}>(NO)</MenuItem>
+                <MenuItem onClick={handleChangeMeno}>(- )</MenuItem>
                 <MenuItem onClick={handleChangeInterro}>?</MenuItem>
                 <MenuItem onClick={handleChangeRemMenu}>Rimuovi</MenuItem>
               </Menu>

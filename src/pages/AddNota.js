@@ -18,11 +18,14 @@ import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
 import PrintIcon from '@mui/icons-material/Print';
 import DeleteIcon from "@mui/icons-material/Delete";
+import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import InputAdornment from '@mui/material/InputAdornment';
 import { motion } from 'framer-motion';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export const AutoProdCli = [];
 export const AutoDataScal = [];
@@ -37,6 +40,7 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal, OrdD
     const [indirizzo, setIndirizzo] = React.useState("");
     const [telefono, setTelefono] = React.useState("");
 
+    const [Progress, setProgress] = React.useState(false);
     const [popupActive, setPopupActive] = useState(true);  
 
     const [searchTerm, setSearchTerm] = useState("");  //search
@@ -49,7 +53,7 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal, OrdD
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
   
     const scalCollectionRef = collection(db, "addNota"); 
-    const matches = useMediaQuery('(max-width:600px)');  //media query true se è uno smartphone
+    const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
   
     let navigate = useNavigate();
   
@@ -70,7 +74,7 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal, OrdD
       });
       }
 
-      const autoData = async () => {
+  const autoData = async () => {
         const q = query(collection(db, "scalDat")); // vado a prendere tutte le date di scaletta, questo devo cercare di mettere un limitatore, o potrebbe creare problemi in caso di parecchie date
         const querySnapshot = await  getDocs(q);
         querySnapshot.forEach((hi) => {  
@@ -160,6 +164,7 @@ const contEffect = async () => {
           todosArray.push({ ...doc.data(), id: doc.id });
         });
         setTodos(todosArray);
+        setProgress(true);
       });
       contEffect();
       localStorage.removeItem("OrdId");
@@ -236,6 +241,7 @@ const contEffect = async () => {
       tel: telefo,
       partitaIva: iva
     });
+    setNomeC("");
     handleContaNote();
     }
   };
@@ -265,15 +271,32 @@ const contEffect = async () => {
   //********************************************************************************** */
       return ( 
       <>  
+{/**************NAVBAR MOBILE*************************************** */}
+    <div className='navMobile row'>
+      <div className='col-2'>
+        <IconButton className="buttonArrow" aria-label="delete" sx={{ color: "#f6f6f6", marginTop: "7px" }}
+        onClick={ ()=> {navigate("/ordineclientidata"); }}>
+        <ArrowBackIcon sx={{ fontSize: 30 }}/>
+      </IconButton>
+      </div>
+      <div className='col' style={{padding: 0}}>
+      <p className='navText'> Ordine Clienti </p>
+      </div>
+      </div>
+
         <motion.div 
         initial= {{x: "-100vw"}}
         animate= {{x: 0}}
         transition={{ duration: 0.4 }}>
 
-          <h1 className='title mt-3'>Ordine Clienti</h1>
-          <h3 style={{fontSize: "20px"}}>{moment(dataOrd.toDate()).format("L")}</h3>
+{!matches && <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate("/ordineclientidata")}}>
+      <ArrowBackIcon id="i" /></button> }
+
+      {!matches ? <h1 className='title mt-3'> Ordine Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
+  <h3 style={{fontSize: "20px"}}>{moment(dataOrd.toDate()).format("L")}</h3>  
   
-          {!matches &&
+
         <div>
           <span><button onClick={ () => {
               getNotaDataScal(dataOrdConf)
@@ -284,13 +307,11 @@ const contEffect = async () => {
           <span><button onClick={HandleSpeedAddScalClien}>Aggiungi Cliente </button></span>
           <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
         </div>
-      }
    {/************************INSERIMENTO CLIENTE********************************************************************/}       
       {sup ===true && (
           <>
       {popupActive &&     
-          <div>  
-        <form className='formAddNot' onSubmit={createCate}>
+        <form className='formAddNot' style={{width: "350px"}} onSubmit={createCate}>
         
         <div className='divCloseSc'>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); }}>
                 <CloseIcon id="i" />
@@ -309,22 +330,20 @@ const contEffect = async () => {
   
         </div>
       </form>
-      </div>
       }
       </>
       )}
   
   {/**************tabella********************************************************************************************************/}
-      <div className='row'>
+      <div className='containerTabNote'>
   {/***********Note non completate********************************************************************************** */}
-        <div className='col'>
   <div  className='todo_containerOrdCli mt-5'>
         <div className='row'> 
-        <div className='col'>
+        <div className='col' style={{paddingRight: "0px"}}>
         <p className='colTextTitle'> Ordine Clienti</p>
-        <p className='textOrdRed'> Note non Completate</p>
+        <p className='textOrdRed'>Ordini non evasi</p>
         </div>
-        <div className='col'>
+        <div className='col' style={{paddingLeft: "0px", paddingRight: "15px"}}>
         <TextField
       inputRef={inputRef}
       className="inputSearchOrd"
@@ -344,7 +363,7 @@ const contEffect = async () => {
         </div>
         <div className='row'>
         <div className='col-1' >
-        <p className='coltext'>N</p>
+        <p className='coltext'>N.</p>
         </div>
         <div className='col-8' >
         <p className='coltext'>Cliente</p>
@@ -353,6 +372,11 @@ const contEffect = async () => {
       </div>
 
       <div className="scrollOrdCli">
+      {Progress == false && 
+        <div style={{marginTop: "14px"}}>
+          <CircularProgress />
+        </div>
+      }
       {todos.filter((val)=> {
         if(searchTerm === ""){
           return val
@@ -369,7 +393,7 @@ const contEffect = async () => {
         </div>
          <div className='col-8 diviCol' 
           onClick={() => {
-                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito)
+                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
                 navigate("/nota");
                 auto(todo.nomeC);
                 AutoProdCli.length = 0
@@ -402,16 +426,15 @@ const contEffect = async () => {
         ))} 
         </div>
         </div>
-        </div>
-        <div className='col'> 
+
         {/***********Note completate********************************************************************************** */}
         <div  className='todo_containerOrdCli mt-5'>
         <div className='row'> 
-        <div className='col'>
+        <div className='col' style={{paddingRight: "0px"}}>
         <p className='colTextTitle'> Ordine Clienti</p>
-        <p className='textOrd'> Note Completate</p>
+        <p className='textOrd'> Ordini Evasi </p>
         </div>
-        <div className='col'>
+        <div className='col' style={{paddingLeft: "0px", paddingRight: "15px"}}>
         <TextField
       inputRef={inputRef}
       className="inputSearchOrd"
@@ -430,7 +453,7 @@ const contEffect = async () => {
         </div>
         <div className='row'>
         <div className='col-1' >
-        <p className='coltext'>N</p>
+        <p className='coltext'>N.</p>
         </div>
         <div className='col-8' >
         <p className='coltext'>Cliente</p>
@@ -439,6 +462,11 @@ const contEffect = async () => {
       </div>
 
       <div className="scrollOrdCli">
+      {Progress == false && 
+        <div style={{marginTop: "14px"}}>
+          <CircularProgress />
+        </div>
+      }
       {todos.filter((val)=> {
         if(searchTerm2 === ""){
           return val
@@ -455,7 +483,7 @@ const contEffect = async () => {
         </div>
          <div className='col-8 diviCol' 
           onClick={() => {
-                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito)
+                getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
                 navigate("/nota");
                 auto(todo.nomeC);
                 AutoProdCli.length = 0
@@ -488,7 +516,7 @@ const contEffect = async () => {
         ))} 
         </div>
         </div>
-        </div>
+{/*******End tabella ordine evasi********************************** */}
       </div>
       </motion.div>
       </>

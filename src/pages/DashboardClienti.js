@@ -29,18 +29,29 @@ import ShareIcon from '@mui/icons-material/Share';
 import SearchIcon from '@mui/icons-material/Search';
 import { WhatsappShareButton, WhatsappIcon } from 'react-share';
 import { motion } from 'framer-motion';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CircularProgress from '@mui/material/CircularProgress';
+
+export const dataProdotto = [];  //in questo caso viene salvato il valore anche quando cambio pagina
 
 function DashClienti({ clientId, nomeCli, getNotaDash }) {
 
   const [todos, setTodos] = React.useState([]);
   const [todosOrdChiu, setTodosOrdChiu] = React.useState([]);
+  const [todosNotaBlock, setTodosNotaBlock] = React.useState([]);
+  const [todosProdotto, setTodosProdotto] = React.useState([]);
 
   const timeElapsed = Date.now();  //prende la data attuale in millisecondi
   const today = new Date(timeElapsed);    //converte
   const [day, setday] = React.useState("");
 
+  const [Progress, setProgress] = React.useState(false);
+
   const [sommaTotIncasso, setSommaTotIncasso] = React.useState(0);
   const [sommaTotVendita, setSommaTotVendita] = React.useState(0);
+
+  const [flagRicercaProd, setFlagRicercaProd] = React.useState(false);
+  const [AutoProd, setAutoProd] = React.useState(localStorage.getItem("AutoProd"));
 
   const componentRef = useRef();  //serve per la stampa
   let navigate = useNavigate();
@@ -48,7 +59,7 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
   const [flagTabellaProdotti, setFlagTabellaProdotti] = useState(false);  
   const [FlagStampa, setFlagStampa] = useState(false);
 
-  const matches = useMediaQuery('(max-width:600px)');  //media query true se è uno smartphone
+  const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
   const [popupActive, setPopupActive] = useState(false); 
 
     //permessi utente
@@ -58,6 +69,28 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
 
     const [searchTerm, setSearchTerm] = useState("");  //search
     const inputRef= useRef();
+
+
+    function handleInputChange(event, value) {
+      localStorage.setItem("AutoProd", value);
+      setAutoProd(value)
+      var flag;
+      dataProdotto.length = 0   //qui va ad azzerrare l'aray
+      todosNotaBlock.map((nice) => {    //vado a prendere le date di quel prodotto
+        flag= false;  //riazzera il flag
+        if ( value == nice.prodottoC && nomeCli == nice.nomeC) {   //se il prodotto è uguale ad una nota vado a prendere la data di quella nota
+          dataProdotto.map((nice2) => {   //controllo data uguale, cambia il falg se trova la stessa data
+            if (nice2.dataProd == nice.dataC) {  //qui va a verificare che questa data non è presenete gia nell'array dataProdotto, se è diversa allora salva la trupla
+              flag=true;   //Se questo diventa true allora la quella data non verrà messa nell'array, perché è uguale a già un altra data che è stata già inserita
+            }
+          })
+          if(flag == false) {    //va ad aggiungere la trupla
+            let car = { dataProd: nice.dataC }  //mi vado a salvare la data nell'array
+            dataProdotto.push(car);   //inserisce la trupla nell'aray di oggetti
+          }
+        }
+      })
+  }
 
 //_________________________________________________________________________________________________________________
      //messaggio di conferma per cancellare la trupla
@@ -99,6 +132,9 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
       setTodosOrdChiu(todosArray);
+      setProgress(true);
+      today.setDate(today.getDate() - 31);   //fa la differenza rispetto al valore del select sottraendo, il risultato sarà in millisecondi
+      localStorage.setItem("bho4", today.getTime())
     });
     return () => unsub();
   }, []);
@@ -106,6 +142,39 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
   React.useEffect(() => {   //mi serve per la tabella ordini chiusi
     SommaTot()
   }, [todosOrdChiu, day]);
+
+  React.useEffect(() => {   //mi serve per la tabella ordini chiusi
+    SommaTot()
+  }, [todosOrdChiu, day]);
+//********************************************************************************** */
+  React.useEffect(() => {   //mi serve per creare l'arrai dataProdotto;
+    const collectionRef = collection(db, "NotaBloccata");  //va a prendere le note bloccate
+    const q = query(collectionRef, where("nomeC", "==", nomeCli));
+
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let todosArray = [];
+      querySnapshot.forEach((doc) => {
+        todosArray.push({ ...doc.data(), id: doc.id });
+      });
+      setTodosNotaBlock(todosArray);
+    });
+    return () => unsub();
+  }, [flagRicercaProd == true]);
+
+
+  React.useEffect(() => {   //mi serve per l'autocomplete della ricerca per prodotti
+    const collectionRef = collection(db, "prodotto");
+    const q = query(collectionRef, orderBy("nomeP"));
+
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let todosArray = [];
+      querySnapshot.forEach((doc) => {
+        todosArray.push({ ...doc.data(), id: doc.id });
+      });
+      setTodosProdotto(todosArray);
+    });
+    return () => unsub();
+  }, [flagRicercaProd == true]);
     //**************************************************************************** */
 
     const handleChangeDataSelect = (event) => {
@@ -155,12 +224,32 @@ const print = async () => {
 
       return ( 
       <> 
+    {/**************NAVBAR MOBILE*************************************** */}
+    <div className='navMobile row'>
+      <div className='col-2'>
+        <IconButton className="buttonArrow" aria-label="delete" sx={{ color: "#f6f6f6", marginTop: "7px" }}
+        onClick={ ()=> {navigate("/listaclienti"); }}>
+        <ArrowBackIcon sx={{ fontSize: 30 }}/>
+      </IconButton>
+      </div>
+      <div className='col' style={{padding: 0}}>
+      <p className='navText'> Dashboard Clienti </p>
+      </div>
+      </div>
+
       <motion.div
         initial= {{x: "-100vw"}}
         animate= {{x: 0}}
         transition={{ duration: 0.4 }}
        >
-        <h1 className='title mt-3'> Dashboard Clienti</h1>
+
+  {!matches &&
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate("/listaclienti")}}>
+      <ArrowBackIcon id="i" /></button> 
+  }
+
+      {!matches ? <h1 className='title mt-3'> Dashboard Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
         <h4 className='mt-3'>Nome Cliente: {nomeCli} </h4>
 
 {/*********************** Icona Share
@@ -168,11 +257,22 @@ const print = async () => {
         <WhatsappIcon type="button" size={40} round={true} />
     </WhatsappShareButton>
 */}
-        {!matches &&
+
       <div>
         <span><button >Debito </button></span>
+        <span><button onClick={() => {setFlagRicercaProd(!flagRicercaProd)}}>Ricerca per prodotto </button></span>
       </div>
-    }
+
+  {flagRicercaProd == true &&
+  <div style={{width: "500px", margin: "0 auto", marginTop: "20px"}}>
+    <Autocomplete
+        freeSolo
+      value={AutoProd}
+      options={todosProdotto.map((option) => option.nomeP)}
+      onInputChange={handleInputChange}
+      componentsProps={{ popper: { style: { width: 'fit-content' } } }}
+      renderInput={(params) => <TextField {...params} label="Seleziona il prodotto" />}/> </div>
+  }
 
 {/*************Tabella ordini chiusi******************************************* */}
 <div ref={componentRef} className='todo_containerProdCli mt-3'>
@@ -187,7 +287,7 @@ const print = async () => {
           <Select sx={{height:39, marginLeft:-1, width: 200}}
             labelId="demo-simple-select-label"
             id="demo-simple-select"
-            defaultValue={8}
+            defaultValue={31}
             onChange={handleChangeDataSelect}>
               <MenuItem value={8}>Ultimi 7 giorni</MenuItem>
               <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
@@ -223,8 +323,41 @@ const print = async () => {
 </div>
     <hr style={{margin: "0"}}/>
 </div>
-
-
+  {Progress == false && 
+  <div style={{marginTop: "14px"}}>
+      <CircularProgress />
+  </div>
+      }
+{/**********filtro per ricerca del prodotto se è presente nell'autocomplete********************************** */}
+{(AutoProd && flagRicercaProd == true) &&  
+<>
+  { dataProdotto.map((dtPrd) => (
+  <>
+  <div key={dtPrd.id}>
+  {todosOrdChiu.map((todo) => (
+    <div key={todo.id}>
+    {dtPrd.dataProd == todo.data && todo.nomeC == nomeCli && todo.dataMilli >= localStorage.getItem("bho4") && 
+    <div className='row' style={{padding: "0px"}}   
+                  onClick={() => {
+                  getNotaDash(todo.id, todo.nomeC, todo.data)
+                navigate("/notadashcliente");
+                         }}>
+      <div className='col diviCol'><p className='inpTab'>{todo.data} </p> </div>
+      <div className='col diviCol'><p className='inpTab'> {todo.quota} </p> </div>
+      <div className='col diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.sommaTotale}</p></div>
+      <hr style={{margin: "0"}}/>
+    </div>
+    }
+    </div>
+  ))}
+  </div>
+  </>
+)) }
+</>
+}
+{/**********filtro per data, nel caso in cui non è presente il prodotto nell'autocomplete********************************** */}
+{(!AutoProd || flagRicercaProd == false) &&
+<>
 {todosOrdChiu.map((todo) => (
     <div key={todo.id}>
     { todo.nomeC == nomeCli && todo.dataMilli >= localStorage.getItem("bho4") && 
@@ -241,6 +374,8 @@ const print = async () => {
     }
     </div>
   ))}
+</>
+}
   </div>
   </motion.div> 
       </>

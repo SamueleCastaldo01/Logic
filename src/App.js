@@ -131,17 +131,35 @@ function App() {
             setValue(newValue);
           }}
         >
-        {(gui ==true || sup==true)  && 
+        {sup ==true   && 
+          <BottomNavigationAction
+          component={Link}
+          className="linq"
+          to="/"
+           label="Home" icon={<HomeIcon/>}/> }
+        {gui ==true   && 
           <BottomNavigationAction
           component={Link}
           className="linq"
           to="/scalettadatadip"
            label="Scaletta" icon={<FormatListBulletedIcon/>}/> }
-        {((gui ==true) || (sup ==true))  && 
+        {sup ==true   && 
+          <BottomNavigationAction
+          component={Link}
+          className="linq"
+          to="/scalettadata"
+           label="Scaletta" icon={<FormatListBulletedIcon/>}/> }
+        {gui ==true  && 
           <BottomNavigationAction
           component={Link}
           className="linq"
           to="/listaclientidip"
+           label="Clienti" icon={<ContactPageIcon/>} /> }
+        {sup ==true  && 
+          <BottomNavigationAction
+          component={Link}
+          className="linq"
+          to="/listaclienti"
            label="Clienti" icon={<ContactPageIcon/>} /> }
         {(dip ==true || sup == true) &&
           <BottomNavigationAction
@@ -155,7 +173,7 @@ function App() {
            className="linq"
           to="/ordineclientidata"
            label="Ordine" icon={<ShoppingCartIcon />} />}
-        {(dip == true || sup == true) &&
+        {dip == true &&
            <BottomNavigationAction
            component={Link}
            className="linq"

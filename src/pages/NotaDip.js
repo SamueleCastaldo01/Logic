@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import Fade from '@mui/material/Fade';
 import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes, notifyErrorNumCartoni} from '../components/Notify';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) {
@@ -47,6 +48,7 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
     const [contPage, setContPage] = useState(notaDipCont);
     const [numeroPagineNota, setNumeroPagineNota] = useState("");
 
+    const [Progress, setProgress] = React.useState(false);
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
     const today = new Date(timeElapsed);    //converte da millisecondi a data
 
@@ -104,6 +106,7 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
             todosArray.push({ ...doc.data(), id: doc.id });
           });
           setTodos(todosArray);
+          setProgress(true);
         });
         localStorage.removeItem("NotaDipId");
         handleNumeroDiNote();
@@ -212,7 +215,6 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
         querySnapshot.forEach(async (hi) => {
         await updateDoc(doc(db, "debito", hi.id), { deb1:debTrunc});  //aggiorna deb1 nel database del debito
         });
-
         toast.clearWaitingQueue(); 
   };
   //*************************IN ORDINE E IN SOSPESO************************************************************************ */
@@ -223,6 +225,14 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
           nomeC: nomeC,
           dataC: notaDipDataC,
           qtProdotto: nice.qtProdotto,
+          prodottoC: nice.prodottoC,
+        });
+      }
+      if (nomeC == nice.nomeC && notaDipDataC==nice.dataC && nice.simbolo == "1") {   //va a prendere il prodotto con il (-...) e inseriamo questo prodotto nel db inOrdine
+        await addDoc(collection(db, "inOrdine"), {   //va a creare la nuova trupla nella tabella inOrdine
+          nomeC: nomeC,
+          dataC: notaDipDataC,
+          qtProdotto: nice.meno,
           prodottoC: nice.prodottoC,
         });
       }
@@ -318,7 +328,7 @@ const print = async () => {
       </IconButton>
       </div>
       <div className='col' style={{padding: 0}}>
-      <p className='navText'> NoteDip </p>
+      <p className='navText'> Note Dipendente </p>
       </div>
       </div>
 
@@ -348,6 +358,11 @@ const print = async () => {
 
 {/** tabella dei prodotti solo la lista */}
   <div className="scrollNota">
+  {Progress == false && 
+  <div style={{marginTop: "14px"}}>
+    <CircularProgress />
+  </div>
+      }
   {todos.map((todo1) => (
     <div key={todo1.id}>
     {todo1.nomeC  === todo.nomeC && todo1.dataC == todo.data &&  (

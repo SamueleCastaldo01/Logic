@@ -19,6 +19,7 @@ import SpeedDialAction from '@mui/material/SpeedDialAction';
 import PrintIcon from '@mui/icons-material/Print';
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from '@mui/icons-material/Add';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DescriptionIcon from '@mui/icons-material/Description';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
@@ -286,21 +287,9 @@ const contEffect = async () => {
   //********************************************************************************** */
       return ( 
       <>  
-        <SpeedDial
-          ariaLabel="SpeedDial basic example"
-          hidden={!matches}
-          sx={{ position: 'absolute', bottom: 120, right: 36 }}
-          icon={<SpeedDialIcon />}
-        >
-          {actions.map((action) => (
-            <SpeedDialAction
-              key={action.name}
-              icon={action.icon}
-              tooltipTitle={action.name}
-              onClick={action.action}
-            />
-          ))}
-        </SpeedDial>
+       <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate("/ordinefornitoridata")}}>
+      <ArrowBackIcon id="i" /></button> 
           <h1 className='title mt-3'>Ordine Fornitori</h1>
           <h3 style={{fontSize: "20px"}}>{moment(dataOrd.toDate()).format("L")}</h3>
   

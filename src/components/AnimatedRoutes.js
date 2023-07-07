@@ -20,6 +20,7 @@ import Nota from '../pages/Nota';
 import NotaForni from '../pages/NotaForni';
 import DashClienti from '../pages/DashboardClienti';
 import DashFornitori from '../pages/DashboardFornitori';
+import ScortaTinte from '../pages/ScortaTinte';
 import Scorta from '../pages/Scorta';
 import NotaDashCliente from '../pages/NotaDashCliente';
 import {PrivateRoutes, PrivateCate, PrivatePerm, PrivateDashCli, PrivateOrd, PrivateOrdForn, PrivateNota, PrivateNotaForni, PrivateDashForn, PrivateAddClientiScalet, PrivateRoutesDipen, PrivateRoutesSup, PrivateRoutesGuid} from '../components/PrivateRoutes';
@@ -85,6 +86,7 @@ function AnimatedRoutes() {
     const [notaTel, setNotaTel] = useState(localStorage.getItem("notaTel"));
     const [notaIva, setNotaIva] = useState(localStorage.getItem("notaIva"));
     const [IdDebNota, setIdDebNota] = useState(localStorage.getItem("idDebNot"));
+    const [notaNumBuste, setNotaNumBuste] = useState(localStorage.getItem("notaNumBuste"));
     const [notaCompleta, setNotaCompleta] = useState(localStorage.getItem("notaCompleta"));
   
     const [notaDipId, setNotaDipId] = useState(localStorage.getItem("notaDipId"));
@@ -149,7 +151,7 @@ function AnimatedRoutes() {
         setDataOrdFornConf(data);
       };
     
-      const getNotadHandler = (id, cont, nome, datav, datac, numCart, sommaTot, debiResi, debiTot, indi, tel, iva, comp, idDebito) => {
+      const getNotadHandler = (id, cont, nome, datav, datac, numCart, sommaTot, debiResi, debiTot, indi, tel, iva, comp, idDebito, numBust) => {
         localStorage.setItem("NotaId", id); 
         localStorage.setItem("NotaCon", cont); //save the value locally
         localStorage.setItem("NotaNomeC", nome); 
@@ -164,6 +166,7 @@ function AnimatedRoutes() {
         localStorage.setItem("notaIva", iva); 
         localStorage.setItem("notaCompleta", comp);
         localStorage.setItem("idDebNot", idDebito);
+        localStorage.setItem("notaNumBuste", numBust);
         console.log({comp})
         setNotaId(id);
         setNotaCont(cont);
@@ -177,8 +180,9 @@ function AnimatedRoutes() {
         setNotaIndi(indi);
         setNotaTel(tel);
         setNotaIva(iva);
-        setIdDebNota(idDebito)
-        setNotaCompleta(comp)
+        setIdDebNota(idDebito);
+        setNotaCompleta(comp);
+        setNotaNumBuste(numBust);
       };
     
       const getNotaDipHandler = (id, cont, nome, datac, nuCat) => {
@@ -242,6 +246,7 @@ function AnimatedRoutes() {
     <Route path="/" element={<HomePage />} />
     <Route path="/listafornitori" element={<AddFornitori getFornId={getFornIdHandler}/>} />
     <Route path="/scorta" element={<Scorta />} />
+    <Route path="/scortatinte" element={<ScortaTinte />} />
     <Route path="/scalettadata" element={<ScaletData getColId={getColIdHandler}/>} />
     <Route path="/ordineclientidata" element={<OrdineCliData getOrdId={getOrderIdHandler}/>} />
     <Route path="/ordinefornitoridata" element={<OrdineForniData getOrdFornId={getOrderFornIdHandler}/>} />
@@ -280,7 +285,7 @@ function AnimatedRoutes() {
       </Route>
   
       <Route element={<PrivateNota notaId={notaId}/>}>
-      <Route path="/nota" element={<Nota notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
+      <Route path="/nota" element={<Nota notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
       </Route>
   
       <Route element={<PrivateNotaForni notaFornId={notaFornId}/>}>

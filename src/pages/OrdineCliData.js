@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, Timestamp, query, where, orderBy, getDocs} from 'firebase/firestore';
 import moment from 'moment/moment';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { TextField } from '@mui/material';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -21,7 +22,10 @@ import MenuItem from '@mui/material/MenuItem';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import LockIcon from '@mui/icons-material/Lock';
 import { Opacity, Timer3 } from '@mui/icons-material';
+import IconButton from '@mui/material/IconButton';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { motion } from 'framer-motion';
+import CircularProgress from '@mui/material/CircularProgress';
 export const AutoComp1 = [];
 
 
@@ -36,9 +40,11 @@ function OrdineCliData({ getOrdId }) {
     const [flagDelete, setFlagDelete] = useState(false); 
     const [flagBlock, setFlagBlock] = useState(false); 
 
+    const [Progress, setProgress] = React.useState(false);
     const [popupActive, setPopupActive] = useState(false);  
 
     const [nome, setData] = useState("");
+    const matches = useMediaQuery('(max-width:920px)');  //media query true se è un dispositivo più piccolo del value
 
     moment.locale("it");
 
@@ -146,6 +152,7 @@ function OrdineCliData({ getOrdId }) {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
       setColle(todosArray);
+      setProgress(true);
       today.setDate(today.getDate() - 8);   //fa la differenza rispetto al valore del select sottraendo
       localStorage.setItem("bho3", today.getTime())
     });
@@ -253,12 +260,21 @@ function OrdineCliData({ getOrdId }) {
 //************************************************************** */
     return ( 
     <> 
+        {/**************NAVBAR MOBILE*************************************** */}
+        <div className='navMobile row'>
+      <div className='col-2'>
+      </div>
+      <div className='col' style={{padding: 0}}>
+      <p className='navText'> Ordine Clienti </p>
+      </div>
+      </div>
+
         <motion.div className='container' style={{padding: "0px"}}
         initial= {{x: "-100vw"}}
         animate= {{x: 0}}
         transition={{ duration: 0.4 }}
         >
-    <h1 className='title mt-3'> Ordine Clienti</h1>
+   {!matches ? <h1 className='title mt-3'> Ordine Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
     <button onClick={() => {setFlagDelete(true); setFlagBlock(false)}}>elimina</button>
     <button onClick={() => {setFlagBlock(true); setFlagDelete(false)}}>blocca</button>
 {/** inserimento Data *************************************************************/}
@@ -299,8 +315,8 @@ function OrdineCliData({ getOrdId }) {
           
                 </div>
               </div>
-
-          <div className='todo_container' style={{width: "400px"}}>
+{/*************************TABELLA ORDINI CLIENTI DATA************************************************************************** */}
+          <div className='todo_container' style={{width: "350px"}}>
               <div className='row'>
                       <div className='col colTextTitle'>
                        Ordine Clienti
@@ -308,7 +324,7 @@ function OrdineCliData({ getOrdId }) {
                       <div className='col'>
                         <FormControl >
                         <InputLabel id="demo-simple-select-label"></InputLabel>
-                        <Select sx={{height:39, marginLeft:-1, width: 200}}
+                        <Select sx={{height:39, marginLeft:-1, width: 150}}
                          labelId="demo-simple-select-label"
                         id="demo-simple-select"
                         defaultValue={8}
@@ -322,20 +338,26 @@ function OrdineCliData({ getOrdId }) {
                         </div>
                     </div>
 
+                    {Progress == false && 
+                    <div style={{marginTop: "14px"}}>
+                      <CircularProgress />
+                    </div>
+                    }
                 {colle.map((col) => (
                   <div key={col.id}>
                   {col.dataMilli >= localStorage.getItem("bho3") && 
                     <>
-                    <div className="diviCol" > 
+                    <div className="diviCol"> 
                       <div className="row">
-
-                        <div className="col-9">
-                        <h3 className='inpTab' onClick={() => {
+                        <div className="col-9" onClick={() => {
                             getOrdId(col.id, col.nome, col.data, col.dataMilli)
-                            navigate("/addnota");
+                            setTimeout(function(){
+                              navigate("/addnota");
+                            },10);
                             auto();
                             AutoComp1.length = 0
-                            }}>{ moment(col.nome.toDate()).format("L") } &nbsp; { moment(col.nome.toDate()).format('dddd') }</h3>
+                            }}>
+                        <h3 className='inpTab' >{ moment(col.nome.toDate()).format("L") } &nbsp; { moment(col.nome.toDate()).format('dddd') }</h3>
                         </div>
                         <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}>  
                         <NavigateNextIcon/>          

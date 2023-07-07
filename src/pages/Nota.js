@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp} from 'firebase/firestore';
 import { useRef } from 'react';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
 import BeenhereIcon from '@mui/icons-material/Beenhere';
@@ -10,14 +12,17 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import { IconButton } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
 import { fontSize } from '@mui/system';
 import { motion } from 'framer-motion';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
-function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNota, debit, debTo, indirizzo, tel, iva, completa, idDebito }) {
+function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, numBust, prezzoTotNota, debit, debTo, indirizzo, tel, iva, completa, idDebito }) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -28,6 +33,10 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
     const [todosInOrdine, setTodosInOrdine] = React.useState([]);
     const [todosInSospeso, setTodosInSospeso] = React.useState([]);
 
+    let navigate = useNavigate();
+
+    const [Progress, setProgress] = React.useState(false);
+
     const [prodottoC, setProdottoC] = React.useState("");
     const [t1, setT1] = React.useState("");   //tinte, che dentro una trupla ci possono essere massimo 5
     const [t2, setT2] = React.useState("");
@@ -35,6 +44,8 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
     const [t4, setT4] = React.useState("");
     const [t5, setT5] = React.useState("");
     const [nomTin, setnomTin] = React.useState("");
+
+    const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
 
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
     const today = new Date(timeElapsed);    //converte da millisecondi a data
@@ -46,6 +57,7 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, prezzoTotNot
     const [flagInSospeso, setFlagInSospeso] = React.useState(false);  //quando è falso si vedono le icone,
 
     const [NumCart, setNumCart] = React.useState(numCart);
+    const [NumBuste, setNumBuste] = React.useState(numBust);
     const [Completa, setCompleta] = useState(completa);
    
     const [sumTot, setSumTot] =React.useState(prezzoTotNota);
@@ -124,6 +136,7 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
             todosArray.push({ ...doc.data(), id: doc.id });
           });
           setTodos(todosArray);
+          setProgress(true);
         });
         localStorage.removeItem("NotaId");
         return () => unsub();
@@ -169,6 +182,7 @@ const createCate = async () => {
     artPreso: false,
     simbolo: "",
     simbolo2: "",
+    meno: 0,
     t1,
     t2,
     t3,
@@ -191,6 +205,14 @@ const handleInOrdine = async () => {  //Inserisce una nuova trupa nella tabella 
         nomeC: nomeCli,
         dataC: dataNotaC,
         qtProdotto: nice.qtProdotto,
+        prodottoC: nice.prodottoC,
+      });
+    }
+    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC && nice.simbolo == "1") {   //va a prendere il prodotto con il (-...) e inseriamo questo prodotto nel db inOrdine
+      await addDoc(collection(db, "inOrdine"), {   //va a creare la nuova trupla nella tabella inOrdine
+        nomeC: nomeCli,
+        dataC: dataNotaC,
+        qtProdotto: nice.meno,
         prodottoC: nice.prodottoC,
       });
     }
@@ -264,6 +286,25 @@ const handleRemoveNumCart = async (e) => {  //quando si preme il pulsante per ri
   await updateDoc(doc(db, "addNota", notaId), { NumCartoni:nuCut});
 }
 
+const handleAddNumBuste = async (e) => {  //funzione aggiungere i cartoni
+  var nuCut
+  e.preventDefault();
+  setNumBuste(+NumBuste+1);
+  nuCut=+NumBuste+1
+  await updateDoc(doc(db, "addNota", notaId), { NumBuste: nuCut});
+}
+
+const handleRemoveNumBuste = async (e) => {  //quando si preme il pulsante per rimuovere (numero di cartoni)
+  var nuCut
+  e.preventDefault();
+  if(NumBuste <= 0) {  //se il numero di cartoni è minore di 0 non fa nulla
+    return
+  }
+  setNumBuste(+NumBuste-1);
+  nuCut= +NumBuste-1
+  await updateDoc(doc(db, "addNota", notaId), { NumBuste:nuCut});
+}
+//_________________________________________________________________________________________________________________
 const handleEditCompAnn = async (e) => {  //completa
   setDebTot(0)
   await updateDoc(doc(db, "addNota", notaId), { completa: localStorage.getItem("completa"), debitoTotale: 0}) ;
@@ -325,14 +366,34 @@ const print = async () => {
 //************************************************************** */
     return (  
         <>
+        {/**************NAVBAR MOBILE*************************************** */}
+        <div className='navMobile row'>
+      <div className='col-2'>
+        <IconButton className="buttonArrow" aria-label="delete" sx={{ color: "#f6f6f6", marginTop: "7px" }}
+        onClick={ ()=> {navigate("/addnota"); }}>
+        <ArrowBackIcon sx={{ fontSize: 30 }}/>
+      </IconButton>
+      </div>
+      <div className='col' style={{padding: 0}}>
+      <p className='navText'> Nota </p>
+      </div>
+      </div>
+
+
         <motion.div
         initial= {{opacity: 0}}
         animate= {{opacity: 1}}
         transition={{ duration: 0.7 }}>
-    <h1 className='title mt-3'>Nota</h1>
+
+{!matches && 
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate("/addnota")}}>
+      <ArrowBackIcon id="i" /></button> }
+
+      
+      {!matches ? <h1 className='title mt-3'> Nota</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
     <span><button onClick={print}>Stampa </button></span>
-
       {Completa==0 && 
       <>
       <span><button onClick={() => {
@@ -526,6 +587,11 @@ const print = async () => {
 
 {/** tabella dei prodotti */}
   <div className="scrollNota">
+  {Progress == false && 
+  <div style={{marginTop: "14px"}}>
+      <CircularProgress />
+  </div>
+      }
   {todos.map((todo) => (
     <div key={todo.id}>
     {todo.nomeC  === nomeCli && todo.dataC == dataNotaC &&  (
@@ -558,6 +624,13 @@ const print = async () => {
         <button className="button-delete" style={{padding: "0px"}} onClick={handleRemoveNumCart}> <RemoveCircleIcon sx={{ fontSize: 35 }}/> </button>
       </span> }
     </h6> 
+    <h6 className='mt-2'>Numero Buste: <span> {NumBuste} </span> 
+    {Completa == 0 && flagStampa ==false &&
+      <span>
+        <button className="button-complete" style={{padding: "0px"}} onClick={handleAddNumBuste}> <AddCircleIcon sx={{ fontSize: 35 }}/> </button>
+        <button className="button-delete" style={{padding: "0px"}} onClick={handleRemoveNumBuste}> <RemoveCircleIcon sx={{ fontSize: 35 }}/> </button>
+      </span> }
+    </h6> 
        </div>
 
     <div className='col' style={{textAlign:"right", padding:"0px"}}>
@@ -579,8 +652,8 @@ const print = async () => {
     </div>
 
   </div>
-
     </div>
+    <div style={{marginBottom: "120px"}}></div>
 </motion.div>
     </>
       )

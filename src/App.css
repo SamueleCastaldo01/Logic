@@ -13,10 +13,17 @@ body {
   --greenHo: #39A675;
   --red: #FD2B38;
 }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
 
 .grafici {
+  border-width: 3px;
   background-color: #efefef;
-  max-width: 450px;
+  width: 450px;
+  margin: 0 auto;
   border-radius: 20px;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
@@ -45,6 +52,17 @@ button:active {
 .checkboxStyle{
   zoom: 2;
   margin-top: 3px;
+}
+.buttonArrow{
+  float: left;
+}
+.backArrowPage{
+  background-color: #EFEFEF;
+  border-radius: 10px;
+}
+
+.backArrowPage:hover{
+  box-shadow:inset 0 0.6em 2em -0.3em rgba(0,0,0,0.15),inset 0 0 0em 0.05em rgba(255,255,255,0.12);
 }
 
 .but {
@@ -129,7 +147,12 @@ button:active {
 }
 
 .diviCol {
+  border-radius: 5px;
   height: 40px;
+}
+.diviCol:active{
+  box-shadow:inset 0 0.6em 2em -0.3em rgba(0,0,0,0.15),inset 0 0 0em 0.05em rgba(255,255,255,0.12);
+  transform: translateY(-1px);
 }
 
 .hrNotDip{
@@ -215,7 +238,7 @@ opacity: 1;
   font-family: "Times New Roman";
   border: px solid;
   border-radius: 20px;
-  width: 200px;
+  width: 185px;
   height: 35px;
 }
 
@@ -225,15 +248,8 @@ opacity: 1;
   text-align: left;
 }
 
-.AscCont {
-  width: 1200px;
-  padding-left: 10px;
-  margin: 0 auto;
-}
-
 .foglioA4{
 width: 792px;
-
 }
 
 .colNotaSini{
@@ -348,6 +364,7 @@ width: 792px;
   padding-bottom: 45px;
 }
 
+.formScortTinte,
 .formForni,
 .formCli,
 .formAC,
@@ -376,9 +393,11 @@ width: 792px;
   margin-top: 20px;
 }
 .formScort{
-  height: 250px;
+  height: 300px;
 }
-
+.formScortTinte{
+  height: 238px;
+}
 .formAC {
   height: 300px;
 }
@@ -388,7 +407,7 @@ width: 792px;
 }
 .formSD {
   max-width: 355px;
-  height: 370px;
+  height: 390px;
 }
 
 .textOrdRed,
@@ -458,7 +477,7 @@ width: 110%;
   padding-left: 10px;
   padding-top: 10px;
   padding-right: 10px;
-  padding-bottom: 30px;
+  padding-bottom: 20px;
   margin: 0 auto;
   overflow-y: hidden;
   overflow-x: hidden;
@@ -473,20 +492,30 @@ width: 110%;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
 
+.containerTabNote,
+.containerGrafici{
+  width: 100%;
+  padding: 0px;
+  padding-top: 20px;
+  display: flex;
+  column-gap: 20px;
+}
+
+.todo_containerScalet,
 .todo_containerInOrdine,
 .todo_containerCli,
 .todo_containerScorta,
 .todo_containerFor,
 .todo_containerOrdCli,
 .todo_containerProdCli{
-  max-height: 500;
+  max-height: 840;
   padding-right: 0px;
 }
 
 .scrollScaletDatDip,
 .scrollOrdCli,
 .scroll {
-  max-height: 830px;
+  max-height: 880px;
   overflow-y: scroll;
   overflow-x: hidden;
   padding-bottom: 0px;
@@ -502,25 +531,25 @@ width: 110%;
   width: 1000px;
 }
 .todo_containerDebCli{
-  width: 1000px;
+  width: 760px;
 }
 .todo_container {
   width: 1200px;
 }
 .todo_containerScalet {
-  width: 1200px;
+  width: 760px;
 }
 .todo_containerCli {
-  width: 1200px;
+  width: 760px;
 }
 .todo_containerScorta{
-  width: 900px;
+  width: 760px;
 }
 .todo_containerFor{
   width: 500px;
 }
 .todo_containerOrdCli{
-  max-width: 400px;
+  width: 350px;
 }
 .todo_containerProdCli{
   width: 500px;
@@ -567,6 +596,8 @@ width: 110%;
   background-color: var(--red);
 }
 
+.ButtonFilterCale,
+.buttonCalender,
 .buttonMenu,
 .button-navBar,
 .button-complete,
@@ -580,6 +611,9 @@ width: 110%;
 }
 #i {
   font-size: 35px;
+}
+.buttonCalender{
+  padding-right: 12px;
 }
 .buttonMenu {
   color: #333333;
@@ -695,6 +729,12 @@ button:focus {
   .titleNotaDip{
     font-size: 20px;
   }
+  .grafici {
+    max-width: 370px;
+  }
+  .scroll {
+    max-height: 850px;
+  }
 }
 
 @media screen and (max-width: 600px) { /* smartphone s20 ultra*/
@@ -726,6 +766,9 @@ button:focus {
   .divScalDipData{
     width: 360px;
   }
+  .grafici {
+    max-width: 390px;
+  }
 }
 
 @media screen and (max-width: 392px) { /* smartphone iphone x*/ 
@@ -751,11 +794,14 @@ button:focus {
   .divScalDipData{
     width: 325px;
   }
+  .grafici {
+    max-width: 350px;
+  }
 }
 
 @media screen and (max-width: 1370px) { /* surface pro 7*/
   .scroll {
-    max-height: 510px;
+    max-height: 850px;
   }
   .scrollOrdCli{
     max-height: 300px;

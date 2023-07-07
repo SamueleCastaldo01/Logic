@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, Timestamp, query, where, orderBy, getDocs, serverTimestamp} from 'firebase/firestore';
 import moment from 'moment/moment';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { TextField } from '@mui/material';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -22,6 +23,7 @@ import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import { motion } from 'framer-motion';
 import LockIcon from '@mui/icons-material/Lock';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export const AutoComp = [];
 
@@ -34,6 +36,8 @@ function ScaletData({ getColId }) {
     const [flagDelete, setFlagDelete] = useState(false); 
     const [flagBlock, setFlagBlock] = useState(false); 
 
+    const [Progress, setProgress] = React.useState(false);
+    const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
 
     const [nome, setData] = useState("");
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
@@ -116,7 +120,7 @@ function ScaletData({ getColId }) {
     )
 
       const block = () => {
-        bloccaNota(localStorage.getItem("scalId"), localStorage.getItem("dataEli"), localStorage.getItem("scalDataMilli"), localStorage.getItem("ScaltotalQuota"));
+        bloccaNota(localStorage.getItem("scalId"), localStorage.getItem("dataEli"), localStorage.getItem("scalDataMilli"), localStorage.getItem("ScaltotalQuota"), localStorage.getItem("scalSommaTot") );
           toast.clearWaitingQueue(); 
                }
 
@@ -145,13 +149,14 @@ function ScaletData({ getColId }) {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
       setColle(todosArray);
+      setProgress(true);
       today.setDate(today.getDate() - 8);   //fa la differenza rispetto al valore del select sottraendo, il risultato sarà in millisecondi
       localStorage.setItem("bho2", today.getTime())
     });
     return () => unsub();
   }, []);
   //_________________________________________________________________________________________________________________
-  const bloccaNota = async (id, dat, dtMilli, sQuot) => { //salva prima i dati su un altro database per poi cancellare i dati sul database in cui stavano
+  const bloccaNota = async (id, dat, dtMilli, sQuot, TotSom) => { //salva prima i dati su un altro database per poi cancellare i dati sul database in cui stavano
     const colDoc = doc(db, "scalDat", id);  
      
     //vado prima a inserire i dati nella scalettaBloccata, e dopo elimino tutti i dati della scaletta in base a quella data
@@ -172,6 +177,7 @@ function ScaletData({ getColId }) {
       data: dat,
       dataMilli: dtMilli,
       totalQuota: sQuot,
+      totalSommaTotale: TotSom,
     });
     await deleteDoc(colDoc);      //infine elimina la data scalDat
 }
@@ -231,12 +237,21 @@ function ScaletData({ getColId }) {
 //************************************************************** */
     return ( 
     <> 
+    {/**************NAVBAR MOBILE*************************************** */}
+    <div className='navMobile row'>
+      <div className='col-2'>
+      </div>
+      <div className='col' style={{padding: 0}}>
+      <p className='navText'> Scaletta </p>
+      </div>
+      </div>
+
     <motion.div
         initial= {{x: "-100vw"}}
         animate= {{x: 0}}
         transition={{ duration: 0.4 }}>
 
-    <h1 className='title mt-3'> Scaletta</h1>
+{!matches ? <h1 className='title mt-3'> Scaletta</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
     <button onClick={() => {setFlagDelete(true); setFlagBlock(false)}}>elimina</button>
     <button onClick={() => {setFlagBlock(true); setFlagDelete(false)}}>blocca</button>
@@ -302,17 +317,23 @@ function ScaletData({ getColId }) {
       </FormControl>
   </div>
 </div>
-
+        {Progress == false && 
+  <div style={{marginTop: "14px"}}>
+      <CircularProgress />
+  </div>
+      }
                 {colle.map((col) => (
                   <div key={col.id}>
                   {col.dataMilli >= localStorage.getItem("bho2") && 
                     <>
-                    <div className="diviCol"  > 
+                    <div className="diviCol" > 
                       <div className="row">
 
-                        <div className="col-9"  onClick={() => {
+                        <div className="col-9" onClick={() => {
                             getColId(col.id, col.nome, col.data)
-                            navigate("/scaletta");
+                            setTimeout(function(){
+                              navigate("/scaletta");
+                            },10);
                             auto();
                             AutoComp.length = 0
                             }}>
@@ -343,6 +364,7 @@ function ScaletData({ getColId }) {
                             localStorage.setItem("scalId", col.id);
                             localStorage.setItem("ScaltotalQuota", col.totalQuota);
                             localStorage.setItem("scalDataMilli", col.dataMilli);
+                            localStorage.setItem("scalSommaTot", col.totalSommaTotale);
                             displayMsgBlock();
                             toast.clearWaitingQueue(); 
                             }}>
