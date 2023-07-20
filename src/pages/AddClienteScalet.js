@@ -23,6 +23,8 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DescriptionIcon from '@mui/icons-material/Description';
 import IconButton from '@mui/material/IconButton';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import Calendar from 'react-calendar';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -43,8 +45,10 @@ function AddClienteScalet({notaDat, getDataScal }) {
     const [telefono, setTelefono] = React.useState("");
 
     const [dataSc, setDataSc] = React.useState("");
+    const [DataCal, setDataCal] = useState(new Date());
 
     const [popupActive, setPopupActive] = useState(true); 
+    const [activeCalender, setActiveCalender] = useState(false)
     const [Progress, setProgress] = React.useState(false); 
   
     //permessi utente
@@ -60,6 +64,14 @@ function AddClienteScalet({notaDat, getDataScal }) {
     function handleInputChange(event, value) {
         setDataSc(value)
     }
+
+    function onChangeDataCal(value) {   //si attiva quando seleziono una data dal calendario
+      setDataCal(value)  //serve per il calendario
+      var formattedDate = moment(value).format('DD-MM-YYYY');  //conversione della data in stringa
+    setDataSc(formattedDate)  //serve per cambiare la data come filtro
+    setActiveCalender(false)  //disattiva il calendario
+    }
+//____________
 //_________________________________________________________________________________________________________________
 const contEffect = async () => {
     console.log({notaDat})
@@ -108,6 +120,10 @@ const contEffect = async () => {
       })
           toast.clearWaitingQueue();}
   
+
+          const handleButtonScaletta = () => {
+                navigate("/scalettadata")
+                toast.clearWaitingQueue();}
   //********************************************************************************** */  
     React.useEffect(() => {
       const collectionRef = collection(db, "addNota");
@@ -220,7 +236,6 @@ const contEffect = async () => {
       </div>
       </div>
 
-
         <motion.div 
         initial= {{x: "-100vw"}}
         animate= {{x: 0}}
@@ -228,13 +243,14 @@ const contEffect = async () => {
 
     {!matches && 
   <button className="backArrowPage" style={{float: "left"}}
-      onClick={() => {navigate("/addnota")}}>
+      onClick={() => {navigate(-1)}}>
       <ArrowBackIcon id="i" /></button> 
     }
 
       {!matches ? <h1 className='title mt-3'>Aggiungi Cliente alla Scaletta</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
         <div>
+        <span><button onClick={() => {handleButtonScaletta()}}>Aggiungi una data alla scaletta</button></span>
           <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
         </div>
 
@@ -308,22 +324,33 @@ const contEffect = async () => {
                 handleNaviScaletta()
             }}> <u>Scaletta</u></p>                
         </div>
-        <div className='col' style={{paddingRight: "25px"}}>
-        <Autocomplete
-      value={dataSc}
-      options={AutoDataScal}
-      onInputChange={handleInputChange}
-      componentsProps={{ popper: { style: { width: 'fit-content' } } }}
-      renderInput={(params) => <TextField {...params} label="Seleziona la data" />}/>
+    <div className='col' style={{textAlign:"right"}}>
+     {dataSc}
+      <button className='buttonCalender' onClick={() => {setActiveCalender(!activeCalender)}}> <CalendarMonthIcon/></button>
+      {activeCalender== true &&
+      <>
+  <div style={{width: "265px",position: "absolute", opacity:"100%"}}>
+  <motion.div
+        initial= {{x: -10}}
+        animate= {{x: -45}}
+        transition={{ type: "spring", mass: 0.5 }}>
+      <Calendar onChange={onChangeDataCal} value={DataCal} 
+        tileClassName={({ date, view }) => {
+      if(AutoDataScal.find(x=>x.label===moment(date).format("DD-MM-YYYY"))){
+       return  'highlight'
+      }
+      }}/>
+        </motion.div>
+      </div>
+    </>}
+    </div>
         </div>
-        </div>
-        <div className='row'>
+        <div className='row' style={{borderBottom: "1px solid gray"}}>
         <div className='col-8' >
         <p className='coltext'>Cliente</p>
         </div>
         
       </div>
-      <hr style={{margin: "0"}}/>
       <div className="scrollOrdCli">
       {Progress == false && 
         <div style={{marginTop: "14px"}}>
@@ -334,7 +361,7 @@ const contEffect = async () => {
           <div key={todo.id}>
           {todo.dataScal  === dataSc  &&  (
       <>
-    <div className='row'>
+    <div className='row' style={{borderBottom: "1px solid gray"}}>
          <div className='col-8 diviCol' 
           onClick={() => {
                          }}>
@@ -352,8 +379,7 @@ const contEffect = async () => {
                 <DeleteIcon id="i" />
                 </button>  
             </div>}
-    </div>
-    <hr style={{margin: "0"}}/>
+      </div>
              </>
                   )}
           </div>

@@ -10,11 +10,12 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { notifyErrorProd, notifyUpdateProd, notifyErrorNumNegativo, notifyErrorProdList, notifyErrorPrezzoProd } from '../components/Notify';
 import CloseIcon from '@mui/icons-material/Close';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import TodoScorta from '../components/TodoScorta';
 import Button from '@mui/material/Button';
-import { supa, guid, tutti } from '../components/utenti';
+import { supa, guid, tutti, dipen } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete from '@mui/material/Autocomplete';
 import SpeedDial from '@mui/material/SpeedDial';
@@ -37,6 +38,7 @@ function Scorta() {
 
   const [todos, setTodos] = React.useState([]);
   const [crono, setCrono] = React.useState([]);
+  const [cronoPa, setCronoPa] = React.useState([]);
 
   const [Progress, setProgress] = React.useState(false);
   const [Progress1, setProgress1] = React.useState(false);
@@ -61,7 +63,9 @@ function Scorta() {
   const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
 
   const [popupActiveCrono, setPopupActiveCrono] = useState(false);  
+  const [popupActiveCronoPa, setPopupActiveCronoPa] = useState(true); 
   const [FlagFilter, setFlagFilter] = useState("0");
+  const [PrdDisp, setPrdDisp] = useState(-1);
   const [FlagEdit, setFlagEdit] = useState("0");
   const [FlagRep, setFlagRep] = useState("2");   //incominciamo con il reparto maschile
 
@@ -81,6 +85,7 @@ function Scorta() {
 
   //permessi utente
   let sup= supa.includes(localStorage.getItem("uid"))
+  let dip= dipen.includes(localStorage.getItem("uid"))
   let gui= guid.includes(localStorage.getItem("uid"))
   let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
@@ -140,7 +145,7 @@ React.useEffect(() => {
 
   }, [FlagFilter, FlagEdit]);
 
-
+//cronologia debito
   React.useEffect(() => {
     const collectionRef = collection(db, "cronologia");
     const q = query(collectionRef, orderBy("createdAt", "desc"));
@@ -157,6 +162,24 @@ React.useEffect(() => {
 
   }, [popupActiveCrono == true]);
 
+
+  //cronologia Pa
+  React.useEffect(() => {
+    const collectionRef = collection(db, "cronologiaPa");
+    const q = query(collectionRef, orderBy("createdAt", "desc"));
+
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let todosArray = [];
+      querySnapshot.forEach((doc) => {
+        todosArray.push({ ...doc.data(), id: doc.id });
+      });
+      setCronoPa(todosArray);
+      setProgress1(true)
+    });
+    return () => unsub();
+
+  }, [popupActiveCrono == true]);
+
  //******************************************************************************* */
  //stampa
  const handlePrint = useReactToPrint({
@@ -164,6 +187,7 @@ React.useEffect(() => {
   documentTitle: 'emp-data',
   onAfterPrint: () => setFlagStampa(false)
 })
+
 
 const print = async () => {
   setFlagStampa(true);
@@ -219,6 +243,12 @@ const handleQuantCre = () => {  //va a fare l'ordinamento della qt in modo cresc
 
 const handleNome = () => {  //va a fare l'ordinamento della qt in modo crescente
   setFlagFilter("0");
+  setPrdDisp(-1);
+  handleClosi();
+};
+
+const handleProdDisp = () => {  //va a prendere i prodotti disponibili
+setPrdDisp(0);
   handleClosi();
 };
 
@@ -254,15 +284,6 @@ function handlePopUp(image, nota) {
       })
       });
  } 
- /**    Funzione per eliminare tutti i campi di una tabella del database
- const provaEli = async () => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
-  console.log("ciaaao");
-  const q = query(collection(db, "prodottoClin"));  //prendo tutti i clienti
-  const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (hi) => {
-      await deleteDoc(doc(db, "prodottoClin", hi.id));
-      });
- }  */
   
  const handleSubmit = async (e) => {   //creazione prdotto
     var bol= true
@@ -292,6 +313,7 @@ function handlePopUp(image, nota) {
         nomeP,
         quantita: 0,
         brand,
+        pa: 0,
         nota,
         sottoScorta,
         prezzoIndi,
@@ -313,7 +335,7 @@ function handlePopUp(image, nota) {
       setFlagEdit(+FlagEdit+1);
   };
  //******************************************************************************************************** */
-  const handleCronologia = async (todo, ag, somma, flag) => {   //aggiunta della trupla cronologia
+  const handleCronologia = async (todo, ag, somma, flag) => {   //aggiunta della trupla cronologia quantità
     if (flag === "true") { var quant= "+"+ag }
     else { var quant= "-"+ag }
       await addDoc(collection(db, "cronologia"), {
@@ -334,11 +356,35 @@ function handlePopUp(image, nota) {
         await deleteDoc(doc(db, "cronologia", hi.id)); //elimina la trupla (quindi quella più vecchia)
         });
       }
-
+  };
+   //******************************************************************************************************** */
+   const handleCronologiaPa = async (todo, pap ) => {   //aggiunta della trupla cronologia Pa
+    console.log("entarto nella coronologia Pa")
+    console.log(todo.pa)
+      await addDoc(collection(db, "cronologiaPa"), {
+        autore: auth.currentUser.displayName,
+        createdAt: serverTimestamp(),
+        nomeP: todo.nomeP,
+        paI: todo.pa,
+        paF: pap,
+      });
+      //rimuove in modo automatico una volta arrivata a 50 e cancella quello più vecchio
+      const coll = collection(db, "cronologiaPa");  
+      const snapshot = await getCountFromServer(coll);  //va a verificare quante trupe ne sono
+      if(snapshot.data().count>50) {  //se supera i 50, deve eliminare la trupla più vecchia (quindi la prima dato che è già ordinata)
+        const q = query(collection(db, "cronologiaPa"), orderBy("createdAt"), limit(1));  //prende solo la prima trupla
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (hi) => {
+        await deleteDoc(doc(db, "cronologiaPa", hi.id)); //elimina la trupla (quindi quella più vecchia)
+        });
+      }
   };
 //****************************************************************************************** */
-  const handleEdit = async ( todo, nome, SotSco, quaOrd) => {
-    await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd});
+  const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
+    if(todo.pa != pap) {    //la trupla viene inserita solo se pa viene cambiato
+      handleCronologiaPa(todo, pap)
+    }
+    await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd, pa:pap});
     setFlagEdit(+FlagEdit+1);
     toast.clearWaitingQueue(); 
   };
@@ -413,6 +459,12 @@ function handlePopUp(image, nota) {
            initial= {{opacity: 0}}
         animate= {{opacity: 1}}
         transition={{ duration: 0.7 }}>
+  
+  {!matches && 
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate(-1)}}>
+      <ArrowBackIcon id="i" /></button> 
+    }
 
 {!matches ? <h1 className='title mt-3'> Magazzino</h1> : <div style={{marginBottom:"60px"}}></div>} 
       
@@ -421,7 +473,7 @@ function handlePopUp(image, nota) {
         <span><button onClick={handleSpeedScorta}>Scorta </button></span>
         <span><button onClick={() => {navigate("/scortatinte")}}>Scorta Tinte</button></span>
         <span><button onClick={handleSpeedCronologia}>Cronologia </button></span>
-        <span><button onClick={print}>Stampa </button></span>
+     {/************* <span><button onClick={print}>Stampa </button></span>   */}   
     {sup == true && <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>}   
       </div>
 
@@ -471,20 +523,20 @@ function handlePopUp(image, nota) {
 {/** tabella prodotti nel magazzino *****************************************************************************************************************/}
 {popupActiveScorta &&
 <>
-<div ref={componentRef} className='todo_containerScorta mt-5'>
+<div ref={componentRef} className='todo_containerScorta mt-5'style={{width: dip == true && "100%"}}>
 <div className='row' > 
 <div className='col-2'>
 <p className='colTextTitle'> Magazzino</p>
 </div>
 <div className='col-4'>
 {FlagRep ==0 && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> Tutti i prodotti</p>}
-{FlagRep ==1 && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> Reparto Femminile</p>}
-{FlagRep ==2 && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> Reparto Maschile</p>}
+{FlagRep ==1 && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> Rep. Fem.</p>}
+{FlagRep ==2 && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> Rep. Mas.</p>}
 </div>
-<div className='col'>
+<div className='col' style={{padding: "0px"}}>
 <TextField
       inputRef={inputRef}
-      className="inputSearch"
+      className="inputSearchScorta"
       onChange={event => {setSearchTerm(event.target.value)}}
       type="text"
       placeholder="Ricerca Prodotto"
@@ -497,7 +549,7 @@ function handlePopUp(image, nota) {
                 }}
        variant="outlined"/>
   </div>
-  <div className='col'>   
+  <div className='col' style={{padding: "0px"}}>   
   <button type="button" className="buttonMenu" style={{padding: "0px"}} >
         <FilterListIcon id="i" onClick={handleMenu}/>
         <Menu  sx={
@@ -520,7 +572,8 @@ function handlePopUp(image, nota) {
                 open={Boolean(anchorEl)}
                 onClose={handleClosi}
               >
-                <MenuItem onClick={handleNome}>Nome</MenuItem>
+                <MenuItem onClick={handleNome}>Annulla Filtri</MenuItem>
+                <MenuItem onClick={handleProdDisp}>Prodotti disponibili</MenuItem>
                 <MenuItem onClick={handleQuantCre}>Quantità Crescente</MenuItem>
                 <MenuItem onClick={handleQuant}>Quantità Decrescente</MenuItem>
                 <MenuItem onClick={handleRepTutti}>Tutti i Prodotti</MenuItem>
@@ -539,12 +592,18 @@ function handlePopUp(image, nota) {
 <div className='col-1' style={{padding: "0px"}}>
 <p className='coltext'>Qt</p>
 </div>
+{sup == true && 
+<>
 <div className='col-1' style={{padding: "0px"}}>
 <p className='coltext'>Ss</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
+<p className='coltext'>Pa(€)</p>
+</div>
+<div className='col-1' style={{padding: "0px"}}>
 <p className='coltext'>Qo</p>
 </div>
+</>}
 <div className='col-1' style={{padding: "0px"}}>
 <p className='coltext'>Agg</p>
 </div>
@@ -565,7 +624,10 @@ function handlePopUp(image, nota) {
                 }
             }).map((todo) => (
     <div key={todo.id}>
-    { FlagRep == 0 &&(
+    {/*****Si attiva quando seleziono tutti i prodotti********** */}
+    { FlagRep == 0 &&(    
+      <>
+      {todo.quantita > PrdDisp && 
     <TodoScorta
       key={todo.id}
       todo={todo}
@@ -578,10 +640,12 @@ function handlePopUp(image, nota) {
       FlagStampa={FlagStampa}
       flagDelete= {flagDelete}
     />
+    }
+    </>
      )}
-     { FlagRep == 1 &&(
+     { FlagRep != 0 &&(
       <>
-      {todo.reparto == 1 && 
+      {todo.reparto == FlagRep && todo.quantita > PrdDisp &&
       <TodoScorta
       key={todo.id}
       todo={todo}
@@ -597,24 +661,7 @@ function handlePopUp(image, nota) {
       }
     </>
      )}
-     { FlagRep == 2 &&(
-      <>
-      {todo.reparto == 2 && 
-      <TodoScorta
-      key={todo.id}
-      todo={todo}
-      handleDelete={handleDelete}
-      handleEdit={handleEdit}
-      handleAddQuant={handleAddQuant}
-      handleRemQuant= {handleRemQuant}
-      handlePopUp={handlePopUp}
-      displayMsg={displayMsg}
-      FlagStampa={FlagStampa}
-      flagDelete= {flagDelete}
-    />
-      }
-    </>
-     )}
+
     </div>
   ))}
   </div>
@@ -622,19 +669,19 @@ function handlePopUp(image, nota) {
   </>
 }
 
-{/* tabella cronologia*******************************************************************************************************************/}
+{/* tabella cronologia Quantità*******************************************************************************************************************/}
 {popupActiveCrono &&
   <div className='todo_containerCli mt-5'>
   <div className='row'> 
-<p className='colTextTitle'> Cronologia</p>
+<p className='colTextTitle'> Cronologia Quantità</p>
 </div>
   <div className='row' style={{marginRight: "5px"}}>
-      <div className='col-3'><p className='coltext' >DataModifica</p></div>
-      <div className='col-3' style={{padding: "0px"}}><p className='coltext' >Prodotto</p> </div>
-      <div className='col-2' style={{padding: "0px"}}><p className='coltext'>Autore</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>ValoreIni</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Modifica</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>ValoreFin</p></div>
+      <div className='col-3' style={{width:"220px"}}><p  className='coltext' >DataModifica</p></div>
+      <div className='col-3' style={{padding: "0px", width:"280px"}}><p className='coltext' >Prodotto</p> </div>
+      <div className='col-2' style={{padding: "0px", width:"90px"}}><p className='coltext'>Autore</p></div>
+      <div className='col-1' style={{padding: "0px", width:"50px"}}><p className='coltext'>V.Ini.</p></div>
+      <div className='col-1' style={{padding: "0px", width:"50px"}}><p className='coltext'>Edit</p></div>
+      <div className='col-1' style={{padding: "0px", width:"50px"}}><p className='coltext'>V.Fin.</p></div>
       <hr style={{margin: "0"}}/>
     </div>
     <div className="scroll">
@@ -646,12 +693,48 @@ function handlePopUp(image, nota) {
   {crono.map((col) => (
     <div key={col.id}>
     <div className='row' style={{padding: "0px"}}>
-      <div className='col-3 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
-      <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeP} </p> </div>
-      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.autore}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantIni}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantAgg}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantFin}</p></div>
+      <div className='col-3 diviCol' style={{width:"220px"}}><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
+      <div className='col-3 diviCol' style={{padding: "0px", width:"280px"}}><p className='inpTab'>{col.nomeP} </p> </div>
+      <div className='col-2 diviCol' style={{padding: "0px", width:"90px"}}><p className='inpTab'>{col.autore.substr(0, 7)}..</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px", width:"50px"}}><p className='inpTab'>{col.quantIni}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px", width:"50px"}}><p className='inpTab'>{col.quantAgg}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px", width:"50px"}}><p className='inpTab'>{col.quantFin}</p></div>
+      <hr style={{margin: "0"}}/>
+    </div>
+    </div>
+    ))}
+    </div>
+  </div>
+}
+
+{/* tabella cronologiaPA*******************************************************************************************************************/}
+{popupActiveCrono &&
+  <div className='todo_containerCli mt-5'>
+  <div className='row'> 
+<p className='colTextTitle'> Cronologia PA</p>
+</div>
+  <div className='row' style={{marginRight: "5px"}}>
+      <div className='col-3' style={{width:"220px"}}><p  className='coltext' >DataModifica</p></div>
+      <div className='col-3' style={{padding: "0px", width:"280px"}}><p className='coltext' >Prodotto</p> </div>
+      <div className='col-2' style={{padding: "0px", width:"90px"}}><p className='coltext'>Autore</p></div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Pa I.</p></div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Pa F. </p></div>
+      <hr style={{margin: "0"}}/>
+    </div>
+    <div className="scroll">
+    {Progress1 == false && 
+  <div style={{marginTop: "14px"}}>
+      <CircularProgress />
+  </div>
+      }
+  {cronoPa.map((col) => (
+    <div key={col.id}>
+    <div className='row' style={{padding: "0px"}}>
+      <div className='col-3 diviCol' style={{width:"220px"}}><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
+      <div className='col-3 diviCol' style={{padding: "0px", width:"280px"}}><p className='inpTab'>{col.nomeP} </p> </div>
+      <div className='col-2 diviCol' style={{padding: "0px", width:"90px"}}><p className='inpTab'>{col.autore.substr(0, 7)}..</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.paI}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.paF}</p></div>
       <hr style={{margin: "0"}}/>
     </div>
     </div>

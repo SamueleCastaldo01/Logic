@@ -18,12 +18,13 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
   const [newNomeP, setNomeP] = React.useState(todo.nomeP);
   const [newQuantita, setQuantita] = React.useState(todo.quantita);
   const [newSottoScorta, setNewSottoScorta] = React.useState(todo.sottoScorta);
+  const [newPa, setNewPa] = React.useState(todo.pa);
   const [newQuantitaOrdinabile, setnewQuantitaOrdinabile] = React.useState(todo.quantitaOrdinabile);
   const [aggiungi, setAggiungi] = React.useState("");
 
   const handleSubm = (e) => {
     e.preventDefault();
-    handleEdit(todo, newNomeP, newSottoScorta, newQuantitaOrdinabile);
+    handleEdit(todo, newNomeP, newSottoScorta, newQuantitaOrdinabile, newPa);
     setAggiungi("");
   };
 
@@ -45,6 +46,11 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
       todo.sottoScorta = "";
       setNewSottoScorta(e.target.value);
     }
+  };
+
+  const handleChangePa = (e) => {
+    e.preventDefault();
+      setNewPa(e.target.value);
   };
 
   const handleChangeQo = (e) => {
@@ -100,8 +106,8 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     )}
     </div>
   {/********************SOTTOSCORTA'*********************************************************** */}
-<div className="col-1 diviCol" style={{padding: "0px"}}>
 {sup ===true && ( 
+  <div className="col-1 diviCol" style={{padding: "0px"}}>
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
@@ -110,11 +116,23 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
         className="inpNumb"
         onChange={handleChangeSs}
       />
+  </div>
     )}
-    </div>
-  {/********************QUANTITA ORDINABILE'*********************************************************** */}
-  <div className="col-1 diviCol" style={{padding: "0px"}}>
+{/********************PA'*********************************************************** */}
 {sup ===true && ( 
+  <div className="col-1 diviCol" style={{padding: "0px"}}>
+    <input
+        type="text"
+        onBlur={handleSubm}
+        value={ newPa }
+        className="inpNumb"
+        onChange={handleChangePa}
+      />
+     </div>
+    )}
+  {/********************QUANTITA ORDINABILE'*********************************************************** */}
+{sup ===true && ( 
+  <div className="col-1 diviCol" style={{padding: "0px"}}>
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="text"
@@ -123,12 +141,11 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
         className="inpNumb"
         onChange={handleChangeQo}
       />
+  </div>
     )}
-    </div>
 {/**********************AGGIUNGI************************************************************* */}
 
 <div className="col-1 diviCol" style={{padding: "0px"}}>
-    {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="number" min="1"
@@ -136,19 +153,18 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
         onChange={(event) => {setAggiungi(event.target.value);}}
         className="inpNumb"
       />
-    )}
 </div>
-{/***************************BUTTON******************************************************** */}
+{/***************************BUTTON aggiungi e rimuovi******************************************************** */}
     { FlagStampa==false &&
-    <div className="col-2 diviCol" style={{padding:"0px"}}>
+    <div className="col diviCol" style={{padding:"0px"}}>
       <button 
       className="butAddProd me-2"
       type="button"
-      onClick={() =>{ { localStorage.setItem("flagCron", true); handleAddQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>Agg</button>
+      onClick={() =>{ { localStorage.setItem("flagCron", true); handleAddQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>+</button>
       <button
       className="butRemProd"
       type="button"
-      onClick={() =>{ {localStorage.setItem("flagCron", false); handleRemQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>Rim</button>
+      onClick={() =>{ {localStorage.setItem("flagCron", false); handleRemQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>-</button>
     </div> }
 
     <button

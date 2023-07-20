@@ -244,7 +244,10 @@ const createCate = async (e) => {
 
       <div>
         <span><button onClick={print}>Stampa</button></span>
-        <span><button onClick={HandleSpeedAddScalClien}>Aggiungi Cliente</button></span>
+        {/************** 
+                <span><button onClick={HandleSpeedAddScalClien}>Aggiungi Cliente</button></span>
+        */}
+
       </div>
 
  {/************************INSERIMENTO CLIENTE********************************************************************/}       

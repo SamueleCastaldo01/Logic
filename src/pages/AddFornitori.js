@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
 import TextField from '@mui/material/TextField';
+import { useMediaQuery } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
@@ -35,6 +37,8 @@ function AddFornitori( {getFornId} ) {
   const [popupActive, setPopupActive] = useState(false);
   const [flagAnaCli, setFlagAnaCli] = useState(true);   
   const [flagDebiCli, setFlagDebiCli] = useState(false);  
+
+  const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
 
   const [searchTerm, setSearchTerm] = useState("");  //search
   const inputRef= useRef();
@@ -198,7 +202,14 @@ React.useEffect(() => {
         initial= {{opacity: 0}}
         animate= {{opacity: 1}}
         transition={{ duration: 0.7 }}>
-    <h1 className='title mt-3'> Lista Fornitori</h1>
+    
+    {!matches && 
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate(-1)}}>
+      <ArrowBackIcon id="i" /></button> 
+    }
+
+    {!matches ? <h1 className='title mt-3'>Lista Fornitori</h1> : <div style={{marginBottom:"60px"}}></div>} 
     <div>
         <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Fornitore</button></span>
         <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>

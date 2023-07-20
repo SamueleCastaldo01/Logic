@@ -231,9 +231,18 @@ opacity: 1;
   font-family: "Times New Roman";
   border: px solid;
   border-radius: 20px;
-  width: 270px;
+  width: 100%;
   height: 35px;
 }
+
+.inputSearchScorta .MuiOutlinedInput-root {
+  font-family: "Times New Roman";
+  border: px solid;
+  border-radius: 20px;
+  width: 100%;
+  height: 35px;
+}
+
 .inputSearchOrd .MuiOutlinedInput-root {
   font-family: "Times New Roman";
   border: px solid;
@@ -494,7 +503,6 @@ width: 110%;
 
 .containerTabNote,
 .containerGrafici{
-  width: 100%;
   padding: 0px;
   padding-top: 20px;
   display: flex;
@@ -508,14 +516,14 @@ width: 110%;
 .todo_containerFor,
 .todo_containerOrdCli,
 .todo_containerProdCli{
-  max-height: 840;
+  max-height: 440;
   padding-right: 0px;
 }
 
 .scrollScaletDatDip,
 .scrollOrdCli,
 .scroll {
-  max-height: 880px;
+  max-height: 480px;
   overflow-y: scroll;
   overflow-x: hidden;
   padding-bottom: 0px;
@@ -722,20 +730,6 @@ button:focus {
 }
 
 
-@media screen and (max-width: 920px) { /* tablet*/
-  .skipPageLef{
-    left: 2vh;
-  }
-  .titleNotaDip{
-    font-size: 20px;
-  }
-  .grafici {
-    max-width: 370px;
-  }
-  .scroll {
-    max-height: 850px;
-  }
-}
 
 @media screen and (max-width: 600px) { /* smartphone s20 ultra*/
   .autocomp {
@@ -767,7 +761,14 @@ button:focus {
     width: 360px;
   }
   .grafici {
-    max-width: 390px;
+    min-width: 390px;
+  }
+  .containerGrafici {
+    padding-left: 5px;
+    padding-right: 5px;
+    margin: 0 auto;
+    width: 550px;
+    overflow-x: scroll;
   }
 }
 
@@ -795,16 +796,44 @@ button:focus {
     width: 325px;
   }
   .grafici {
-    max-width: 350px;
+    min-width: 350px;
+  }
+  .containerGrafici {
+    padding-left: 5px;
+    padding-right: 5px;
+    margin: 0 auto;
+    width: 340px;
+    overflow-x: scroll;
   }
 }
 
 @media screen and (max-width: 1370px) { /* surface pro 7*/
   .scroll {
-    max-height: 850px;
+    max-height: 480px;
   }
   .scrollOrdCli{
     max-height: 300px;
   }
 }
 
+@media screen and (max-width: 990px) { /* tablet*/
+  .skipPageLef{
+    left: 2vh;
+  }
+  .titleNotaDip{
+    font-size: 20px;
+  }
+  .grafici {
+    min-width: 450px;
+  }
+  .scroll {
+    max-height: 880px;
+  }
+  .containerGrafici {
+    padding-left: 5px;
+    padding-right: 5px;
+    margin: 0 auto;
+    width: 765px;
+    overflow-x: scroll;
+  }
+}

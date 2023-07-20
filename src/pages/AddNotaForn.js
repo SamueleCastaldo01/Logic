@@ -170,32 +170,16 @@ const contEffect = async () => {
       return () => unsub();
     }, []);
   //****************************************************************************************** */
-  const elimDb = async () => {
-    const q = query(collection(db, "notaForni"));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (hi) => {
-  // doc.data() is never undefined for query doc snapshots
-    console.log(hi.id, " => ", hi.data().nomeF, hi.data().dataScal);
-    await deleteDoc(doc(db, "notaForni", hi.id)); 
-    }); 
-   } 
-
 
   const cliEffect = async () => {  //funzione per l'anagrafica del cliente
     const collectionRef = collection(db, "prodotto");
-      //aggiorna il contatore di tutti i dati di addNota della stessa data
-      console.log("sono entrato 1")
-
         //un ciclo dentro un altro ciclo
     todosNota.map( async (todo) => {    //ciclo for sui prodotti del fornitore
         if(todo.author.name == nomeF ) { //vado a prendere solo i prodotti dei quel fornitore che sto andando a inserire
-          console.log("entrato 2 nell if");
           const q = query(collectionRef, where("nomeP", "==", todo.nomeP));  // va a prendere lo stesso prodotto, vado a prendere i dati di quel prodotto
           const querySnapshot = await getDocs(q);
 
           querySnapshot.forEach(async (hi) => {   //questo è il ciclo for della query, dove vado nella scorta
-
-            console.log("entrato nel ciclo della query");
             if (hi.data().quantita < hi.data().sottoScorta) {  //se la quantità è minore della sottoscorta allora aggiunte il prodotto alla lista
               console.log("sono entrato nel if della query");
               await addDoc(collection(db, "notaForni"), {
@@ -204,18 +188,14 @@ const contEffect = async () => {
                 nomeP: todo.nomeP,
                 quantita: hi.data().quantitaOrdinabile,
                 createdAt: serverTimestamp(),
-              });
-              
+              }); 
             }
-
           });
         }
     })
   }
 //****************************************************************************************** */
-
    //stampa
-  
   function HandleSpeedAddScalClien() {
     setPopupActive(true);
   }
@@ -252,17 +232,6 @@ const contEffect = async () => {
     setClear();
     }
   };
-
-  //****************************************************************************************** */
-    const handleEdit = async (todo, nome, numA, not, deb, quot) => {
-      await updateDoc(doc(db, "addNotaForni", todo.id), { nomeF: nome, numAsc:numA, note:not, debito:deb, quota:quot});
-      notifyUpdateCli();
-      toast.clearWaitingQueue(); 
-    };
-    const toggleComplete = async (todo) => {
-      await updateDoc(doc(db, "addNotaForni", todo.id), { completed: !todo.completed });
-    };
-
     //_____________________________________________________________________________________
     const handleDelete = async (id, nomeFli, DataC) => {
       handleContRem();
@@ -356,7 +325,7 @@ const contEffect = async () => {
          <div className='col-8 diviCol' 
           onClick={() => {
                 getNotaForniId(todo.id, todo.nomeF, dataOrd, dataOrdConf)
-                navigate("/notaforni");
+                navigate("/notaforni/"+todo.id+"/"+todo.nomeF+"/"+dataOrdConf);
                 auto(todo.nomeF);
                 AutoProdForn.length = 0
                          }}>

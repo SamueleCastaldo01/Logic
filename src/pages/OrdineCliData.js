@@ -227,7 +227,7 @@ function OrdineCliData({ getOrdId }) {
   //_________________________________________________________________________________________________________________
   const createCol = async (e) => {    
     e.preventDefault();  
-    var formattedDate = moment(nome).format('DD/MM/YYYY');
+    var formattedDate = moment(nome).format('DD-MM-YYYY');
     var bol= true
     if(!nome) {            
       notifyError();
@@ -269,11 +269,17 @@ function OrdineCliData({ getOrdId }) {
       </div>
       </div>
 
-        <motion.div className='container' style={{padding: "0px"}}
+        <motion.div  style={{padding: "0px"}}
         initial= {{x: "-100vw"}}
         animate= {{x: 0}}
         transition={{ duration: 0.4 }}
         >
+        
+        {!matches && 
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate(-1)}}>
+      <ArrowBackIcon id="i" /></button> 
+    }
    {!matches ? <h1 className='title mt-3'> Ordine Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
     <button onClick={() => {setFlagDelete(true); setFlagBlock(false)}}>elimina</button>
     <button onClick={() => {setFlagBlock(true); setFlagDelete(false)}}>blocca</button>

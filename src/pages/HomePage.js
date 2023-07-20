@@ -25,6 +25,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Bar } from 'react-chartjs-2';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import DeleteIcon from "@mui/icons-material/Delete";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CircularProgress from '@mui/material/CircularProgress';
 import { optionsNumCart, optionsTotQuota, optionsVendite } from '../components/OptionsGrafici';
@@ -58,10 +59,12 @@ function HomePage(  ) {
 
   const [todosNumNote, setTodosNumNote] = React.useState([]);
   const [todosScaletta, setTodosScaletta] = React.useState([]);
+  const [todosInOrdine, setTodosInOrdine] = React.useState([]);
   const [todosVendite, setTodosVendite] = React.useState([]);
   const [todosScalettaBlock, setTodosScalettaBlock] = React.useState([]);
   
   const [Progress, setProgress] = React.useState(false);
+  const [Progress2, setProgress2] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorEl2, setAnchorEl2] = React.useState(null);
   const [anchorEl3, setAnchorEl3] = React.useState(null);
@@ -99,6 +102,7 @@ function HomePage(  ) {
 
   const [dataSc, setDataSc] = React.useState("");
   const [quotaTot, setQuotaTot] = React.useState(0);
+  const [venditeTot, setVenditeTot] = React.useState(0);
 
   //variabili per gestire le date del grafico 1
   const [filtroData1, setFlitroData1] = useState(false);
@@ -141,6 +145,7 @@ function HomePage(  ) {
   const [searchTerm, setSearchTerm] = useState("");  //search
   const inputRef= useRef();
   const [popupActive, setPopupActive] = useState(false);  
+  const [popupActiveInOrdine, setPopupActiveInOrdine] = useState(false); 
 
   //permessi utente
   let sup= supa.includes(localStorage.getItem("uid"))
@@ -170,15 +175,22 @@ function HomePage(  ) {
 
 function onChangeDataCal(value) {   //si attiva quando seleziono una data dal calendario
   var quTot;
+  var venTot;
   setDataCal(value)  //serve per il calendario
-  var formattedDate = moment(value).format('DD/MM/YYYY');  //conversione della data in stringa
+  var formattedDate = moment(value).format('DD-MM-YYYY');  //conversione della data in stringa
 
   todosScaletta.map((nice) => {  //qui va a prendere la quota totale da parte dell'array scaldatBlock
     if (formattedDate == nice.data) {
       quTot= nice.totalQuota;
     }
 })
+todosVendite.map((nice) => {  //qui va a prendere la quota totale da parte dell'array scaldatBlock
+  if (formattedDate == nice.data) {
+    venTot= nice.totalSommaTotale;
+  }
+})
 setQuotaTot(quTot);   //somma Totale della quota
+setVenditeTot(venTot);  //TotSommaTotale
 setDataSc(formattedDate)  //serve per cambiare la data come filtro
 setActiveCalender(false)  //disattiva il calendario
 }
@@ -187,7 +199,7 @@ function onChangeDataIni(value) {   //si attiva quando seleziono una data dal ca
   var datMilli = value.getTime();
   if( datMilli<=DataMilliFine || !DataMilliFine) {   //controllo la data iniziale deve essere minore di quella finale
     setDataIni(value)  //serve per il calendario
-    var formattedDate = moment(value).format('DD/MM/YYYY');  //conversione della data in stringa
+    var formattedDate = moment(value).format('DD-MM-YYYY');  //conversione della data in stringa
     setDataConvIni(formattedDate)  //serve per cambiare la data come filtro
     setDataMilliIni(datMilli)
     setActiveCalenderIni(false)    //chiude il calendario
@@ -198,7 +210,7 @@ function onChangeDataFine(value) {   //si attiva quando seleziono una data dal c
   var datMilli = value.getTime();
   if (datMilli >= DataMilliIni || !DataMilliIni) {
     setDataFine(value)  //serve per il calendario
-    var formattedDate = moment(value).format('DD/MM/YYYY');  //conversione della data in stringa
+    var formattedDate = moment(value).format('DD-MM-YYYY');  //conversione della data in stringa
     setDataConvFine(formattedDate)  //serve per cambiare la data come filtro
     setDataMilliFine(datMilli)
     setActiveCalenderFine(false) //chiude il calendario
@@ -209,7 +221,7 @@ function onChangeDataIni2(value) {   //si attiva quando seleziono una data dal c
   var datMilli = value.getTime();
   if( datMilli<=DataMilliFine || !DataMilliFine) {   //controllo la data iniziale deve essere minore di quella finale
     setDataIni2(value)  //serve per il calendario
-    var formattedDate = moment(value).format('DD/MM/YYYY');  //conversione della data in stringa
+    var formattedDate = moment(value).format('DD-MM-YYYY');  //conversione della data in stringa
     setDataConvIni2(formattedDate)  //serve per cambiare la data come filtro
     setDataMilliIni2(datMilli)
     setActiveCalenderIni2(false)    //chiude il calendario
@@ -220,7 +232,7 @@ function onChangeDataFine2(value) {   //si attiva quando seleziono una data dal 
   var datMilli = value.getTime();
   if (datMilli >= DataMilliIni || !DataMilliIni) {
     setDataFine2(value)  //serve per il calendario
-    var formattedDate = moment(value).format('DD/MM/YYYY');  //conversione della data in stringa
+    var formattedDate = moment(value).format('DD-MM-YYYY');  //conversione della data in stringa
     setDataConvFine2(formattedDate)  //serve per cambiare la data come filtro
     setDataMilliFine2(datMilli)
     setActiveCalenderFine2(false) //chiude il calendario
@@ -231,18 +243,23 @@ function onChangeDataIni3(value) {   //si attiva quando seleziono una data dal c
   var datMilli = value.getTime();
   if( datMilli<=DataMilliFine3 || !DataMilliFine3) {   //controllo la data iniziale deve essere minore di quella finale
     setDataIni3(value)  //serve per il calendario
-    var formattedDate = moment(value).format('DD/MM/YYYY');  //conversione della data in stringa
+    var formattedDate = moment(value).format('DD-MM-YYYY');  //conversione della data in stringa
     setDataConvIni3(formattedDate)  //serve per cambiare la data come filtro
     setDataMilliIni3(datMilli)
     setActiveCalenderIni3(false)    //chiude il calendario
   }
 }
 
+const handleDeleteInOrdine = async (id) => {
+  const colDoc = doc(db, "inOrdine", id); 
+  await deleteDoc(colDoc); 
+};
+
 function onChangeDataFine3(value) {   //si attiva quando seleziono una data dal calendario
   var datMilli = value.getTime();
   if (datMilli >= DataMilliIni || !DataMilliIni) {
     setDataFine3(value)  //serve per il calendario
-    var formattedDate = moment(value).format('DD/MM/YYYY');  //conversione della data in stringa
+    var formattedDate = moment(value).format('DD-MM-YYYY');  //conversione della data in stringa
     setDataConvFine3(formattedDate)  //serve per cambiare la data come filtro
     setDataMilliFine3(datMilli)
     setActiveCalenderFine3(false) //chiude il calendario
@@ -282,7 +299,12 @@ function onChangeDataFine3(value) {   //si attiva quando seleziono una data dal 
     )
 
       const Remove = () => {
+        if(localStorage.getItem("flagRemove") == 0 ) {
           handleDelete(localStorage.getItem("IDscal"), localStorage.getItem("NomeCliProd") );
+        }
+          else if(localStorage.getItem("flagRemove") == 1 ) {
+          handleDeleteInOrdine(localStorage.getItem("IDNOTa"));
+          }
           toast.clearWaitingQueue(); 
                }
 
@@ -359,6 +381,10 @@ function onChangeDataFine3(value) {   //si attiva quando seleziono una data dal 
     return () => unsub();
   }, [day, DataMilliFine2, DataMilliIni2, filtroData2]);
 
+  React.useEffect(() => {    //se la variabile cambia allora viene eseguita questa funzione
+    handleTotQuota();  //per il grafico vendite
+  }, [todosScaletta]);
+
   //******************Per il grafico Vendite********************************************************************* */
   React.useEffect(() => {    //va a prendere la quota totale dalla scalettaDat quella bloccata
     const collectionRef = collection(db, "scalDatBloccata");
@@ -383,12 +409,11 @@ function onChangeDataFine3(value) {   //si attiva quando seleziono una data dal 
       setTodosVendite(todosArray);
     });
     return () => unsub();
-  }, [day, DataMilliFine2, DataMilliIni2, filtroData2]);
+  }, [day3, DataMilliFine3, DataMilliIni3, filtroData3]);
 
   React.useEffect(() => {    //se la variabile cambia allora viene eseguita questa funzione
-    handleTotQuota();  //per il grafico incasso
     handleVendite();  //per il grafico vendite
-  }, [todosScaletta]);
+  }, [todosVendite]);
 
   
 //******************Per la tabella scaletta chiusa********************************************************************* */
@@ -403,6 +428,22 @@ React.useEffect(() => {
     });
     setTodosScalettaBlock(todosArray);
     setProgress(true);
+  });
+  return () => unsub();
+}, [popupActive == true]);
+
+//per la tabella in ordine
+React.useEffect(() => {
+  const collectionRef = collection(db, "inOrdine");
+  const q = query(collectionRef, orderBy("nomeC"));
+
+  const unsub = onSnapshot(q, (querySnapshot) => {
+    let todosArray = [];
+    querySnapshot.forEach((doc) => {
+      todosArray.push({ ...doc.data(), id: doc.id });
+    });
+    setTodosInOrdine(todosArray);
+    setProgress2(true);
   });
   return () => unsub();
 }, [popupActive == true]);
@@ -471,9 +512,16 @@ const handleVendite = async () => {
         initial= {{opacity: 0}}
         animate= {{opacity: 1}}
         transition={{ duration: 0.7 }}>
+
+{!matches && 
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate(-1)}}>
+      <ArrowBackIcon id="i" /></button> 
+    }
           {!matches ? <h1 className='title mt-3'> HomePage</h1> : <div style={{marginBottom:"60px"}}></div>} 
       <div>
-        <span><button onClick={() => {setPopupActive(!popupActive); setActiveCalender(false)}}>Scalette Chiuse</button></span>
+        <span><button onClick={() => {setPopupActive(!popupActive); setActiveCalender(false); setPopupActiveInOrdine(false)}}>Scalette Chiuse</button></span>
+        <span><button onClick={() => {setPopupActive(false); setActiveCalender(false); setPopupActiveInOrdine(true)}}>In Ordine</button></span>
       </div>
 
 <div className='containerGrafici'>
@@ -697,6 +745,88 @@ const handleVendite = async () => {
 
 </div>
 
+{/**********tabella in ordine********************** */}
+{popupActiveInOrdine == true && 
+<div className='todo_containerInOrdine mt-5' style={{paddingTop: "0px"}}>
+<div className='row' > 
+<div className='col'>
+<p className='colTextTitle'> In ordine </p>
+</div>
+<div className='col'></div>
+<div className='col'>
+<TextField
+      inputRef={inputRef}
+      className="inputSearch"
+      onChange={event => {setSearchTerm(event.target.value)}}
+      type="text"
+      placeholder="Ricerca Cliente"
+      InputProps={{
+      startAdornment: (
+      <InputAdornment position="start">
+      <SearchIcon color='secondary'/>
+      </InputAdornment>
+                ),
+                }}
+       variant="outlined"/>
+</div>
+</div>
+<div className='row' style={{marginRight: "5px"}}>
+<div className='col-3' >
+<p className='coltext' >Cliente</p>
+</div>
+<div className='col-1' style={{padding: "0px"}}>
+<p className='coltext' >Qt</p>
+</div>
+<div className='col-4' style={{padding: "0px"}}>
+<p className='coltext' >Prodotto</p>
+</div>
+<div className='col-2' style={{padding: "0px"}}>
+<p className='coltext' >Data Inserimento</p>
+</div>
+    <hr style={{margin: "0"}}/>
+</div>
+
+<div className="scroll">
+{Progress2 == false && 
+  <div style={{marginTop: "14px"}}>
+      <CircularProgress />
+  </div>
+}
+{todosInOrdine.filter((val)=> {
+        if(searchTerm === ""){
+          return val
+      } else if (val.nomeC.toLowerCase().includes(searchTerm.toLowerCase()) ) {
+        return val
+                }
+            }).map((todo) => (
+    <div key={todo.id}> 
+    <div className='row' style={{padding: "0px", marginRight: "5px"}}>
+      <div className='col-3 diviCol'><p className='inpTab'>{todo.nomeC} </p> </div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.qtProdotto}</p></div>
+      <div className='col-4 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.prodottoC}</p></div>
+      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.dataC}</p></div>
+      {sup ===true && ( 
+        <>
+      <div className="col diviCol" style={{padding:"0px", marginTop:"-8px"}}>
+        <button className="button-delete" onClick={() =>{
+          localStorage.setItem("flagRemove", 1);
+           localStorage.setItem("IDNOTa", todo.id);
+           displayMsg();
+           toast.clearWaitingQueue(); }}>
+          <DeleteIcon id="i" />
+        </button>
+    </div>  
+        </>
+        )}
+      <hr style={{margin: "0"}}/>
+    </div>
+    </div>
+  ))}
+</div>
+  </div>  
+  }
+
+
 {/***********Tabella scalette chiuse filtro tramite le date di scal Dat*************************** */}
 {popupActive &&
   <>
@@ -707,14 +837,14 @@ const handleVendite = async () => {
 <div className='todo_containerScalet mt-5'>
   <div className='row'> 
   <div className='col'><p className='colTextTitle'> Scalette chiuse</p>
-  <p style={{textAlign: "left"}}>Quota Totale: {quotaTot}€</p>
+  <p style={{textAlign: "left", marginBottom: "0px"}}>Quota Totale: {quotaTot}€</p>
+  <p style={{textAlign: "left"}}>Vendite Totali: {venditeTot}€</p>
   </div>
   <div className='col' style={{textAlign: "right"}}>
   <p style={{fontSize: "20px"}}>{dataSc} </p>
   </div>
   <div className='col-5' style={{textAlign: "right"}}>
     <button className='buttonCalender' onClick={() => {setActiveCalender(!activeCalender)}}> <CalendarMonthIcon/></button>
-
 
 {activeCalender== true &&
   <>
@@ -725,14 +855,13 @@ const handleVendite = async () => {
         transition={{ type: "spring", mass: 0.5 }}>
       <Calendar onChange={onChangeDataCal} value={DataCal} 
         tileClassName={({ date, view }) => {
-      if(todosScaletta.find(x=>x.data===moment(date).format("DD/MM/YYYY"))){
+      if(todosScaletta.find(x=>x.data===moment(date).format("DD-MM-YYYY"))){
        return  'highlight'
       }
     }}
       />
         </motion.div>
       </div>
-
 </>
 }
   </div>
@@ -742,8 +871,8 @@ const handleVendite = async () => {
       <div className='col-4' style={{marginRight: "3px"}}><p className='coltext' >Cliente </p> </div>
       <div className='col-1' style={{padding: "0px", width:"100px"}}><p className='coltext'>Debito</p></div>
       <div className='col-1' style={{padding: "0px", width:"100px"}}><p className='coltext'>Vendita</p></div>
-      <div className='col-1' style={{padding: "0px", width:"100px"}}><p className='coltext'>quota</p></div>
-      <div className='col-3' style={{padding: "0px", width:"100px"}}><p className='coltext'>note</p></div>
+      <div className='col-1' style={{padding: "0px", width:"100px"}}><p className='coltext'>Quota</p></div>
+      <div className='col-3' style={{padding: "0px", width:"100px"}}><p className='coltext'>Note</p></div>
     </div>
     <div className="scroll">
     {Progress == false && 

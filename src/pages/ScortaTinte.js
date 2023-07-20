@@ -10,11 +10,12 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { notifyErrorProd, notifyUpdateProd, notifyErrorNumNegativo, notifyErrorProdList, notifyErrorPrezzoProd } from '../components/Notify';
 import CloseIcon from '@mui/icons-material/Close';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import TodoScorta from '../components/TodoScorta';
 import Button from '@mui/material/Button';
-import { supa, guid, tutti } from '../components/utenti';
+import { supa, guid, tutti, dipen } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete from '@mui/material/Autocomplete';
 import SpeedDial from '@mui/material/SpeedDial';
@@ -60,6 +61,7 @@ function ScortaTinte() {
   const [FlagFilter, setFlagFilter] = useState("0");
   const [FlagEdit, setFlagEdit] = useState("0");
   const [flagTinte, setflagTinte] = useState("TECH");
+  const [PrdDisp, setPrdDisp] = useState(-1);
 
   const [open, setOpen] = React.useState(false); //serve per lo speedDial
   const handleOpen = () => setOpen(true);
@@ -77,6 +79,7 @@ function ScortaTinte() {
 
   //permessi utente
   let sup= supa.includes(localStorage.getItem("uid"))
+  let dip= dipen.includes(localStorage.getItem("uid"))
   let gui= guid.includes(localStorage.getItem("uid"))
   let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
@@ -253,9 +256,15 @@ const handleQuantCre = () => {  //va a fare l'ordinamento della qt in modo cresc
 };
 
 const handleNome = () => {  //va a fare l'ordinamento della qt in modo crescente
+  setPrdDisp(-1);
   setFlagFilter("0");
   handleClosi();
 };
+
+const handleProdDisp = () => {  //va a prendere i prodotti disponibili
+  setPrdDisp(0);
+    handleClosi();
+  };
 
 function handlePopUp(image, nota) {
   setImageSer(image)
@@ -353,6 +362,12 @@ function handlePopUp(image, nota) {
         animate= {{opacity: 1}}
         transition={{ duration: 0.7 }}>
 
+{!matches && 
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate(-1)}}>
+      <ArrowBackIcon id="i" /></button> 
+    }
+
 {!matches ? <h1 className='title mt-3'> Scorta Tinte</h1> : <div style={{marginBottom:"60px"}}></div>} 
       
 
@@ -411,7 +426,7 @@ function handlePopUp(image, nota) {
 {/** tabella tinte scorta *****************************************************************************************************************/}
 {popupActiveScorta &&
 <>
-<div ref={componentRef} className='todo_containerScorta mt-5'>
+<div ref={componentRef} className='todo_containerScorta mt-5' style={{width: dip == true && "100%"}}>
 <div className='row' > 
 <div className='col-3'>
 <p className='colTextTitle'> Scorta Tinte</p>
@@ -468,7 +483,8 @@ function handlePopUp(image, nota) {
                 open={Boolean(anchorEl)}
                 onClose={handleClosi}
               >
-                <MenuItem onClick={handleNome}>Ord. per Nome</MenuItem>
+                <MenuItem onClick={handleNome}>Annulla filtri</MenuItem>
+                <MenuItem onClick={handleProdDisp}>Prodotti disponibili</MenuItem>
                 <MenuItem onClick={handleQuantCre}>Ord. Quantità Crescente</MenuItem>
                 <MenuItem onClick={handleQuant}>Ord. Quantità Decrescente</MenuItem>
                 <MenuItem onClick={handleTech}>TECH</MenuItem>
@@ -495,12 +511,15 @@ function handlePopUp(image, nota) {
 <div className='col-1' style={{padding: "0px"}}>
 <p className='coltext'>Qt</p>
 </div>
+{sup == true && 
+<>
 <div className='col-1' style={{padding: "0px"}}>
 <p className='coltext'>Ss</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
 <p className='coltext'>Qo</p>
 </div>
+</>}
 <div className='col-1' style={{padding: "0px"}}>
 <p className='coltext'>Agg</p>
 </div>
@@ -521,7 +540,7 @@ function handlePopUp(image, nota) {
                 }
             }).map((todo) => (
     <div key={todo.id}>
-    { flagTinte == todo.brand &&(
+    { flagTinte == todo.brand && todo.quantita> PrdDisp && (
     <TodoScorta
       key={todo.id}
       todo={todo}

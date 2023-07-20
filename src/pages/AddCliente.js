@@ -18,6 +18,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
 import TodoDebiCli from '../components/TodoDebiCli';
 import SearchIcon from '@mui/icons-material/Search';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import moment from 'moment';
 import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -60,7 +61,11 @@ function AddCliente( {getCliId} ) {
   const [popupActiveCrono, setPopupActiveCrono] = useState(false);  
 
   const [searchTerm, setSearchTerm] = useState("");  //search
+  const [searchTermDeb, setSearchTermDeb] = useState("");  //search
+  const [searchTermCrono, setSearchTermCrono] = useState("");  //search
   const inputRef= useRef();
+  const inputRefDeb= useRef();
+  const inputRefCrono= useRef();
 
 
   //permessi utente
@@ -338,7 +343,14 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
         initial= {{opacity: 0}}
         animate= {{opacity: 1}}
         transition={{ duration: 0.7 }}>
-          {!matches ? <h1 className='title mt-3'> Lista Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
+
+{!matches && 
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate(-1)}}>
+      <ArrowBackIcon id="i" /></button> 
+    }
+
+  {!matches ? <h1 className='title mt-3'> Lista Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
     <div>
         <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Cliente </button></span>
         <span><button onClick={handleButtonAna}>Anagrafiche Clienti</button></span>
@@ -476,9 +488,9 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 </div>
 <div className='col'>
 <TextField
-      inputRef={inputRef}
+      inputRef={inputRefDeb}
       className="inputSearch"
-      onChange={event => {setSearchTerm(event.target.value)}}
+      onChange={event => {setSearchTermDeb(event.target.value)}}
       type="text"
       placeholder="Ricerca Cliente"
       InputProps={{
@@ -565,9 +577,9 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
   </div>
       }
 {todosDebi.filter((val)=> {
-        if(searchTerm === ""){
+        if(searchTermDeb === ""){
           return val
-      } else if (val.nomeC.toLowerCase().includes(searchTerm.toLowerCase()) ) {
+      } else if (val.nomeC.toLowerCase().includes(searchTermDeb.toLowerCase()) ) {
         return val
                 }
             }).map((todo) => (
@@ -591,7 +603,25 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 {popupActiveCrono &&
   <div className='todo_containerCli mt-3'>
   <div className='row'> 
-<p className='colTextTitle'> Cronologia Debito</p>
+  <div className='col'>
+  <p className='colTextTitle'> Cronologia Debito</p>
+  </div>
+<div className='col' style={{textAlign: "right", paddingRight:"20px"}}>
+<TextField
+      inputRef={inputRefCrono}
+      className="inputSearch"
+      onChange={event => {setSearchTermCrono(event.target.value)}}
+      type="text"
+      placeholder="Ricerca Cliente"
+      InputProps={{
+      startAdornment: (
+      <InputAdornment position="start">
+      <SearchIcon color='secondary'/>
+      </InputAdornment>
+                ),
+                }}
+       variant="outlined"/>
+  </div>
 </div>
   <div className='row' style={{marginRight: "5px"}}>
       <div className='col-3'><p className='coltext' >DataModifica</p></div>
@@ -602,7 +632,13 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
       <hr style={{margin: "0"}}/>
     </div>
     <div className="scroll">
-  {crono.map((col) => (
+  {crono.filter((val)=> {
+        if(searchTermCrono === ""){
+          return val
+      } else if (val.nomeC.toLowerCase().includes(searchTermCrono.toLowerCase()) ) {
+        return val
+                }
+            }).map((col) => (
     <div key={col.id}>
     <div className='row' style={{padding: "0px"}}>
       <div className='col-3 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>

@@ -23,6 +23,7 @@ import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import { motion } from 'framer-motion';
 import LockIcon from '@mui/icons-material/Lock';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircularProgress from '@mui/material/CircularProgress';
 
 export const AutoComp = [];
@@ -200,7 +201,7 @@ function ScaletData({ getColId }) {
   //_________________________________________________________________________________________________________________
   const createCol = async (e) => {    
     e.preventDefault(); 
-    var formattedDate = moment(nome).format('DD/MM/YYYY');
+    var formattedDate = moment(nome).format('DD-MM-YYYY');
     var bol= true
     if(!nome) {            
       notifyError();
@@ -251,7 +252,14 @@ function ScaletData({ getColId }) {
         animate= {{x: 0}}
         transition={{ duration: 0.4 }}>
 
+{!matches && 
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate(-1)}}>
+      <ArrowBackIcon id="i" /></button> 
+    }
+
 {!matches ? <h1 className='title mt-3'> Scaletta</h1> : <div style={{marginBottom:"60px"}}></div>} 
+
 
     <button onClick={() => {setFlagDelete(true); setFlagBlock(false)}}>elimina</button>
     <button onClick={() => {setFlagBlock(true); setFlagDelete(false)}}>blocca</button>

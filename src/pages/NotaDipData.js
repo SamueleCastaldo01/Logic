@@ -14,6 +14,8 @@ import { supa, guid, tutti } from '../components/utenti';
 import PrintIcon from '@mui/icons-material/Print';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import Switch from '@mui/material/Switch';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import Calendar from 'react-calendar';
 import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
 
@@ -24,7 +26,6 @@ function NotaDipData({notaDat, getNotaDip }) {
     const [todos, setTodos] = React.useState([]);
     const [todosDataAuto, setTodosDataAuto] = React.useState([]);
 
-
     const [nomeC, setNomeC] = React.useState("");
     const [cont, setCont] = React.useState(1);
     const [flagDelete, setFlagDelete] = useState(false); 
@@ -32,8 +33,10 @@ function NotaDipData({notaDat, getNotaDip }) {
     const [switInt, setswitInt] = React.useState("0");
 
     const [dataSc, setDataSc] = React.useState(notaDat);
+    const [DataCal, setDataCal] = useState(new Date());
 
     const [popupActive, setPopupActive] = useState(true);  
+    const [activeCalender, setActiveCalender] = useState(false)
     const [Progress, setProgress] = React.useState(false);
   
     //permessi utente
@@ -52,8 +55,14 @@ function NotaDipData({notaDat, getNotaDip }) {
 
     const handleChangeSwitch = (event) => {
       setSwitchChecked(event.target.checked);
-
     };
+
+    function onChangeDataCal(value) {   //si attiva quando seleziono una data dal calendario
+      setDataCal(value)  //serve per il calendario
+      var formattedDate = moment(value).format('DD-MM-YYYY');  //conversione della data in stringa
+    setDataSc(formattedDate)  //serve per cambiare la data come filtro
+    setActiveCalender(false)  //disattiva il calendario
+    }
 //_________________________________________________________________________________________________________________
 const contEffect = async () => {  //fa il conteggio
     const coll = collection(db, "addNota");
@@ -144,8 +153,7 @@ const contEffect = async () => {  //fa il conteggio
   //********************************************************************************** */
       return ( 
       <>  
-      <motion.div>
-    {/**************NAVBAR MOBILE*************************************** */}
+          {/**************NAVBAR MOBILE*************************************** */}
     <div className='navMobile row'>
       <div className='col-2'>
       </div>
@@ -153,7 +161,9 @@ const contEffect = async () => {  //fa il conteggio
       <p className='navText'> NoteDip </p>
       </div>
       </div>
-  
+
+
+      <motion.div>
       <div className='container' style={{padding: "20px"}}>
   {/**************tabelle********************************************************************************************************/}
       <div className='row' style={{marginTop: "40px"}}>
@@ -172,18 +182,31 @@ const contEffect = async () => {  //fa il conteggio
           inputProps={{ 'aria-label': 'controlled' }}/>
       </div>
         </div>
-        <div className='col' style={{paddingLeft: "0px", paddingRight: "25px"}}>
-        <Autocomplete
-        freeSolo
-      value={dataSc}
-      options={todosDataAuto.map((option) => option.data)}
-      onInputChange={handleInputChange}
-      componentsProps={{ popper: { style: { width: 'fit-content' } } }}
-      renderInput={(params) => <TextField {...params} label="Seleziona la data" />}/>
-        </div>
+        <div className='col' style={{paddingLeft: "0px", textAlign: "right"}}>
+        {dataSc}
+      <button className='buttonCalender' onClick={() => {setActiveCalender(!activeCalender)}}> <CalendarMonthIcon/></button>
+      {activeCalender== true &&
+  <>
+  <div style={{width: "265px",position: "absolute", opacity:"100%"}}>
+  <motion.div
+        initial= {{x: -70}}
+        animate= {{x: -93}}
+        transition={{ type: "spring", mass: 0.5 }}>
+      <Calendar onChange={onChangeDataCal} value={DataCal} 
+        tileClassName={({ date, view }) => {
+      if(todosDataAuto.find(x=>x.data===moment(date).format("DD-MM-YYYY"))){
+       return  'highlight'
+      }
+    }}
+      />
+        </motion.div>
+      </div>
 
+</>
+} 
         </div>
-        <div className='row'>
+        </div>
+        <div className='row' style={{borderBottom: "1px solid gray"}}>
         <div className='col-1' >
         <p className='coltext'>N</p>
         </div>
@@ -192,7 +215,6 @@ const contEffect = async () => {  //fa il conteggio
         </div>
         
       </div>
-      <hr style={{margin: "0"}}/>
       <div className="scrollOrdCli">
       {Progress == false && 
         <div style={{marginTop: "14px"}}>
@@ -203,7 +225,7 @@ const contEffect = async () => {  //fa il conteggio
           <div key={todo.id}>
           {todo.data  === dataSc &&(!switChchecked ? todo.completa == "0" : todo.completa == "1") &&  (
       <>
-    <div className='row diviCol' onClick={() => {
+    <div className='row diviCol' style={{borderBottom: "1px solid gray"}} onClick={() => {
             getNotaDip(todo.id, todo.cont, todo.nomeC, dataSc, todo.NumCartoni)
             setTimeout(function(){
               navigate("/notadip");
@@ -219,7 +241,6 @@ const contEffect = async () => {  //fa il conteggio
                         <NavigateNextIcon/>          
         </div>
     </div>
-    <hr style={{margin: "0"}}/>
              </>
                   )}
           </div>

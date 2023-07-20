@@ -16,6 +16,7 @@ import { AutoProdCli } from "../pages/AddNota";
 import { fontSize } from "@mui/system";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Menu from '@mui/material/Menu';
+import { FlareSharp } from "@mui/icons-material";
 
 export const AutoCompProd = [];
 
@@ -137,6 +138,17 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
     }
     setMeno(0);
     await updateDoc(doc(db, "Nota", todo.id), { simbolo:" ", meno:0});
+    handleClose()
+  };
+
+  const handleChangeEt = async (event) => {  //si attiva quando vado ad evidenziare
+    if (todo.flagEt == false) {
+      await updateDoc(doc(db, "Nota", todo.id), { flagEt: true});  //aggiorno il flagEt
+    }
+    if(todo.flagEt == true) {
+      await updateDoc(doc(db, "Nota", todo.id), { flagEt: false});  //aggiorno il flagEt
+    }
+
     handleClose()
   };
 
@@ -278,7 +290,8 @@ const handleChangeAge = (event) => {
 {((sup ===true  && Completa== "1" && todo.simbolo != "(NO)") || (sup ===true  && Completa== "0")) &&(   //non fa visualizzare i prodotti no, quando confermi la nota
     <div className="row " style={{ borderBottom:"solid",  borderWidth: "2px" }}>
 {/**************************QUANTITA'******************************************************************* */}
-    <div className="col-1" style={{padding:"0px", background: todo.simbolo == " " && "#FFFF00" }}>    
+    <div className="col-1" style={{padding:"0px",
+     background: (todo.simbolo == " " || (todo.prodottoC == "ROIAL ASCIUGAMANO 60 pz" && (todo.simbolo != "(NO)" && todo.simbolo != "X"))) && "#FFFF00" }}>    
     {sup ===true && Completa == 0 &&  ( 
       <>
       <span style={{padding:"0px"}}>
@@ -305,8 +318,9 @@ const handleChangeAge = (event) => {
     </div>
 
 {/*******************Prodotto********************************************************************************** */}
-<div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px", background: todo.simbolo == " " && "#FFFF00", height: "40px"}}>
-      {/***Prodotti********************** */}
+<div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px",
+ background: (todo.simbolo == " " || (todo.prodottoC == "ROIAL ASCIUGAMANO 60 pz" && (todo.simbolo != "(NO)" && todo.simbolo != "X"))) && "#FFFF00", height: "40px"}}>
+      {/***Prodotti non completati (non tinte)********************** */}
     {sup ===true && todo.flagTinte===false && Completa == 0 &&( 
       <>
       <Autocomplete
@@ -319,10 +333,15 @@ const handleChangeAge = (event) => {
       componentsProps={{ popper: { style: { width: 'fit-content', border: "none" } } }}
       renderInput={(params) => <TextField {...params}  size="small"/>}
     />
-    {/*********Simboli****************** */}
+    {/*********Simboli*************************************************** */}
       { todo.simbolo != "1" &&
       <h3 className="simboloNota" style={{color: "red", fontSize: "16px"}}>{todo.simbolo}</h3>
        }
+       {todo.flagEt == true && (
+        <>
+        <span className="simboloNota" style={{color: "blue", left: "150px", bottom: "40px"}}>+ET.</span>
+        </>
+      )}
        {(todo.simbolo== "1" && Completa == 0) && <h3 className="simboloNota" style={{color: "red", fontSize: "16px", textAlign: "center", left:"150px"}}> (-
                         <input
                          onChange={(e) => setMeno(e.target.value)}
@@ -331,10 +350,16 @@ const handleChangeAge = (event) => {
 }
     </>
     )}
-
+   {/*****PRD completati************** */}
     {sup ===true && todo.flagTinte===false && Completa == 1 &&( 
       <>
-      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> <span style={{background: todo.simbolo == " " && "#FFFF00"}}>{todo.prodottoC}</span>
+      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> <span style={{background: todo.simbolo == " "  && "#FFFF00"}}>{todo.prodottoC}
+      {todo.flagEt == true && (
+        <>
+        <span style={{color: "blue"}}>&nbsp;ET.</span>
+        </>
+      )}
+      </span>
          {todo.simbolo=="X" && <span style={{color: "red", fontSize: "16px"}}> {todo.simbolo} </span> } 
        </h3>
       </>
@@ -486,6 +511,7 @@ const handleChangeAge = (event) => {
                 onClose={handleClose}
               >
                 <MenuItem onClick={handleChangeEvi}>Evidenzia</MenuItem>
+                <MenuItem onClick={handleChangeEt}>ET</MenuItem>
                 <MenuItem onClick={handleChangeNo}>(NO)</MenuItem>
                 <MenuItem onClick={handleChangeMeno}>(- )</MenuItem>
                 <MenuItem onClick={handleChangeInterro}>?</MenuItem>

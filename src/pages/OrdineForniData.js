@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { notifyError, notifyErrorDat } from '../components/Notify';
 import Calendar from 'react-calendar';
 import Button from '@mui/material/Button';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import 'moment/locale/it'
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from '@mui/icons-material/Close';
@@ -35,10 +37,9 @@ function OrdineForniData({ getOrdFornId }) {
     const [flagDelete, setFlagDelete] = useState(false); 
 
     const [popupActive, setPopupActive] = useState(false);  
+    const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
 
     const [nome, setData] = useState("");
-
-
 
     moment.locale("it");
 
@@ -148,7 +149,7 @@ function OrdineForniData({ getOrdFornId }) {
   //_________________________________________________________________________________________________________________
   const createCol = async (e) => {    
     e.preventDefault();  
-    var formattedDate = moment(nome).format('DD/MM/YYYY');
+    var formattedDate = moment(nome).format('DD-MM-YYYY');
     var bol= true
     if(!nome) {            
       notifyError();
@@ -186,7 +187,14 @@ function OrdineForniData({ getOrdFornId }) {
         initial= {{x: "-100vw"}}
         animate= {{x: 0}}
         transition={{ duration: 0.4 }}>
-    <h1 className='title mt-3'> Ordine Fornitori</h1>
+
+{!matches && 
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate(-1)}}>
+      <ArrowBackIcon id="i" /></button> 
+    }
+
+    {!matches ? <h1 className='title mt-3'>Ordine Fornitori</h1> : <div style={{marginBottom:"60px"}}></div>} 
     <button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button>
 {/** inserimento Data *************************************************************/}
 {sup ===true && (

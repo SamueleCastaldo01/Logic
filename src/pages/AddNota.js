@@ -289,9 +289,11 @@ const contEffect = async () => {
         animate= {{x: 0}}
         transition={{ duration: 0.4 }}>
 
-{!matches && <button className="backArrowPage" style={{float: "left"}}
-      onClick={() => {navigate("/ordineclientidata")}}>
-      <ArrowBackIcon id="i" /></button> }
+{!matches && 
+  <button className="backArrowPage" style={{float: "left"}}
+      onClick={() => {navigate(-1)}}>
+      <ArrowBackIcon id="i" /></button> 
+    }
 
       {!matches ? <h1 className='title mt-3'> Ordine Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
   <h3 style={{fontSize: "20px"}}>{moment(dataOrd.toDate()).format("L")}</h3>  

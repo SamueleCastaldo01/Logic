@@ -81,21 +81,17 @@ function Nota({notaId, cont, nomeCli, dataNota, dataNotaC, numCart, numBust, pre
     )
 
       const Remove = () => {
-        console.log(localStorage.getItem("flagRemove"))
         if(localStorage.getItem("flagRemove") == 0 ) {
-          console.log("sono entrato")
           handleDelete(localStorage.getItem("IDNOTa"));
         }
 
         else if(localStorage.getItem("flagRemove") == 1 ) {
-          console.log("sono entrato")
           handleDeleteInOrdine(localStorage.getItem("IDNOTa"));
         }
 
         else if(localStorage.getItem("flagRemove")  == 2) {
           handleDeleteInSospeso(localStorage.getItem("IDNOTa"));
         }
-        else{ console.log("non sono entrato ")}
           toast.clearWaitingQueue(); 
                }
 
@@ -183,6 +179,7 @@ const createCate = async () => {
     simbolo: "",
     simbolo2: "",
     meno: 0,
+    flagEt: false,
     t1,
     t2,
     t3,

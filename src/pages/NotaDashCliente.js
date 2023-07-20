@@ -18,33 +18,29 @@ import IconButton from '@mui/material/IconButton';
 import Collapse from '@mui/material/Collapse';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useNavigate } from 'react-router-dom';
-import Fade from '@mui/material/Fade';
-import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes, notifyErrorNumCartoni} from '../components/Notify';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
+import { WhatsappShareButton, WhatsappIcon, EmailShareButton, EmailIcon } from 'react-share';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
-function NotaDashCliente({notaDashId, notaNomeC, notaDataC}) {
+function NotaDashCliente({}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
+    const { nome } = useParams();
+    const { data } = useParams();
+
+    const string = "https://logic-2220e.web.app/notadashcliente/"+nome+"/"+data;
+    const url = string.replace(/ /g, '%20');  //conversione da stringa a url
+
     const [todos, setTodos] = React.useState([]);
     const [todosAddNot, setTodosAddNot] = React.useState([]);
-    const [indirizzoC, setIndirizzoC] = React.useState("");
-    const [partitaIvaC, setPartitaIvaC] = React.useState("");
-    const [cellulareC, setCellulareC] = React.useState("");
-    const [prodottoC, setProdottoC] = React.useState("");
-    const [t1, setT1] = React.useState("");   //tinte, che dentro una trupla ci possono essere massimo 5
-    const [t2, setT2] = React.useState("");
-    const [t3, setT3] = React.useState("");
-    const [t4, setT4] = React.useState("");
-    const [t5, setT5] = React.useState("");
-    const [nomTin, setnomTin] = React.useState("");
-    const [Completa, setCompleta] = useState(0);
     const [numeroPagineNota, setNumeroPagineNota] = useState("");
+    const [Progress, setProgress] = React.useState(false);
 
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
     const today = new Date(timeElapsed);    //converte da millisecondi a data
@@ -99,6 +95,7 @@ function NotaDashCliente({notaDashId, notaNomeC, notaDataC}) {
             todosArray.push({ ...doc.data(), id: doc.id });
           });
           setTodos(todosArray);
+          setProgress(true);
         });
         localStorage.removeItem("NotaDipId");
         return () => unsub();
@@ -124,7 +121,7 @@ function NotaDashCliente({notaDashId, notaNomeC, notaDataC}) {
      const SommaTot = async (id, nomeC ) => {  //fa la somma totale, di tutti i prezzi totali
       var sommaTot=0;
       todos.map((nice) => {
-        if (nomeC == nice.nomeC && notaDataC==nice.dataC) {   //se il nome della tinta è uguale ad un prodotto dell'array allora si prende il prezzo unitario
+        if (nomeC == nice.nomeC && data ==nice.dataC) {   //se il nome della tinta è uguale ad un prodotto dell'array allora si prende il prezzo unitario
            sommaTot=+nice.prezzoTotProd + sommaTot;   // va a fare la somma totale
         }
       })
@@ -174,14 +171,27 @@ const print = async () => {
       <ArrowBackIcon id="i" /></button> 
   }
 
+  {matches && <div style={{marginTop: "50px"}}></div>}
+
       <span><button onClick={print}>Stampa </button></span>
+
+{sup == true && 
+  <>
+  <WhatsappShareButton url={url}>
+        <WhatsappIcon type="button" size={40} round={true} />
+    </WhatsappShareButton>
+    <EmailShareButton url={url}>
+        <EmailIcon type="button" size={40} round={true} />
+    </EmailShareButton>
+  </>
+}
 
 {/****Nota*****************/}
 <div ref={componentRef} className="foglioA4" style={{ }}>
   <div className='container' style={{paddingLeft: "24px", paddingRight: "24px"}}>
     {todosAddNot.map((todo) => (
     <div key={todo.id}>
-    { todo.data == notaDataC  && notaNomeC == todo.nomeC &&  (
+    { todo.data == data  && nome == todo.nomeC &&  (
       <>
       <div className='row' style={{marginTop: "40px"}} >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
@@ -203,23 +213,26 @@ const print = async () => {
 
 {/** tabella dei prodotti solo la lista */}
   <div className="scrollNota">
+  {Progress == false && 
+  <div style={{marginTop: "14px"}}>
+      <CircularProgress />
+  </div>
+      }
   {todos.map((todo1) => (
     <div key={todo1.id}>
     {todo1.nomeC  === todo.nomeC && todo1.dataC == todo.data &&  (
       <>
-    { ta === true &&(
     <TodoNotaDashCli
       key={todo1.id}
       todo={todo1}
       handleDelete={""}
       handleEdit={""}
       displayMsg={displayMsg}
-      nomeCli={notaNomeC}
+      nomeCli={nome}
       flagStampa={flagStampa}
       Completa={todo.completa}
       SommaTot={SommaTot}
     />
-     )}
      </>
                   )}
     </div>

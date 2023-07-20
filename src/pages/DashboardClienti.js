@@ -27,7 +27,6 @@ import MenuItem from '@mui/material/MenuItem';
 import TodoProdClin from '../components/TodoProdClin';
 import ShareIcon from '@mui/icons-material/Share';
 import SearchIcon from '@mui/icons-material/Search';
-import { WhatsappShareButton, WhatsappIcon } from 'react-share';
 import { motion } from 'framer-motion';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -252,12 +251,6 @@ const print = async () => {
       {!matches ? <h1 className='title mt-3'> Dashboard Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
         <h4 className='mt-3'>Nome Cliente: {nomeCli} </h4>
 
-{/*********************** Icona Share
-        <WhatsappShareButton url={"https://github.com/nygardk/react-share"}>
-        <WhatsappIcon type="button" size={40} round={true} />
-    </WhatsappShareButton>
-*/}
-
       <div>
         <span><button >Debito </button></span>
         <span><button onClick={() => {setFlagRicercaProd(!flagRicercaProd)}}>Ricerca per prodotto </button></span>
@@ -340,7 +333,7 @@ const print = async () => {
     <div className='row' style={{padding: "0px"}}   
                   onClick={() => {
                   getNotaDash(todo.id, todo.nomeC, todo.data)
-                navigate("/notadashcliente");
+                  navigate('/notadashcliente/'+todo.nomeC+"/"+todo.data);
                          }}>
       <div className='col diviCol'><p className='inpTab'>{todo.data} </p> </div>
       <div className='col diviCol'><p className='inpTab'> {todo.quota} </p> </div>
@@ -364,7 +357,7 @@ const print = async () => {
     <div className='row' style={{padding: "0px"}}   
                   onClick={() => {
                   getNotaDash(todo.id, todo.nomeC, todo.data)
-                navigate("/notadashcliente");
+                  navigate('/notadashcliente/'+todo.nomeC+"/"+todo.data);
                          }}>
       <div className='col diviCol'><p className='inpTab'>{todo.data} </p> </div>
       <div className='col diviCol'><p className='inpTab'> {todo.quota} </p> </div>

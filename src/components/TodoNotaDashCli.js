@@ -19,7 +19,7 @@ import { fontSize } from "@mui/system";
 
 export const AutoCompProd = [];
 
-export default function TodoNotaDashCli({ todo, handleEdit, displayMsg, nomeCli, flagStampa, Completa, SommaTot}) {
+export default function TodoNotaDashCli({ todo}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))

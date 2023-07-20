@@ -151,7 +151,7 @@ export default function Todo({ todo, toggleComplete, handleDelete, handleEdit, f
 <div className="col-2 diviCol" style={{padding: "0px", width:"120px"}}>
     {sup ===true && ( 
     <input
-      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px", border: "1px solid" }}
         type="text"
         onBlur={handleSubm}
         value={ newQuota}

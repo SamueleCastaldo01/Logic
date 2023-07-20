@@ -234,10 +234,14 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence>
     <Routes location={location} key={location.pathname}>
+    <Route path="/notadashcliente/:nome/:data" element={<NotaDashCliente />} />
+    <Route path="/notaforni/:id/:nome/:data" element={<NotaForni notaId={notaFornId} nomeForni={notaFornNomeF} dataNota={notaFornDataV} dataNotaC={notaFornDataC} />} />
     <Route element={<PrivateRoutes isAuth={isAuth}/>}>
     <Route element={<PrivatePerm/>}>
   
     <Route element={<PrivateRoutesDipen/>}>
+    <Route path="/scorta" element={<Scorta />} />
+    <Route path="/scortatinte" element={<ScortaTinte />} />
     <Route path="/notadipdata" element={<NotaDipData notaDat={todayC} getNotaDip={getNotaDipHandler}/>} />
     <Route path="/notadip" element={<NotaDip notaDipId={notaDipId} notaDipCont={notaDipCont} notaDipNome={notaDipNomeC} notaDipDataC={notaDipDataC} numCart={NumCartNotaDip}/>} />
     </Route>
@@ -261,8 +265,6 @@ function AnimatedRoutes() {
       <Route element={<PrivateDashCli clientId={clientId}/>}>
       <Route path="/dashclienti" element={<DashClienti clientId={clientId} nomeCli={nomeCli} getNotaDash={getNotaDashHandler}/>} />
       </Route>
-
-      <Route path="/notadashcliente" element={<NotaDashCliente notaDashId={notaDashId} notaNomeC={notaDashNomeC} notaDataC={notaDashData}/>} />
   
       <Route element={<PrivateDashForn fornId={fornId}/>}>
       <Route path="/dashfornitore" element={<DashFornitori fornId={fornId} nomeForn={nomeForn}/>} />
@@ -289,7 +291,6 @@ function AnimatedRoutes() {
       </Route>
   
       <Route element={<PrivateNotaForni notaFornId={notaFornId}/>}>
-      <Route path="/notaforni" element={<NotaForni notaId={notaFornId} nomeForni={notaFornNomeF} dataNota={notaFornDataV} dataNotaC={notaFornDataC} />} />
       </Route>
   
     </Route>
