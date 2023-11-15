@@ -34,16 +34,6 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
     const [todos, setTodos] = React.useState([]);
     const [todosAddNot, setTodosAddNot] = React.useState([]);
     const [NumCart, setNumCart] = React.useState(numCart);
-    const [indirizzoC, setIndirizzoC] = React.useState("");
-    const [partitaIvaC, setPartitaIvaC] = React.useState("");
-    const [cellulareC, setCellulareC] = React.useState("");
-    const [prodottoC, setProdottoC] = React.useState("");
-    const [t1, setT1] = React.useState("");   //tinte, che dentro una trupla ci possono essere massimo 5
-    const [t2, setT2] = React.useState("");
-    const [t3, setT3] = React.useState("");
-    const [t4, setT4] = React.useState("");
-    const [t5, setT5] = React.useState("");
-    const [nomTin, setnomTin] = React.useState("");
     const [Completa, setCompleta] = useState(0);
     const [contPage, setContPage] = useState(notaDipCont);
     const [numeroPagineNota, setNumeroPagineNota] = useState("");
@@ -59,10 +49,6 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
     const [sumTot, setSumTot] =React.useState("");
 
     const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
-
-    const [qtProdotto, setQtProdotto] = React.useState("1");
-    const [prezzoUniProd, setprezzoUniProd] = React.useState("");
-    const [prezzoTotProd, setprezzoTotProd] = React.useState("");
 
     let navigate = useNavigate();
 
@@ -323,16 +309,16 @@ const print = async () => {
       <div className='navMobile row'>
       <div className='col-2'>
         <IconButton className="buttonArrow" aria-label="delete" sx={{ color: "#f6f6f6", marginTop: "7px" }}
-        onClick={ ()=> {navigate("/notadipdata"); }}>
+        onClick={ ()=> {navigate(-1); }}>
         <ArrowBackIcon sx={{ fontSize: 30 }}/>
       </IconButton>
       </div>
       <div className='col' style={{padding: 0}}>
-      <p className='navText'> Note Dipendente </p>
+      <p className='navText'> Ordini Da Evadere </p>
       </div>
       </div>
 
-
+{/*************DDT****************************************** */}
   <div className='container' style={{paddingLeft: "24px", paddingRight: "24px"}}>
     {todosAddNot.map((todo) => (
     <div key={todo.id}>
@@ -341,11 +327,11 @@ const print = async () => {
       <hr className='hrNotDip' style={{borderTop: todo.completa==1 ? "6px solid green" : "6px solid red"}}></hr>
       <div className='row' style={{marginTop: "40px"}} >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
-        <h5 className='titleNotaDip' style={{marginBottom:"0px", marginTop:"0px"}}> {todo.nomeC} </h5>
+        <h6  style={{marginBottom:"0px", marginTop:"0px"}}> {todo.nomeC} </h6>
         </div>
 
         <div className='col'  style={{textAlign:"left", padding:"0px", marginLeft:"5px"}}>
-        <h4 className='titleNotaDip' style={{marginBottom:"9px"}}> <b>N.</b> <span style={{marginRight:"10px"}}>{todo.cont}</span> <span style={{fontSize:"13px"}}><b>del</b></span> {todo.data} </h4>
+        <h6  style={{marginBottom:"9px"}}> <b>N.</b> <span style={{marginRight:"10px"}}>{todo.cont}</span> <span style={{fontSize:"13px"}}><b>del</b></span> {todo.data} </h6>
     </div>
     </div>
 

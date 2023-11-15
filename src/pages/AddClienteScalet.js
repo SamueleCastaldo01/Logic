@@ -28,6 +28,7 @@ import Calendar from 'react-calendar';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 export const AutoProdCli = [];
 
@@ -50,6 +51,7 @@ function AddClienteScalet({notaDat, getDataScal }) {
     const [popupActive, setPopupActive] = useState(true); 
     const [activeCalender, setActiveCalender] = useState(false)
     const [Progress, setProgress] = React.useState(false); 
+    const [alignment, setAlignment] = React.useState('scorta');
   
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))   //confronto con uid corrente
@@ -116,9 +118,12 @@ const contEffect = async () => {
       AutoDataScal.map((nice) => {   //se la data inserita è uguale ad una data della scaletta, allora lo fa navigare
         if(dataSc == nice.label) {
           navigate("/scaletta")
-        }
-      })
+        }})
           toast.clearWaitingQueue();}
+    
+    const handleChangeTogg = (event) => {
+        setAlignment(event.target.value);
+          };
   
 
           const handleButtonScaletta = () => {
@@ -249,10 +254,17 @@ const contEffect = async () => {
 
       {!matches ? <h1 className='title mt-3'>Aggiungi Cliente alla Scaletta</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
-        <div>
-        <span><button onClick={() => {handleButtonScaletta()}}>Aggiungi una data alla scaletta</button></span>
-          <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
-        </div>
+        <ToggleButtonGroup
+      color="primary"
+      value={alignment}
+      exclusive
+      onChange={handleChangeTogg}
+      aria-label="Platform"
+    > 
+        {sup == true && <Button onClick={() => {handleButtonScaletta()}} size="small" variant="contained">Aggiungi una data alla scaletta</Button>}
+        {sup == true && <Button onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">Elimina</Button> }
+
+    </ToggleButtonGroup>
 
   
   {/**************tabella********************************************************************************************************/}
@@ -345,7 +357,7 @@ const contEffect = async () => {
     </>}
     </div>
         </div>
-        <div className='row' style={{borderBottom: "1px solid gray"}}>
+        <div className='row' style={{borderBottom: "1px solid gray", marginTop: "35px"}}>
         <div className='col-8' >
         <p className='coltext'>Cliente</p>
         </div>

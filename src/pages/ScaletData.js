@@ -25,6 +25,7 @@ import { motion } from 'framer-motion';
 import LockIcon from '@mui/icons-material/Lock';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircularProgress from '@mui/material/CircularProgress';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 export const AutoComp = [];
 
@@ -39,6 +40,8 @@ function ScaletData({ getColId }) {
 
     const [Progress, setProgress] = React.useState(false);
     const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
+
+    const [alignment, setAlignment] = React.useState('scorta');
 
     const [nome, setData] = useState("");
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
@@ -72,6 +75,10 @@ function ScaletData({ getColId }) {
         var ok= event.target.value
         today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo, il risultato sarà in millisecondi
          localStorage.setItem("bho2", today.getTime())
+      };
+
+      const handleChangeTogg = (event) => {
+        setAlignment(event.target.value);
       };
    //_________________________________________________________________________________________________________________
     const setClear = () => {
@@ -260,9 +267,17 @@ function ScaletData({ getColId }) {
 
 {!matches ? <h1 className='title mt-3'> Scaletta</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
+    <ToggleButtonGroup
+      color="primary"
+      value={alignment}
+      exclusive
+      onChange={handleChangeTogg}
+      aria-label="Platform"
+    > 
+        {sup == true && <Button onClick={() => {setFlagDelete(true); setFlagBlock(false)}} color="error" variant="contained">Elimina</Button> }
+    {sup == true && <Button  onClick={() => {setFlagBlock(true); setFlagDelete(false)}} size="small" variant="contained">Blocca</Button>}
 
-    <button onClick={() => {setFlagDelete(true); setFlagBlock(false)}}>elimina</button>
-    <button onClick={() => {setFlagBlock(true); setFlagDelete(false)}}>blocca</button>
+    </ToggleButtonGroup>
     
 {/** inserimento Data *************************************************************/}
 {sup ===true && (
@@ -334,7 +349,7 @@ function ScaletData({ getColId }) {
                   <div key={col.id}>
                   {col.dataMilli >= localStorage.getItem("bho2") && 
                     <>
-                    <div className="diviCol" > 
+                    <div className="diviCol1" > 
                       <div className="row">
 
                         <div className="col-9" onClick={() => {

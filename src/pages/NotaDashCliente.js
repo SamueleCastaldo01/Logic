@@ -152,6 +152,8 @@ const print = async () => {
 //************************************************************** */
     return (  
         <>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8550341729584646"
+        crossorigin="anonymous"></script>
     {/**************NAVBAR MOBILE*************************************** */}
       <div className='navMobile row'>
       <div className='col-2'>
@@ -271,6 +273,10 @@ const print = async () => {
     </div>
 
     </div>
+
+  
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8550341729584646"
+        crossorigin="anonymous"></script>
     </>
       )
 }

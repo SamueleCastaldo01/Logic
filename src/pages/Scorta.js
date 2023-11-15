@@ -17,10 +17,6 @@ import TodoScorta from '../components/TodoScorta';
 import Button from '@mui/material/Button';
 import { supa, guid, tutti, dipen } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
-import Autocomplete from '@mui/material/Autocomplete';
-import SpeedDial from '@mui/material/SpeedDial';
-import SpeedDialIcon from '@mui/material/SpeedDialIcon';
-import SpeedDialAction from '@mui/material/SpeedDialAction';
 import RestoreIcon from '@mui/icons-material/Restore';
 import PrintIcon from '@mui/icons-material/Print';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -31,6 +27,8 @@ import Menu from '@mui/material/Menu';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { color, motion } from 'framer-motion';
 
@@ -59,6 +57,8 @@ function Scorta() {
   const [imageSer, setImageSer] = React.useState(localStorage.getItem("imageProd"));
   const [notaSer, setNotaSer] = React.useState(localStorage.getItem("NotaProd"));
 
+  const [alignment, setAlignment] = React.useState('scorta');
+
   const componentRef = useRef();  //serve per la stampa
   const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
 
@@ -67,7 +67,7 @@ function Scorta() {
   const [FlagFilter, setFlagFilter] = useState("0");
   const [PrdDisp, setPrdDisp] = useState(-1);
   const [FlagEdit, setFlagEdit] = useState("0");
-  const [FlagRep, setFlagRep] = useState("2");   //incominciamo con il reparto maschile
+  const [FlagRep, setFlagRep] = useState("0");   //incominciamo con tutti i prodotti come filtro
 
   const [open, setOpen] = React.useState(false); //serve per lo speedDial
   const handleOpen = () => setOpen(true);
@@ -77,6 +77,8 @@ function Scorta() {
   const [flagDelete, setFlagDelete] = useState(false); 
 
   const [popupActiveSearch, setPopupActiveSearch] = useState(false);  
+
+  const [notiPaId, setNotiPaId] = React.useState("7k5cx6hwSnQTCvWGVJ2z");
 
   const [popupActive, setPopupActive] = useState(false);  
   const [popupActiveScorta, setPopupActiveScorta] = useState(true);  
@@ -148,7 +150,7 @@ React.useEffect(() => {
 //cronologia debito
   React.useEffect(() => {
     const collectionRef = collection(db, "cronologia");
-    const q = query(collectionRef, orderBy("createdAt", "desc"));
+    const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
@@ -166,7 +168,7 @@ React.useEffect(() => {
   //cronologia Pa
   React.useEffect(() => {
     const collectionRef = collection(db, "cronologiaPa");
-    const q = query(collectionRef, orderBy("createdAt", "desc"));
+    const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
@@ -215,6 +217,10 @@ const print = async () => {
     setOpen(false)
   }
  //******************************************************************************* */
+ const handleChangeTogg = (event) => {
+  setAlignment(event.target.value);
+};
+
  function handleInputChangeBrand(event, value) {
   setBrand(value)
 }
@@ -285,7 +291,7 @@ function handlePopUp(image, nota) {
       });
  } 
   
- const handleSubmit = async (e) => {   //creazione prdotto
+ const handleSubmit = async (e) => {   //creazione prodotto
     var bol= true
     e.preventDefault();
     if(!nomeP) {            //controllo che il nom sia inserito
@@ -346,21 +352,9 @@ function handlePopUp(image, nota) {
         quantAgg: quant,
         quantFin: somma,
       });
-      //rimuove in modo automatico una volta arrivata a 50 e cancella quello più vecchio
-      const coll = collection(db, "cronologia");  
-      const snapshot = await getCountFromServer(coll);  //va a verificare quante trupe ne sono
-      if(snapshot.data().count>50) {  //se supera i 50, deve eliminare la trupla più vecchia (quindi la prima dato che è già ordinata)
-        const q = query(collection(db, "cronologia"), orderBy("createdAt"), limit(1));  //prende solo la prima trupla
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (hi) => {
-        await deleteDoc(doc(db, "cronologia", hi.id)); //elimina la trupla (quindi quella più vecchia)
-        });
-      }
   };
    //******************************************************************************************************** */
    const handleCronologiaPa = async (todo, pap ) => {   //aggiunta della trupla cronologia Pa
-    console.log("entarto nella coronologia Pa")
-    console.log(todo.pa)
       await addDoc(collection(db, "cronologiaPa"), {
         autore: auth.currentUser.displayName,
         createdAt: serverTimestamp(),
@@ -368,16 +362,7 @@ function handlePopUp(image, nota) {
         paI: todo.pa,
         paF: pap,
       });
-      //rimuove in modo automatico una volta arrivata a 50 e cancella quello più vecchio
-      const coll = collection(db, "cronologiaPa");  
-      const snapshot = await getCountFromServer(coll);  //va a verificare quante trupe ne sono
-      if(snapshot.data().count>50) {  //se supera i 50, deve eliminare la trupla più vecchia (quindi la prima dato che è già ordinata)
-        const q = query(collection(db, "cronologiaPa"), orderBy("createdAt"), limit(1));  //prende solo la prima trupla
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (hi) => {
-        await deleteDoc(doc(db, "cronologiaPa", hi.id)); //elimina la trupla (quindi quella più vecchia)
-        });
-      }
+      await updateDoc(doc(db, "notify", notiPaId), { NotiPa: true });  //va a modificare il valore della notifica
   };
 //****************************************************************************************** */
   const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
@@ -394,6 +379,7 @@ function handlePopUp(image, nota) {
     var flag = localStorage.getItem("flagCron");
     if(ag<=0) { // se è un numero negativo esce dalla funzione
       notifyErrorNumNegativo();
+      toast.clearWaitingQueue(); 
       return
     }
     var somma = +todo.quantita+(+ag)
@@ -409,6 +395,7 @@ function handlePopUp(image, nota) {
     var flag = localStorage.getItem("flagCron");
     if(ag<=0) { // se è un numero negativo esce dalla funzione e non avviene l'operazione di update
       notifyErrorNumNegativo();
+      toast.clearWaitingQueue(); 
       return
     }
     var somma = +todo.quantita-(+ag)
@@ -420,6 +407,7 @@ function handlePopUp(image, nota) {
       handleCronologia(todo, ag, somma, flag);
     }
     setFlagEdit(+FlagEdit+1);
+
   };
 
 //**************************************************************************** */
@@ -452,11 +440,18 @@ function handlePopUp(image, nota) {
   <div className='col-2'>
   </div>
   <div className='col' style={{padding: 0}}>
-  <p className='navText'> Magazzino </p>
+  <p className='navText'> Anagrafica Magazzino </p>
   </div>
+  {dip == true &&
+<div className='col-4'>
+  {FlagRep ==0 && <p className='navText' style={{ color: "#f8dcb5",}}> Tutti Prd.</p>}
+  {FlagRep ==1 && <p className='navText' style={{ color: "#f8dcb5"}}> Rep. Fem.</p>}
+  {FlagRep ==2 && <p className='navText' style={{ color: "#f8dcb5"}}> Rep. Mas.</p>}
+</div>
+}
   </div>
    <motion.div
-           initial= {{opacity: 0}}
+        initial= {{opacity: 0}}
         animate= {{opacity: 1}}
         transition={{ duration: 0.7 }}>
   
@@ -465,17 +460,23 @@ function handlePopUp(image, nota) {
       onClick={() => {navigate(-1)}}>
       <ArrowBackIcon id="i" /></button> 
     }
+{/**************TITLE*************************************** */}
+{!matches ? <h1 className='title mt-3'> Anagrafica Magazzino </h1> : <div style={{marginBottom:"60px"}}></div>} 
 
-{!matches ? <h1 className='title mt-3'> Magazzino</h1> : <div style={{marginBottom:"60px"}}></div>} 
-      
-      <div>
-    {sup == true &&  <span><button onClick={handleSpeedAddProd}>Aggiungi Prodotto </button></span>}   
-        <span><button onClick={handleSpeedScorta}>Scorta </button></span>
-        <span><button onClick={() => {navigate("/scortatinte")}}>Scorta Tinte</button></span>
-        <span><button onClick={handleSpeedCronologia}>Cronologia </button></span>
-     {/************* <span><button onClick={print}>Stampa </button></span>   */}   
-    {sup == true && <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>}   
-      </div>
+{/**************Bottoni*************************************** */}
+      <ToggleButtonGroup
+      color="primary"
+      value={alignment}
+      exclusive
+      onChange={handleChangeTogg}
+      aria-label="Platform"
+    > 
+    {sup == true &&<Button onClick={handleSpeedAddProd} size="small" variant="contained">Aggiungi Prodotto</Button>}
+      <ToggleButton onClick={handleSpeedScorta} color='secondary' value="scorta">Scorta</ToggleButton>
+      <ToggleButton onClick={() => {navigate("/scortatinte")}} color='secondary' value="scortatinte">Scorta Tinte</ToggleButton>
+      <ToggleButton onClick={handleSpeedCronologia} color='secondary' value="cronologia">Cronologia</ToggleButton> 
+      {sup == true && <Button onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
+    </ToggleButtonGroup>
 
     {sup ===true && (
         <>    
@@ -523,17 +524,23 @@ function handlePopUp(image, nota) {
 {/** tabella prodotti nel magazzino *****************************************************************************************************************/}
 {popupActiveScorta &&
 <>
-<div ref={componentRef} className='todo_containerScorta mt-5'style={{width: dip == true && "100%"}}>
+{sup == true  && <div style={{marginTop: "50px"}}></div>}
+{sup == false  && <div style={{marginTop: "20px"}}></div>}
+
+<div ref={componentRef} className='todo_containerScorta'style={{width: dip == true && "100%"}}>
 <div className='row' > 
-<div className='col-2'>
-<p className='colTextTitle'> Magazzino</p>
+<div className='col-4' style={{width: "100px"}}>
+<p className='colTextTitle'> Scorta</p>
 </div>
+{sup == true &&
 <div className='col-4'>
 {FlagRep ==0 && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> Tutti i prodotti</p>}
 {FlagRep ==1 && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> Rep. Fem.</p>}
 {FlagRep ==2 && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> Rep. Mas.</p>}
 </div>
-<div className='col' style={{padding: "0px"}}>
+}
+
+<div className='col' style={{padding: "0px", paddingRight: "15px"}}>
 <TextField
       inputRef={inputRef}
       className="inputSearchScorta"
@@ -549,8 +556,8 @@ function handlePopUp(image, nota) {
                 }}
        variant="outlined"/>
   </div>
-  <div className='col' style={{padding: "0px"}}>   
-  <button type="button" className="buttonMenu" style={{padding: "0px"}} >
+  <div className='col-1' style={{marginLeft: "20px"}}>   
+  <button type="button" className="buttonMenu" style={{paddingRight:"15px",float:"right"}} >
         <FilterListIcon id="i" onClick={handleMenu}/>
         <Menu  sx={
         { mt: "1px", "& .MuiMenu-paper": 
@@ -589,24 +596,36 @@ function handlePopUp(image, nota) {
 <div className='col-5' >
 <p className='coltext'>Prodotto</p>
 </div>
-<div className='col-1' style={{padding: "0px"}}>
-<p className='coltext'>Qt</p>
-</div>
+
 {sup == true && 
 <>
 <div className='col-1' style={{padding: "0px"}}>
-<p className='coltext'>Ss</p>
+  <p className='coltext'>Qt</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
-<p className='coltext'>Pa(€)</p>
+  <p className='coltext'>Ss</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
-<p className='coltext'>Qo</p>
+  <p className='coltext'>Pa(€)</p>
+</div>
+<div className='col-1' style={{padding: "0px"}}>
+  <p className='coltext'>Qo</p>
+</div>
+<div className='col-1' style={{padding: "0px"}}>
+  <p className='coltext'>Agg</p>
 </div>
 </>}
-<div className='col-1' style={{padding: "0px"}}>
+
+{dip == true &&
+<>
+<div className='col-2' style={{padding: "0px"}}>
+<p className='coltext'>Qt</p>
+</div>
+<div className='col-2' style={{padding: "0px"}}>
 <p className='coltext'>Agg</p>
 </div>
+</>
+}
 <hr style={{margin: "0"}}/>
 </div>
 
@@ -624,7 +643,7 @@ function handlePopUp(image, nota) {
                 }
             }).map((todo) => (
     <div key={todo.id}>
-    {/*****Si attiva quando seleziono tutti i prodotti********** */}
+    {/*****Si attiva quando attivo il filtro tutti i prodotti********** */}
     { FlagRep == 0 &&(    
       <>
       {todo.quantita > PrdDisp && 
@@ -671,7 +690,7 @@ function handlePopUp(image, nota) {
 
 {/* tabella cronologia Quantità*******************************************************************************************************************/}
 {popupActiveCrono &&
-  <div className='todo_containerCli mt-5'>
+  <div className='todo_containerCronoo mt-5'>
   <div className='row'> 
 <p className='colTextTitle'> Cronologia Quantità</p>
 </div>
@@ -684,7 +703,7 @@ function handlePopUp(image, nota) {
       <div className='col-1' style={{padding: "0px", width:"50px"}}><p className='coltext'>V.Fin.</p></div>
       <hr style={{margin: "0"}}/>
     </div>
-    <div className="scroll">
+    <div className="scrollCrono">
     {Progress1 == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />
@@ -709,7 +728,7 @@ function handlePopUp(image, nota) {
 
 {/* tabella cronologiaPA*******************************************************************************************************************/}
 {popupActiveCrono &&
-  <div className='todo_containerCli mt-5'>
+  <div className='todo_containerCronoo mt-5'>
   <div className='row'> 
 <p className='colTextTitle'> Cronologia PA</p>
 </div>
@@ -721,7 +740,7 @@ function handlePopUp(image, nota) {
       <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Pa F. </p></div>
       <hr style={{margin: "0"}}/>
     </div>
-    <div className="scroll">
+    <div className="scrollCrono">
     {Progress1 == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />

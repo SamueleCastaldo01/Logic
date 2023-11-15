@@ -179,6 +179,21 @@ export function notiUploadImage () {
         className: "rounded-4"
         });
 }
+//________________________________________________________________________
+export function notiUpdateScalet () {
+    toast.success("Aggiornato con successo", {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        transition: Slide,
+        progress: undefined,
+        theme: "dark",
+        className: "rounded-4"
+        });
+}
 //_____________________________________________________________________________________
 export function notifyUpdateCli () {
     toast.success("Cliente aggiornato", {

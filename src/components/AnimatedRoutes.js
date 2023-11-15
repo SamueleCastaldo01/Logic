@@ -8,6 +8,9 @@ import Scalet from '../pages/Scalet';
 import ScalettaDataDip from '../pages/ScalettaDataDip';
 import AddCliente from '../pages/AddCliente';
 import AddFornitori from '../pages/AddFornitori';
+import PreventivoData from '../pages/PreventivoData';
+import AddPrevNota from '../pages/AddPrevNota';
+import Preventivo from '../pages/Preventivo';
 import OrdineCliData from '../pages/OrdineCliData'
 import OrdineForniData from '../pages/OrdineForniData';
 import AddNota from '../pages/AddNota';
@@ -22,6 +25,8 @@ import DashClienti from '../pages/DashboardClienti';
 import DashFornitori from '../pages/DashboardFornitori';
 import ScortaTinte from '../pages/ScortaTinte';
 import Scorta from '../pages/Scorta';
+import StampaMassiva from '../pages/StampaMassiva';
+import StampaMassivaPrev from '../pages/StampaMassivaPrev';
 import NotaDashCliente from '../pages/NotaDashCliente';
 import {PrivateRoutes, PrivateCate, PrivatePerm, PrivateDashCli, PrivateOrd, PrivateOrdForn, PrivateNota, PrivateNotaForni, PrivateDashForn, PrivateAddClientiScalet, PrivateRoutesDipen, PrivateRoutesSup, PrivateRoutesGuid} from '../components/PrivateRoutes';
 import { AnimatePresence } from 'framer-motion'
@@ -47,7 +52,7 @@ function AnimatedRoutes() {
   
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
     const today = new Date(timeElapsed);    //converte nel tipo data
-    var formattedDate = moment(today).format('DD/MM/YYYY');  //coverte nel formato richiesto
+    var formattedDate = moment(today).format('DD-MM-YYYY');  //coverte nel formato richiesto
     localStorage.setItem("today", formattedDate);
     const [todayC, setTodayC] = useState(localStorage.getItem("today"));  //variabile che andiamo ad utilizzare
   
@@ -229,8 +234,8 @@ function AnimatedRoutes() {
         setNotaDashId(id);
         setNotaDashData(datNot);
       }
-
 // EndGet ______________________________________________________________________
+
   return (
     <AnimatePresence>
     <Routes location={location} key={location.pathname}>
@@ -252,9 +257,12 @@ function AnimatedRoutes() {
     <Route path="/scorta" element={<Scorta />} />
     <Route path="/scortatinte" element={<ScortaTinte />} />
     <Route path="/scalettadata" element={<ScaletData getColId={getColIdHandler}/>} />
+    <Route path="/preventivodata" element={<PreventivoData getOrdId={getOrderIdHandler}/>} />
     <Route path="/ordineclientidata" element={<OrdineCliData getOrdId={getOrderIdHandler}/>} />
     <Route path="/ordinefornitoridata" element={<OrdineForniData getOrdFornId={getOrderFornIdHandler}/>} />
     <Route path="/listaclienti" element={<AddCliente getCliId={getCliIdHandler}/>} />
+    <Route path="/stampamassiva" element={<StampaMassiva notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
+    <Route path="/stampamassivaprev" element={<StampaMassivaPrev notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
     </Route>
   
     <Route element={<PrivateRoutesGuid/>}>
@@ -279,6 +287,7 @@ function AnimatedRoutes() {
       </Route>
   
       <Route element={<PrivateOrd ordId={ordId}/>}>
+      <Route path="/addprevnota" element={<AddPrevNota ordId={ordId} dataOrd={dataOrd} dataOrdConf={dataOrdConf} getNotaId={getNotadHandler} getNotaDataScal={getNotaDataScalHandler} OrdDataMilli={OrdDataMilli}/>} />
         <Route path="/addnota" element={<AddNota ordId={ordId} dataOrd={dataOrd} dataOrdConf={dataOrdConf} getNotaId={getNotadHandler} getNotaDataScal={getNotaDataScalHandler} OrdDataMilli={OrdDataMilli}/>} />
       </Route>
   
@@ -287,6 +296,7 @@ function AnimatedRoutes() {
       </Route>
   
       <Route element={<PrivateNota notaId={notaId}/>}>
+      <Route path="/preventivo" element={<Preventivo notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
       <Route path="/nota" element={<Nota notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
       </Route>
   

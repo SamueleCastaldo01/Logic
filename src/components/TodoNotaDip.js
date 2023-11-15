@@ -17,6 +17,7 @@ import Menu from '@mui/material/Menu';
 import { AutoProdCli } from "../pages/AddNota";
 import { fontSize } from "@mui/system";
 
+
 export const AutoCompProd = [];
 
 export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, flagStampa, Completa, SommaTot}) {
@@ -177,7 +178,7 @@ const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodot
       <h3 className="inpTabNota" style={{ marginLeft: "12px"}}><span style={{background: todo.simbolo == " " && "#FFFF00"}}>
       {todo.prodottoC}</span>
       {todo.flagEt == true && 
-      <span style={{color: "blue"}}>&nbsp;+ET.</span>
+      <span> &nbsp;+ET.</span>
       }
         </h3>
     )}

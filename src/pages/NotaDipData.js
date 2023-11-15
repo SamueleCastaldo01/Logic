@@ -49,10 +49,6 @@ function NotaDipData({notaDat, getNotaDip }) {
   
     let navigate = useNavigate();
   
-    function handleInputChange(event, value) {
-        setDataSc(value)
-    }
-
     const handleChangeSwitch = (event) => {
       setSwitchChecked(event.target.checked);
     };
@@ -158,7 +154,7 @@ const contEffect = async () => {  //fa il conteggio
       <div className='col-2'>
       </div>
       <div className='col' style={{padding: 0}}>
-      <p className='navText'> NoteDip </p>
+      <p className='navText'> Ordini Da Evadere </p>
       </div>
       </div>
 
@@ -167,7 +163,7 @@ const contEffect = async () => {  //fa il conteggio
       <div className='container' style={{padding: "20px"}}>
   {/**************tabelle********************************************************************************************************/}
       <div className='row' style={{marginTop: "40px"}}>
-        <div className='col'>
+        <div className='col' style={{padding: "0px"}}>
     {/***********tabella note********************************************************************************** */}
         <div  className='todo_containerOrdCli'>
         <div className='row'> 
@@ -176,7 +172,7 @@ const contEffect = async () => {  //fa il conteggio
         { !switChchecked ? <p className='textOrdRed'> Ordini da evadere</p> : <p className='textOrd'> Ordini evasi</p> }
         
         <div style={{height: "25px"}}>
-         <Switch sx={{ position: "relative", right: "75px", bottom: "15px" }}
+         <Switch sx={{ position: "relative", right: "58px", bottom: "15px" }}
           checked={switChchecked}
           onChange={handleChangeSwitch}
           inputProps={{ 'aria-label': 'controlled' }}/>
@@ -201,7 +197,6 @@ const contEffect = async () => {  //fa il conteggio
       />
         </motion.div>
       </div>
-
 </>
 } 
         </div>
@@ -225,7 +220,7 @@ const contEffect = async () => {  //fa il conteggio
           <div key={todo.id}>
           {todo.data  === dataSc &&(!switChchecked ? todo.completa == "0" : todo.completa == "1") &&  (
       <>
-    <div className='row diviCol' style={{borderBottom: "1px solid gray"}} onClick={() => {
+    <div className='row diviCol1' style={{borderBottom: "1px solid gray"}} onClick={() => {
             getNotaDip(todo.id, todo.cont, todo.nomeC, dataSc, todo.NumCartoni)
             setTimeout(function(){
               navigate("/notadip");

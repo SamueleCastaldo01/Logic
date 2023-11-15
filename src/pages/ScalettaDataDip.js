@@ -7,7 +7,7 @@ import { TextField } from '@mui/material';
 import { db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
-import { notifyErrorCli, notifyUpdateCli, notifyErrorCliEm } from '../components/Notify';
+import { notifyErrorCli, notifyUpdateCli, notifyErrorCliEm, notiUpdateScalet } from '../components/Notify';
 import Autocomplete from '@mui/material/Autocomplete';
 import { AutoDataScal } from './AddNota';
 import { supa, guid, tutti } from '../components/utenti';
@@ -90,6 +90,7 @@ function Row(props) {
             await updateDoc(doc(db, "Scaletta", id), { quota:Quota, quotaV:qui});   //Aggiorna la quota nella scaletta
             SomAsc();  //somma della quota totale che viene messata nella scalettaDat
             await updateDoc(doc(db, "addNota", idnote), { quota:Quota});  //aggiorna addNota, questa quota mi serve perché poi va nella dashClienti (ordini chiusi)
+            notiUpdateScalet();
             toast.clearWaitingQueue(); 
       }
       };
@@ -268,7 +269,7 @@ function ScalettaDataDip({notaDat, getNotaDip }) {
 
 <div  style={{padding: "0px"}}>
  {/********************Tabella con MUI***************************************** */}
- <TableContainer sx={ {marginTop: "40px", height: "43rem", bgcolor: "#EFEFEF", borderRadius: "10px", boxShadow: "rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;"}} component={Paper}>
+ <TableContainer sx={ {marginTop: "40px", height: "42rem", bgcolor: "#EFEFEF", borderRadius: "10px", boxShadow: "rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;"}} component={Paper}>
       <Table stickyHeader sx={{ minWidth: 200  }} aria-label="simple table">
         <TableHead>
         <TableRow align="left">

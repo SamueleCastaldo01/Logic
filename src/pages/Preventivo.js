@@ -7,6 +7,7 @@ import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
 import BeenhereIcon from '@mui/icons-material/Beenhere';
 import TodoNota from '../components/TodoNota';
+import TodoPreventivo from '../components/TodoPreventivo';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from "@mui/icons-material/Delete";
 import { auth, db } from "../firebase-config";
@@ -27,7 +28,7 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 
 
-function Nota({notaId, cont, nomeCli, dataNota, nProd, dataNotaC, numCart, numBust, prezzoTotNota, debit, debTo, indirizzo, tel, iva, completa, idDebito }) {
+function Preventivo({notaId, cont, nomeCli, dataNota, nProd, dataNotaC, numCart, numBust, prezzoTotNota, debit, debTo, indirizzo, tel, iva, completa, idDebito }) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -37,6 +38,8 @@ function Nota({notaId, cont, nomeCli, dataNota, nProd, dataNotaC, numCart, numBu
     const [todos, setTodos] = React.useState([]);
     const [todosInOrdine, setTodosInOrdine] = React.useState([]);
     const [todosInSospeso, setTodosInSospeso] = React.useState([]);
+
+    const [updateProdo, setUpdateProd] = React.useState(0);
 
     let navigate = useNavigate();
 
@@ -63,8 +66,6 @@ function Nota({notaId, cont, nomeCli, dataNota, nProd, dataNotaC, numCart, numBu
     const [flagInOrdine, setFlagInOrdine] = React.useState(false);  //quando è falso si vedono le icone
     const [flagInSospeso, setFlagInSospeso] = React.useState(false);  //quando è falso si vedono le icone,
 
-    const [NumCart, setNumCart] = React.useState(numCart);
-    const [NumBuste, setNumBuste] = React.useState(numBust);
     const [Completa, setCompleta] = useState(completa);
    
     const [sumTot, setSumTot] =React.useState(prezzoTotNota);
@@ -131,8 +132,8 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
 }
 //********************************************************************************** */ 
      React.useEffect(() => {
-        const collectionRef = collection(db, "Nota");
-        const q = query(collectionRef, orderBy("createdAt"));
+        const collectionRef = collection(db, "preventivo");
+        const q = query(collectionRef,  orderBy("createdAt"));
         const unsub = onSnapshot(q, (querySnapshot) => {
           let todosArray = [];
           querySnapshot.forEach((doc) => {
@@ -143,7 +144,7 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
         });
         localStorage.removeItem("NotaId");
         return () => unsub();
-      }, []);
+      }, [updateProdo]);
 
       React.useEffect(() => {
         const collectionRef = collection(db, "inOrdine");
@@ -177,7 +178,7 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
 //********************************************************************************** */
   //aggiunge un prodotto nella nota
 const createCate = async () => {
-  await addDoc(collection(db, "Nota"), {
+  await addDoc(collection(db, "preventivo"), {
     dataC: dataNotaC,
     nomeC: nomeCli,
     qtProdotto: 1,
@@ -199,59 +200,9 @@ const createCate = async () => {
     prezzoTotProd,
     createdAt: serverTimestamp(),
   });
+  setUpdateProd(updateProdo +1)
 };
-//_________________________________________________________________________________________________________________
-//gestione degli ordini in sospeso e in ordine, si attivano quando si preme il pulsante conferma
 
-const handleInOrdine = async () => {  //Inserisce una nuova trupa nella tabella in ordine quando viene confermata la nota    si attiva quando premo il pulsante conferma
-  todos.map(async (nice) => {
-    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC && nice.simbolo == "(NO)") {   //va a prendere il prodotto con il no e inseriamo questo prodotto nel db inOrdine
-      await addDoc(collection(db, "inOrdine"), {   //va a creare la nuova trupla nella tabella inOrdine
-        nomeC: nomeCli,
-        dataC: dataNotaC,
-        qtProdotto: nice.qtProdotto,
-        prodottoC: nice.prodottoC,
-      });
-    }
-    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC && nice.simbolo == "1") {   //va a prendere il prodotto con il (-...) e inseriamo questo prodotto nel db inOrdine
-      await addDoc(collection(db, "inOrdine"), {   //va a creare la nuova trupla nella tabella inOrdine
-        nomeC: nomeCli,
-        dataC: dataNotaC,
-        qtProdotto: nice.meno,
-        prodottoC: nice.prodottoC,
-      });
-    }
-})
-}
-
-const handleInSospeso = async () => {  //Inserisce una nuova trupa nella tabella in sospeso quando viene confermata la nota    si attiva quando premo il pulsante conferma
-  todos.map(async (nice) => {
-    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC && nice.simbolo2 == "-") {   //va a prendere il prodotto con il no e inseriamo questo prodotto nel db inOrdine
-      await addDoc(collection(db, "inSospeso"), {   //va a creare la nuova trupla nella tabella inSospeso
-        nomeC: nomeCli,
-        dataC: dataNotaC,
-        qtProdotto: nice.qtProdotto,
-        prodottoC: nice.prodottoC,
-      });
-    }
-})
-}
-
-const handleInOrdineRemove = async () => {  //Va ad eliminare i prodotti da InOrdine, quando viene annullata la conferma    si attiva quando premo il pulsante annulla conferma
-  todosInOrdine.map(async (nice) => {
-    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC) {   //va a prendere la trupla di questo cliente di questa data
-      await deleteDoc(doc(db, "inOrdine", nice.id)); //elimina tutti i prodotti di quel cliente con quella data  quando viene annullata la conferma 
-    }
-  })
-}
-
-const handleInSospesoRemove = async () => {  //Va ad eliminare i prodotti da inSospeso, quando viene annullata la conferma    si attiva quando premo il pulsante annulla conferma
-  todosInSospeso.map(async (nice) => {
-    if (nomeCli == nice.nomeC && dataNotaC==nice.dataC) {   //va a prendere il prodotto con il no e inseriamo questo prodotto nel db inOrdine
-      await deleteDoc(doc(db, "inSospeso", nice.id)); //elimina tutti i prodotti di quel cliente con quella data  quando viene annullata la conferma 
-    }
-  })
-}
 //_________________________________________________________________________________________________________________
 const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5, nomTinte) => {
   var conTinte=0;    //alogoritmo per le tinte
@@ -266,68 +217,27 @@ const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5
   var preT= (conTinte*qt)*prezU;  //qui va a fare il prezzo totale del prodotto in base alla quantità e al prezzo unitario
   if(todo.simbolo == "(NO)"){ preT=0;  }   //se il simbolo è no, non va a fare il suo prezzo totale
   var somTrunc = preT.toFixed(2);
-  await updateDoc(doc(db, "Nota", todo.id), 
+  await updateDoc(doc(db, "preventivo", todo.id), 
   { qtProdotto: qt, prodottoC:prod, prezzoUniProd:prezU, prezzoTotProd:somTrunc, t1:tt1, t2:tt2, t3:tt3, t4:tt4, t5:tt5});
   toast.clearWaitingQueue(); 
   SommaTot();
+  setUpdateProd(updateProdo +1)
 };
-//_________________________________________________________________________________________________________________
-const handleAddNumCart = async (e) => {  //funzione aggiungere i cartoni
-  var nuCut
-  e.preventDefault();
-  setNumCart(+NumCart+1);
-  nuCut=+NumCart+1
-  await updateDoc(doc(db, "addNota", notaId), { NumCartoni: nuCut});
-}
 
-const handleRemoveNumCart = async (e) => {  //quando si preme il pulsante per rimuovere (numero di cartoni)
-  var nuCut
-  e.preventDefault();
-  if(NumCart <= 0) {  //se il numero di cartoni è minore di 0 non fa nulla
-    return
-  }
-  setNumCart(+NumCart-1);
-  nuCut= +NumCart-1
-  await updateDoc(doc(db, "addNota", notaId), { NumCartoni:nuCut});
-}
-
-const handleAddNumBuste = async (e) => {  //funzione aggiungere i cartoni
-  var nuCut
-  e.preventDefault();
-  setNumBuste(+NumBuste+1);
-  nuCut=+NumBuste+1
-  await updateDoc(doc(db, "addNota", notaId), { NumBuste: nuCut});
-}
-
-const handleRemoveNumBuste = async (e) => {  //quando si preme il pulsante per rimuovere (numero di cartoni)
-  var nuCut
-  e.preventDefault();
-  if(NumBuste <= 0) {  //se il numero di cartoni è minore di 0 non fa nulla
-    return
-  }
-  setNumBuste(+NumBuste-1);
-  nuCut= +NumBuste-1
-  await updateDoc(doc(db, "addNota", notaId), { NumBuste:nuCut});
-}
 //_________________________________________________________________________________________________________________
 const handleEditCompAnn = async (e) => {  //completa
   setDebTot(0)
-  await updateDoc(doc(db, "addNota", notaId), { completa: localStorage.getItem("completa"), debitoTotale: 0}) ;
-  await updateDoc(doc(db, "debito", idDebito), { deb1:debitoRes});  //aggiorna deb1 nel database del debito
+  await updateDoc(doc(db, "addNota", notaId), { completa: localStorage.getItem("completa")}) ;
+  setUpdateProd(updateProdo +1)
 };
 
-const handleEditDebitoRes = async (e) => {  //handle se nel caso si voglia modificare il debito residuo
-  e.preventDefault();
-  await updateDoc(doc(db, "addNota", notaId), { debitoRes:debitoRes});
-  toast.clearWaitingQueue(); 
-};
 
 const AlteStamp = async (e) => {  //handle se nel caso si voglia modificare il debito residuo
   //cambiare l'altezza per la stampa
   var conProd = 0;
   var altez = 1123;
   var nProd = 19;
-  const coll = collection(db, "Nota");   //vado a fare il conteggio dei prodotti presenti nella nota
+  const coll = collection(db, "preventivo");   //vado a fare il conteggio dei prodotti presenti nella nota
   const q = query(coll, where("nomeC", "==", nomeCli), where("dataC", "==", dataNotaC));
   const snapshot = await getCountFromServer(q);
   conProd = snapshot.data().count
@@ -346,21 +256,19 @@ const handleConferma = async () => {
   SommaTot();   //va a rifare la somma totale dei prodotti
   sumNota=localStorage.getItem("sumTotNota");
   var debTot= +sumNota+(+debitoRes);   
-  console.log("sommaTot:", sumNota, "  debitoResiduo:" , debitoRes) 
-  var debTrunc = debTot.toFixed(2);   //somma tra la somma totale dei prodotti + il debito
-  setDebTot(debTrunc);
-  await updateDoc(doc(db, "addNota", notaId), { debitoTotale:debTrunc, completa: localStorage.getItem("completa")});  //aggiorna la somma totale del ddt con tutti i debiti nell'add nota
-      await updateDoc(doc(db, "debito", idDebito), { deb1:debTrunc});  //aggiorna deb1 nel database del debito
+  await updateDoc(doc(db, "addNota", notaId), { completa: localStorage.getItem("completa")});  //aggiorna la somma totale del ddt con tutti i debiti nell'add nota
 
   AlteStamp(); //va a fare il controllo tramite il numero di prodotti, per andare a definire l'altezza della pagina che ci serve per la stampa
 
+  setUpdateProd(updateProdo +1)
       toast.clearWaitingQueue(); 
 };
 //_________________________________________________________________________________________________________________
 const handleDelete = async (id) => {
-  const colDoc = doc(db, "Nota", id); 
+  const colDoc = doc(db, "preventivo", id); 
   await deleteDoc(colDoc); 
   SommaTot();
+  setUpdateProd(updateProdo +1)
 };
 
 const handleDeleteInOrdine = async (id) => {
@@ -405,7 +313,7 @@ const print = async () => {
       </IconButton>
       </div>
       <div className='col' style={{padding: 0}}>
-      <p className='navText'> Nota </p>
+      <p className='navText'> Preventivo </p>
       </div>
       </div>
 
@@ -420,7 +328,7 @@ const print = async () => {
       <ArrowBackIcon id="i" /></button> }
 
       
-      {!matches ? <h1 className='title mt-3'> Nota</h1> : <div style={{marginBottom:"60px"}}></div>} 
+      {!matches ? <h1 className='title mt-3'> Preventivo </h1> : <div style={{marginBottom:"60px"}}></div>} 
 
       <ToggleButtonGroup
       color="primary"
@@ -434,8 +342,6 @@ const print = async () => {
     <>
     <Button onClick={() => {FlagT=false; createCate(); }} size="small" variant="contained">Aggiungi Prodotto</Button>
     <Button onClick={() => {FlagT=true; createCate();}} size="small" variant="contained">Aggiungi Tinte</Button>
-      <ToggleButton onClick={() => { setFlagInOrdine(true); setFlagInSospeso(false)}} color='secondary' value="scortatinte">In Ordine</ToggleButton>
-      <ToggleButton onClick={() => { setFlagInOrdine(false); setFlagInSospeso(true)}} color='secondary' value="scortatinte1">In Sospeso</ToggleButton>
     </>}
     {sup == true &&<Button onClick={print} size="small" variant="contained">Stampa</Button>}
 
@@ -581,14 +487,9 @@ const print = async () => {
         </div>
 
         <div className='col'  style={{textAlign:"left", padding:"0px", marginLeft:"5px"}}>
-        <h3  style={{marginBottom:"-5px", fontSize:"22.5px"}}><b>DOCUMENTO DI TRASPORTO</b></h3>
-        <h4 style={{marginBottom:"9px"}}><b>(D.d.t.)</b> <span style={{fontSize:"0.4em", marginRight:"10px"}}>&emsp;&ensp; D.P.R. 472 del 14-08-1996-D.P.R 696 del 21.12.1996 </span></h4>
+        <h3  style={{marginBottom:"-5px", fontSize:"22.5px"}}><b>PREVENTIVO</b></h3>
         <h4 style={{marginBottom:"9px"}}> <b>N.</b> <span style={{marginRight:"10px"}}>{cont}</span> <span style={{fontSize:"13px"}}><b>del</b></span> {moment(dataNota.toDate()).format("L")} </h4>
 
-    <div class="form-check form-check-inline"  style={{padding:"0px", fontSize:"13px"}}>a mezzo: &nbsp; &nbsp;
-    <input id="checkbox3" type="checkbox" checked="checked"/>
-      <label for="checkbox3">&nbsp;mittente</label>
-    </div>
     </div>
     </div>
 
@@ -624,10 +525,8 @@ const print = async () => {
       }
   {todos.map((todo) => (
     <div key={todo.id}>
-    {todo.nomeC  === nomeCli && todo.dataC == dataNotaC &&  (
-      <>
     { ta === true &&(
-    <TodoNota
+    <TodoPreventivo
       key={todo.id}
       todo={todo}
       handleDelete={handleDelete}
@@ -638,43 +537,19 @@ const print = async () => {
       Completa={Completa}
       SommaTot={SommaTot}
     />
-     )}
-     </>
-                  )}
+     )}     
     </div>
   ))}
   </div>
 
   <div className='row'>
-    <div className='col' style={{textAlign:"left", padding:"0px"}}>
-    <h6 className='mt-2'>Numero Cartoni: <span> {NumCart} </span> 
-    {Completa == 0 && flagStampa ==false &&
-      <span>
-        <button className="button-complete" style={{padding: "0px"}} onClick={handleAddNumCart}> <AddCircleIcon sx={{ fontSize: 35 }}/> </button>
-        <button className="button-delete" style={{padding: "0px"}} onClick={handleRemoveNumCart}> <RemoveCircleIcon sx={{ fontSize: 35 }}/> </button>
-      </span> }
-    </h6> 
-    <h6 className='mt-2'>Numero Buste: <span> {NumBuste} </span> 
-    {Completa == 0 && flagStampa ==false &&
-      <span>
-        <button className="button-complete" style={{padding: "0px"}} onClick={handleAddNumBuste}> <AddCircleIcon sx={{ fontSize: 35 }}/> </button>
-        <button className="button-delete" style={{padding: "0px"}} onClick={handleRemoveNumBuste}> <RemoveCircleIcon sx={{ fontSize: 35 }}/> </button>
-      </span> }
-    </h6> 
-       </div>
+
 
     <div className='col' style={{textAlign:"right", padding:"0px"}}>
     <h6>Totale: {sumTot} €</h6>
-    <form onSubmit={handleEditDebitoRes}>
-    <h6>Debito Residuo:     <input value={debitoRes} onBlur={handleEditDebitoRes} style={{textAlign:"center", padding: "0px", width:"50px"}} 
-      onChange={(event) => {
-      setDebitoRes(event.target.value);}}
-    />  €</h6>
-    </form>
-    <h6>Debito Totale: {debitoTot} €</h6>
     {flagStampa == false && <>
-  {Completa==0 ?  <button onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1); handleInOrdine(); handleInSospeso();  handleConferma()}}>Conferma</button> :
-    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleInSospesoRemove(); handleEditCompAnn(); }}>Annulla Conferma</button>
+  {Completa==0 ?  <button onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1);  handleConferma()}}>Conferma</button> :
+    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleEditCompAnn(); }}>Annulla Conferma</button>
      }
   </>}
 
@@ -688,4 +563,4 @@ const print = async () => {
     </>
       )
 }
-export default Nota;
+export default Preventivo;

@@ -15,19 +15,18 @@ import 'moment/locale/it'
 import Menu from '@mui/material/Menu';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
-import Button from '@mui/material/Button';
 import { supa } from '../components/utenti';
 import { guid } from '../components/utenti';
 import { tutti } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
-import Autocomplete from '@mui/material/Autocomplete';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { Bar } from 'react-chartjs-2';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import DeleteIcon from "@mui/icons-material/Delete";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CircularProgress from '@mui/material/CircularProgress';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { optionsNumCart, optionsTotQuota, optionsVendite } from '../components/OptionsGrafici';
 import Calendar from 'react-calendar';
 import { Line } from 'react-chartjs-2';
@@ -68,6 +67,8 @@ function HomePage(  ) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorEl2, setAnchorEl2] = React.useState(null);
   const [anchorEl3, setAnchorEl3] = React.useState(null);
+
+  const [alignment, setAlignment] = React.useState('');
 
   const [dataNumNot, setDataNumNot] = useState({
     labels: "",
@@ -153,6 +154,10 @@ function HomePage(  ) {
   let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
   let navigate = useNavigate();
+
+  const handleChangeTogg = (event) => {
+    setAlignment(event.target.value);
+  };
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -505,7 +510,7 @@ const handleVendite = async () => {
     <div className='navMobile row'>
         <div className='col-2'> </div>
         <div className='col' style={{padding: 0}}>
-          <p className='navText'> Note Dipendente </p>
+          <p className='navText'> Liguori srl </p>
         </div>
     </div>
     <motion.div
@@ -519,10 +524,17 @@ const handleVendite = async () => {
       <ArrowBackIcon id="i" /></button> 
     }
           {!matches ? <h1 className='title mt-3'> HomePage</h1> : <div style={{marginBottom:"60px"}}></div>} 
-      <div>
-        <span><button onClick={() => {setPopupActive(!popupActive); setActiveCalender(false); setPopupActiveInOrdine(false)}}>Scalette Chiuse</button></span>
-        <span><button onClick={() => {setPopupActive(false); setActiveCalender(false); setPopupActiveInOrdine(true)}}>In Ordine</button></span>
-      </div>
+
+      <ToggleButtonGroup
+      color="primary"
+      value={alignment}
+      exclusive
+      onChange={handleChangeTogg}
+      aria-label="Platform"
+    > 
+      <ToggleButton  onClick={() => {setPopupActive(!popupActive); setActiveCalender(false); setPopupActiveInOrdine(false)}} size='small' color='secondary' value="scaletteChiu">Scalette Chiuse</ToggleButton>
+      <ToggleButton onClick={() => {setPopupActive(false); setActiveCalender(false); setPopupActiveInOrdine(true)}} color='secondary' value="scortatinte">In Ordine</ToggleButton>
+    </ToggleButtonGroup>
 
 <div className='containerGrafici'>
 {/***************GRAFICO ORDINI********************************************* */}
@@ -753,7 +765,7 @@ const handleVendite = async () => {
 <p className='colTextTitle'> In ordine </p>
 </div>
 <div className='col'></div>
-<div className='col'>
+<div className='col' style={{ paddingRight: "20px", paddingTop: "8px", paddingBottom: "6px"}}>
 <TextField
       inputRef={inputRef}
       className="inputSearch"
@@ -771,7 +783,7 @@ const handleVendite = async () => {
 </div>
 </div>
 <div className='row' style={{marginRight: "5px"}}>
-<div className='col-3' >
+<div className='col-4' >
 <p className='coltext' >Cliente</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
@@ -801,13 +813,13 @@ const handleVendite = async () => {
             }).map((todo) => (
     <div key={todo.id}> 
     <div className='row' style={{padding: "0px", marginRight: "5px"}}>
-      <div className='col-3 diviCol'><p className='inpTab'>{todo.nomeC} </p> </div>
+      <div className='col-4 diviCol'><p className='inpTab'>{todo.nomeC} </p> </div>
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.qtProdotto}</p></div>
       <div className='col-4 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.prodottoC}</p></div>
       <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.dataC}</p></div>
       {sup ===true && ( 
         <>
-      <div className="col diviCol" style={{padding:"0px", marginTop:"-8px"}}>
+      <div className="col-1 diviCol" style={{padding:"0px", marginTop:"-8px"}}>
         <button className="button-delete" onClick={() =>{
           localStorage.setItem("flagRemove", 1);
            localStorage.setItem("IDNOTa", todo.id);

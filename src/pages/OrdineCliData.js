@@ -26,6 +26,7 @@ import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 export const AutoComp1 = [];
 
 
@@ -49,7 +50,7 @@ function OrdineCliData({ getOrdId }) {
     moment.locale("it");
 
     let navigate = useNavigate();
-
+    const [alignment, setAlignment] = React.useState('scorta');
 
     let sup= supa.includes(localStorage.getItem("uid"))
     let gui= guid.includes(localStorage.getItem("uid"))
@@ -67,6 +68,10 @@ function OrdineCliData({ getOrdId }) {
       }
       });
       }
+
+      const handleChangeTogg = (event) => {
+        setAlignment(event.target.value);
+      };
   //_________________________________________________________________________________________________________________
          const handleChangeDataSelect = (event) => {
           setday(event.target.value);      //prende il valore del select
@@ -281,8 +286,17 @@ function OrdineCliData({ getOrdId }) {
       <ArrowBackIcon id="i" /></button> 
     }
    {!matches ? <h1 className='title mt-3'> Ordine Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
-    <button onClick={() => {setFlagDelete(true); setFlagBlock(false)}}>elimina</button>
-    <button onClick={() => {setFlagBlock(true); setFlagDelete(false)}}>blocca</button>
+
+    <ToggleButtonGroup
+      color="primary"
+      value={alignment}
+      exclusive
+      onChange={handleChangeTogg}
+      aria-label="Platform"
+    > 
+    {sup == true && <Button onClick={() => {setFlagDelete(true); setFlagBlock(false)}} color="error" variant="contained">Elimina</Button> }
+    {sup == true && <Button  onClick={() => {setFlagBlock(true); setFlagDelete(false)}} size="small" variant="contained">Blocca</Button>}
+    </ToggleButtonGroup>
 {/** inserimento Data *************************************************************/}
 {sup ===true && (
         <>    
@@ -353,7 +367,7 @@ function OrdineCliData({ getOrdId }) {
                   <div key={col.id}>
                   {col.dataMilli >= localStorage.getItem("bho3") && 
                     <>
-                    <div className="diviCol"> 
+                    <div className="diviCol1"> 
                       <div className="row">
                         <div className="col-9" onClick={() => {
                             getOrdId(col.id, col.nome, col.data, col.dataMilli)

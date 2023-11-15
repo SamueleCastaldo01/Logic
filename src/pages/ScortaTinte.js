@@ -31,6 +31,8 @@ import Menu from '@mui/material/Menu';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { color, motion } from 'framer-motion';
 
@@ -56,6 +58,8 @@ function ScortaTinte() {
 
   const componentRef = useRef();  //serve per la stampa
   const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
+
+  const [alignment, setAlignment] = React.useState('scorta');
 
   const [popupActiveCrono, setPopupActiveCrono] = useState(false);  
   const [FlagFilter, setFlagFilter] = useState("0");
@@ -140,8 +144,8 @@ React.useEffect(() => {
 
 
   React.useEffect(() => {
-    const collectionRef = collection(db, "cronologia");
-    const q = query(collectionRef, orderBy("createdAt", "desc"));
+    const collectionRef = collection(db, "cronologiaTinte");
+    const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
@@ -192,6 +196,10 @@ const print = async () => {
 
 const handleChangeBrand = (event) => {
   setBrand(event.target.value);      //prende il valore del select
+};
+
+const handleChangeTogg = (event) => {
+  setAlignment(event.target.value);
 };
 
 const handleMenu = (event) => {
@@ -271,6 +279,21 @@ function handlePopUp(image, nota) {
   setNotaSer(nota)
   setPopupActiveSearch(true);
 }
+ //******************************************************************************************************** */
+ const handleCronologia = async (todo, ag, somma, flag) => {   //aggiunta della trupla cronologia quantità
+  if (flag === "true") { var quant= "+"+ag }
+  else { var quant= "-"+ag }
+    await addDoc(collection(db, "cronologiaTinte"), {
+      autore: auth.currentUser.displayName,
+      createdAt: serverTimestamp(),
+      nomeP: todo.nomeP,
+      brand: todo.brand,
+      quantIni: todo.quantita,
+      quantAgg: quant,
+      quantFin: somma,
+    });
+};
+
  //******************************************************************************* */
 
  const handleSubmit = async (e) => {   //creazione prdotto
@@ -317,10 +340,14 @@ function handlePopUp(image, nota) {
     var flag = localStorage.getItem("flagCron");
     if(ag<=0) { // se è un numero negativo esce dalla funzione
       notifyErrorNumNegativo();
+      toast.clearWaitingQueue(); 
       return
     }
     var somma = +todo.quantita+(+ag)
     await updateDoc(doc(db, "scortaTinte", todo.id), { nomeP: nome, quantita:somma});
+    if(ag) {
+      handleCronologia(todo, ag, somma, flag);
+   }
     setFlagEdit(+FlagEdit+1);
   };
 
@@ -329,6 +356,7 @@ function handlePopUp(image, nota) {
     var flag = localStorage.getItem("flagCron");
     if(ag<=0) { // se è un numero negativo esce dalla funzione e non avviene l'operazione di update
       notifyErrorNumNegativo();
+      toast.clearWaitingQueue(); 
       return
     }
     var somma = +todo.quantita-(+ag)
@@ -336,6 +364,9 @@ function handlePopUp(image, nota) {
       somma=0;  
     }
     await updateDoc(doc(db, "scortaTinte", todo.id), { nomeP: nome, quantita:somma});
+    if(ag) {
+      handleCronologia(todo, ag, somma, flag);
+    }
     setFlagEdit(+FlagEdit+1);
   };
 
@@ -356,6 +387,21 @@ function handlePopUp(image, nota) {
   <div className='col' style={{padding: 0}}>
   <p className='navText'> Scorta Tinte </p>
   </div>
+  {dip == true && 
+<div className='col-4'>
+{flagTinte == "TECH" && <p className='navText' style={{ color: "#f8dcb5"}}> TECH</p>}
+{flagTinte == "KF" && <p className='navText' style={{ color: "#f8dcb5"}}> KF</p>}
+{flagTinte == "KR" && <p className='navText' style={{ color: "#f8dcb5"}}> KR</p>}
+{flagTinte == "KG" && <p className='navText' style={{ color: "#f8dcb5"}}> KG</p>}
+{flagTinte == "K10" && <p className='navText' style={{ color: "#f8dcb5"}}> K10</p>}
+{flagTinte == "CB" && <p className='navText' style={{ color: "#f8dcb5"}}> CB</p>}
+{flagTinte == "NUAGE" && <p className='navText' style={{ color: "#f8dcb5"}}> NUAGE</p>}
+{flagTinte == "ROIAL" && <p className='navText' style={{ color: "#f8dcb5"}}> ROIAL</p>}
+{flagTinte == "VIBRANCE" && <p className='navText' style={{ color: "#f8dcb5"}}> VIBRANCE</p>}
+{flagTinte == "EXTREMO" && <p className='navText' style={{ color: "#f8dcb5"}}> EXTREMO</p>}
+{flagTinte == "NATIVE" && <p className='navText' style={{ color: "#f8dcb5"}}> NATIVE</p>}
+</div>
+}
   </div>
    <motion.div
            initial= {{opacity: 0}}
@@ -368,17 +414,22 @@ function handlePopUp(image, nota) {
       <ArrowBackIcon id="i" /></button> 
     }
 
-{!matches ? <h1 className='title mt-3'> Scorta Tinte</h1> : <div style={{marginBottom:"60px"}}></div>} 
+{!matches ? <h1 className='title mt-3'> Scorta Tinte </h1> : <div style={{marginBottom:"60px"}}></div>} 
       
 
-      <div>
-      {sup == true && <span><button onClick={handleSpeedAddProd}>Aggiungi Tinta </button></span>}  
-        <span><button onClick={() => {navigate("/scorta")}}>Magazzino</button></span>
-        <span><button onClick={handleSpeedScorta}>Scorta Tinte</button></span>
-        <span><button onClick={handleSpeedCronologia}>Cronologia </button></span>
-        <span><button onClick={print}>Stampa </button></span>
-        {sup == true && <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>}   
-      </div>
+      <ToggleButtonGroup
+      color="primary"
+      value={alignment}
+      exclusive
+      onChange={handleChangeTogg}
+      aria-label="Platform"
+    > 
+    {sup == true &&<Button onClick={handleSpeedAddProd} size="small" variant="contained">Aggiungi Tinta</Button>}
+      <ToggleButton  onClick={() => {navigate("/scorta")}} color='secondary' value="scortatinte">Scorta</ToggleButton>
+      <ToggleButton onClick={handleSpeedScorta} color='secondary' value="scorta">Scorta Tinte</ToggleButton>
+      <ToggleButton onClick={handleSpeedCronologia} color='secondary' value="cronologia">Cronologia</ToggleButton> 
+      {sup == true && <Button onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
+    </ToggleButtonGroup>
 
     {sup ===true && (
         <>    
@@ -426,11 +477,14 @@ function handlePopUp(image, nota) {
 {/** tabella tinte scorta *****************************************************************************************************************/}
 {popupActiveScorta &&
 <>
-<div ref={componentRef} className='todo_containerScorta mt-5' style={{width: dip == true && "100%"}}>
+{sup == true  && <div style={{marginTop: "50px"}}></div>}
+{sup == false  && <div style={{marginTop: "20px"}}></div>}
+<div ref={componentRef} className='todo_containerScorta' style={{width: dip == true && "100%"}}>
 <div className='row' > 
-<div className='col-3'>
-<p className='colTextTitle'> Scorta Tinte</p>
+<div className='col-4' style={{width: "100px"}}>
+<p className='colTextTitle'>Tinte</p>
 </div>
+{sup == true && 
 <div className='col-3'>
 {flagTinte == "TECH" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> TECH</p>}
 {flagTinte == "KF" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> KF</p>}
@@ -444,10 +498,12 @@ function handlePopUp(image, nota) {
 {flagTinte == "EXTREMO" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> EXTREMO</p>}
 {flagTinte == "NATIVE" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> NATIVE</p>}
 </div>
-<div className='col'>
+}
+
+<div className='col' style={{padding: "0px", paddingRight: "15px"}}>
 <TextField
       inputRef={inputRef}
-      className="inputSearch"
+      className="inputSearchScorta"
       onChange={event => {setSearchTerm(event.target.value)}}
       type="text"
       placeholder="Ricerca Tinte"
@@ -460,8 +516,9 @@ function handlePopUp(image, nota) {
                 }}
        variant="outlined"/>
   </div>
-  <div className='col'>   
-  <button type="button" className="buttonMenu" style={{padding: "0px"}} >
+
+  <div className='col-1'  style={{marginLeft: "20px"}}>   
+  <button type="button" className="buttonMenu" style={{paddingRight:"15px",float:"right"}} >
         <FilterListIcon id="i" onClick={handleMenu}/>
         <Menu  sx={
         { mt: "1px", "& .MuiMenu-paper": 
@@ -508,21 +565,37 @@ function handlePopUp(image, nota) {
 <div className='col-5' >
 <p className='coltext'>Nuance</p>
 </div>
-<div className='col-1' style={{padding: "0px"}}>
-<p className='coltext'>Qt</p>
-</div>
+
 {sup == true && 
 <>
 <div className='col-1' style={{padding: "0px"}}>
-<p className='coltext'>Ss</p>
+  <p className='coltext'>Qt</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
-<p className='coltext'>Qo</p>
+  <p className='coltext'>Ss</p>
+</div>
+<div className='col-1' style={{padding: "0px"}}>
+  <p className='coltext'>Pa(€)</p>
+</div>
+<div className='col-1' style={{padding: "0px"}}>
+  <p className='coltext'>Qo</p>
+</div>
+<div className='col-1' style={{padding: "0px"}}>
+  <p className='coltext'>Agg</p>
 </div>
 </>}
-<div className='col-1' style={{padding: "0px"}}>
+
+{dip == true &&
+<>
+<div className='col-2' style={{padding: "0px"}}>
+<p className='coltext'>Qt</p>
+</div>
+<div className='col-2' style={{padding: "0px"}}>
 <p className='coltext'>Agg</p>
 </div>
+</>
+}
+
 <hr style={{margin: "0"}}/>
 </div>
 
@@ -535,7 +608,7 @@ function handlePopUp(image, nota) {
   {todos.filter((val)=> {
         if(searchTerm === ""){
           return val
-      } else if (val.nomeP.toLowerCase().includes(searchTerm.toLowerCase()) ||  val.brand.toLowerCase().includes(searchTerm.toLowerCase()) ) {
+      } else if (val.nomeP.toLowerCase().includes(searchTerm.toLowerCase()) ) {
         return val
                 }
             }).map((todo) => (
@@ -561,22 +634,24 @@ function handlePopUp(image, nota) {
   </>
 }
 
+
 {/* tabella cronologia*******************************************************************************************************************/}
 {popupActiveCrono &&
-  <div className='todo_containerCli mt-5'>
+  <div className='todo_containerCronoo mt-5'>
   <div className='row'> 
-<p className='colTextTitle'> Cronologia</p>
+<p className='colTextTitle'> Cronologia Quantità</p>
 </div>
   <div className='row' style={{marginRight: "5px"}}>
-      <div className='col-3'><p className='coltext' >DataModifica</p></div>
-      <div className='col-3' style={{padding: "0px"}}><p className='coltext' >Prodotto</p> </div>
-      <div className='col-2' style={{padding: "0px"}}><p className='coltext'>Autore</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>ValoreIni</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Modifica</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>ValoreFin</p></div>
+      <div className='col-3' style={{width:"220px"}}><p  className='coltext' >DataModifica</p></div>
+      <div className='col-3' style={{padding: "0px", width:"140px"}}><p className='coltext' >Prodotto</p> </div>
+      <div className='col-3' style={{padding: "0px", width:"140px"}}><p className='coltext' >Nuance</p> </div>
+      <div className='col-2' style={{padding: "0px", width:"90px"}}><p className='coltext'>Autore</p></div>
+      <div className='col-1' style={{padding: "0px", width:"50px"}}><p className='coltext'>V.Ini.</p></div>
+      <div className='col-1' style={{padding: "0px", width:"50px"}}><p className='coltext'>Edit</p></div>
+      <div className='col-1' style={{padding: "0px", width:"50px"}}><p className='coltext'>V.Fin.</p></div>
       <hr style={{margin: "0"}}/>
     </div>
-    <div className="scroll">
+    <div className="scrollCrono">
     {Progress1 == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />
@@ -585,12 +660,13 @@ function handlePopUp(image, nota) {
   {crono.map((col) => (
     <div key={col.id}>
     <div className='row' style={{padding: "0px"}}>
-      <div className='col-3 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
-      <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeP} </p> </div>
-      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.autore}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantIni}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantAgg}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.quantFin}</p></div>
+      <div className='col-3 diviCol' style={{width:"220px"}}><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
+      <div className='col-3 diviCol' style={{padding: "0px", width:"140px"}}><p className='inpTab'>{col.nomeP} </p> </div>
+      <div className='col-3 diviCol' style={{padding: "0px", width:"140px"}}><p className='inpTab'>{col.brand} </p> </div>
+      <div className='col-2 diviCol' style={{padding: "0px", width:"90px"}}><p className='inpTab'>{col.autore.substr(0, 7)}..</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px", width:"50px"}}><p className='inpTab'>{col.quantIni}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px", width:"50px"}}><p className='inpTab'>{col.quantAgg}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px", width:"50px"}}><p className='inpTab'>{col.quantFin}</p></div>
       <hr style={{margin: "0"}}/>
     </div>
     </div>

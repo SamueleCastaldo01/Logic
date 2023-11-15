@@ -11,7 +11,7 @@ import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
 import { notifyErrorCli, notifyUpdateCli, notifyErrorCliEm } from '../components/Notify';
 import Autocomplete from '@mui/material/Autocomplete';
-import { AutoComp1 } from './OrdineCliData';
+import { AutoComp1 } from './PreventivoData';
 import { supa, guid, tutti } from '../components/utenti';
 import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
@@ -31,7 +31,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 export const AutoProdCli = [];
 export const AutoDataScal = [];
 
-function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal, OrdDataMilli }) {
+function AddPrevNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal, OrdDataMilli }) {
  
     const [todos, setTodos] = React.useState([]);
     const [nomeC, setNomeC] = React.useState("");
@@ -54,7 +54,7 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal, OrdD
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
   
-    const scalCollectionRef = collection(db, "addNota"); 
+    const scalCollectionRef = collection(db, "addPrev"); 
     const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
   
     let navigate = useNavigate();
@@ -79,17 +79,9 @@ function AddNota({ ordId, dataOrd, dataOrdConf, getNotaId, getNotaDataScal, OrdD
       });
       }
 
-  const autoData = async () => {
-        const q = query(collection(db, "scalDat")); // vado a prendere tutte le date di scaletta, questo devo cercare di mettere un limitatore, o potrebbe creare problemi in caso di parecchie date
-        const querySnapshot = await  getDocs(q);
-        querySnapshot.forEach((hi) => {  
-        let car = { label: hi.data().data }
-        AutoDataScal.push(car);
-        });
-        }
 //_________________________________________________________________________________________________________________
 const contEffect = async () => {
-    const coll = collection(db, "addNota");
+    const coll = collection(db, "addPrev");
     const q = query(coll, where("data", "==", dataOrdConf), orderBy("createdAt"));
     const snapshot = await getCountFromServer(q);
     setCont(snapshot.data().count+1)
@@ -104,17 +96,17 @@ const contEffect = async () => {
   
     const contUpdate = async ( dat) => { //si attiva quando viene eliminato un cliente Contatore, non funziona perfettamente
         var cn=0;
-            const collectionRef = collection(db, "addNota");
-              //aggiorna il contatore di tutti i dati di addNota della stessa data, in base all'ordine di creazione
+            const collectionRef = collection(db, "addPrev");
+              //aggiorna il contatore di tutti i dati di addPrev della stessa data, in base all'ordine di creazione
               const q = query(collectionRef, where("data", "==", dat), orderBy("createdAt"));
               const querySnapshot = await getDocs(q);
               querySnapshot.forEach(async (hi) => {
-              await updateDoc(doc(db, "addNota", hi.id), { cont: cn=cn+1});
+              await updateDoc(doc(db, "addPrev", hi.id), { cont: cn=cn+1});
               });
       };
  //_________________________________________________________________________________________________________________   
       const handleContaNote = async () => {   //funzione che viene richiamata quando si crea/elimina la nota    fa il conteggio delle note di quella data
-        const coll = collection(db, "addNota");
+        const coll = collection(db, "addPrev");
         const q = query(coll, where("data", "==", dataOrdConf));
         const snapshot = await getCountFromServer(q);
         await updateDoc(doc(db, "ordDat", ordId), { numeroNote: snapshot.data().count});  //aggiorna il conteggio nel database
@@ -160,7 +152,7 @@ const contEffect = async () => {
   //********************************************************************************** */
   
     React.useEffect(() => {
-      const collectionRef = collection(db, "addNota");
+      const collectionRef = collection(db, "addPrev");
       const q = query(collectionRef, orderBy("cont"));
   
       const unsub = onSnapshot(q, (querySnapshot) => {
@@ -228,7 +220,7 @@ const contEffect = async () => {
     }
     if(bol == true) {
     handleContAdd();
-    await addDoc(collection(db, "addNota"), {
+    await addDoc(collection(db, "addPrev"), {
       cont,
       nomeC,
       quota: 0,
@@ -256,14 +248,14 @@ const contEffect = async () => {
     const handleDelete = async (id, nomeCli, DataC) => {
       handleContRem();
 
-      const colDoc = doc(db, "addNota", id); 
+      const colDoc = doc(db, "addPrev", id); 
     //elimina tutti i dati di nota di quel cliente con la stessa data
-      const q = query(collection(db, "Nota"), where("dataC", "==", DataC), where("nomeC", "==", nomeCli));
+      const q = query(collection(db, "preventivo"), where("dataC", "==", DataC), where("nomeC", "==", nomeCli));
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach(async (hi) => {
-      await deleteDoc(doc(db, "Nota", hi.id)); 
+      await deleteDoc(doc(db, "preventivo", hi.id)); 
       });
-      //infine elimina la data di AddNota
+      //infine elimina la data di addPrev
       await deleteDoc(colDoc);
       handleContaNote(); 
     };
@@ -286,7 +278,7 @@ const contEffect = async () => {
       </IconButton>
       </div>
       <div className='col' style={{padding: 0}}>
-      <p className='navText'> Ordine Clienti </p>
+      <p className='navText'> Preventivo </p>
       </div>
       </div>
 
@@ -301,7 +293,7 @@ const contEffect = async () => {
       <ArrowBackIcon id="i" /></button> 
     }
 
-      {!matches ? <h1 className='title mt-3'> Ordine Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
+      {!matches ? <h1 className='title mt-3'> Preventivo </h1> : <div style={{marginBottom:"60px"}}></div>} 
   <h3 style={{fontSize: "20px"}}>{moment(dataOrd.toDate()).format("L")}</h3>  
   
         <ToggleButtonGroup
@@ -311,14 +303,8 @@ const contEffect = async () => {
       onChange={handleChangeTogg}
       aria-label="Platform"
     > 
-    {sup == true && <Button onClick={ () => {
-              getNotaDataScal(dataOrdConf)
-                navigate("/addclientescaletta");
-                autoData();
-                AutoDataScal.length = 0
-          }} size="small" variant="contained">Aggiungi cliente alla scaletta</Button>}
           <Button onClick={HandleSpeedAddScalClien} size="small" variant="contained"> Aggiungi Cliente</Button>
-          <Button onClick={ () => {navigate("/stampamassiva"); }} size="small" variant="contained"> Stampa Massiva</Button>
+          <Button onClick={ () => {navigate("/stampamassivaprev"); }} size="small" variant="contained"> Stampa Massiva</Button>
       {sup == true && <Button onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
     </ToggleButtonGroup>
 
@@ -357,7 +343,7 @@ const contEffect = async () => {
         <div className='row'> 
         <div className='col' style={{paddingRight: "0px"}}>
         <p className='colTextTitle'> Clienti</p>
-        <p className='textOrdRed'>Ordini non evasi</p>
+        <p className='textOrdRed'>Preventivi non completati</p>
         </div>
         <div className='col' style={{paddingLeft: "0px", paddingRight: "15px"}}>
         <TextField
@@ -410,7 +396,7 @@ const contEffect = async () => {
          <div className='col-8 diviCol' 
           onClick={() => {
                 getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
-                navigate("/nota");
+                navigate("/preventivo");
                 auto(todo.nomeC);
                 AutoProdCli.length = 0
                          }}>
@@ -419,7 +405,7 @@ const contEffect = async () => {
         <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}
             onClick={() => {
                 getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
-                navigate("/nota");
+                navigate("/preventivo");
                 auto(todo.nomeC);
                 AutoProdCli.length = 0
                          }}>  
@@ -454,7 +440,7 @@ const contEffect = async () => {
         <div className='row'> 
         <div className='col' style={{paddingRight: "0px"}}>
         <p className='colTextTitle'> Clienti</p>
-        <p className='textOrd'> Ordini Evasi </p>
+        <p className='textOrd'> Preventivi completati </p>
         </div>
         <div className='col' style={{paddingLeft: "0px", paddingRight: "15px"}}>
         <TextField
@@ -506,7 +492,7 @@ const contEffect = async () => {
          <div className='col-8 diviCol' 
           onClick={() => {
                 getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
-                navigate("/nota");
+                navigate("/preventivo");
                 auto(todo.nomeC);
                 AutoProdCli.length = 0
                          }}>
@@ -515,7 +501,7 @@ const contEffect = async () => {
         <div className="col colIcon" style={{padding:"0px", marginTop:"8px"}}
           onClick={() => {
                 getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
-                navigate("/nota");
+                navigate("/preventivo");
                 auto(todo.nomeC);
                 AutoProdCli.length = 0
                          }}>  
@@ -550,4 +536,4 @@ const contEffect = async () => {
       </>
         )
   }
-export default AddNota;
+export default AddPrevNota;

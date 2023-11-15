@@ -22,6 +22,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import moment from 'moment';
 import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyAygsHvhG251qZ7-N9oR8A-q1ls9yhNkOQ';
 
@@ -47,6 +49,8 @@ function AddCliente( {getCliId} ) {
 
   const [Progress, setProgress] = React.useState(false);
   const [ProgressDebi, setProgressDebi] = React.useState(false);
+
+  const [alignment, setAlignment] = React.useState('scorta');
 
   const [Totdeb1, setTotDeb1] = React.useState("");
   const [Totdeb2, setTotDeb2] = React.useState("");
@@ -178,6 +182,10 @@ React.useEffect(() => {
     setFlagDebiCli(false)
     setPopupActiveCrono(true)
   } 
+
+  const handleChangeTogg = (event) => {
+    setAlignment(event.target.value);
+  };
  //******************************************************************************* */
     //funzione che permette il caricamento automatico dell'aggiunta del prodotto personalizzato
  const handleProdClien = async () => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
@@ -351,13 +359,20 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
     }
 
   {!matches ? <h1 className='title mt-3'> Lista Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
-    <div>
-        <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Cliente </button></span>
-        <span><button onClick={handleButtonAna}>Anagrafiche Clienti</button></span>
-        <span><button onClick={handleButtonDebito}>Debito Clienti </button></span>
-        <span><button onClick={handleButtonCronoDeb}>Cronologia Debito </button></span>
-        <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
-      </div>
+
+      <ToggleButtonGroup
+      color="primary"
+      value={alignment}
+      exclusive
+      onChange={handleChangeTogg}
+      aria-label="Platform"
+    > 
+    {sup == true &&<Button onClick={() => { setPopupActive(true) }} size="small" variant="contained">Aggiungi Cliente</Button>}
+      <ToggleButton size="small" onClick={handleButtonAna} color='secondary' value="scorta">Anagrafiche Clienti</ToggleButton>
+      <ToggleButton onClick={handleButtonDebito} color='secondary' value="scortatinte">Debito Clienti</ToggleButton>
+      <ToggleButton onClick={handleButtonCronoDeb} color='secondary' value="cronologia">Cronologia Debito</ToggleButton> 
+      {sup == true && <Button size="small" onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
+    </ToggleButtonGroup>
 
 
     {sup ===true && (
@@ -484,9 +499,9 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 <div className='todo_containerDebCli mt-5'>
 <div className='row' > 
 <div className='col-7'>
-<p className='colTextTitle'> Lista Clienti </p>
+<p className='colTextTitle'> Debito Clienti </p>
 </div>
-<div className='col'>
+<div className='col' style={{ paddingBottom: "7px"}}>
 <TextField
       inputRef={inputRefDeb}
       className="inputSearch"

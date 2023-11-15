@@ -17,6 +17,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from '@mui/icons-material/Search';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { motion } from 'framer-motion';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 export const AutoCompScorta = [];
 
@@ -33,6 +35,8 @@ function AddFornitori( {getFornId} ) {
   const [deb2, setDeb2] = React.useState("");
   const [deb3, setDeb3] = React.useState("");
   const [deb4, setDeb4] = React.useState("");
+
+  const [alignment, setAlignment] = React.useState('scorta');
 
   const [popupActive, setPopupActive] = useState(false);
   const [flagAnaCli, setFlagAnaCli] = useState(true);   
@@ -90,6 +94,10 @@ const auto = async () => {
   AutoCompScorta.push(car);
   });
   }
+
+  const handleChangeTogg = (event) => {
+    setAlignment(event.target.value);
+  };
 //********************************************************************************** */
       //Anagrafiche
 React.useEffect(() => {
@@ -164,19 +172,6 @@ React.useEffect(() => {
     }
   };
 //****************************************************************************************** */
-  const handleEdit = async ( todo, nome, iv, cel) => {
-    await updateDoc(doc(db, "fornitore", todo.id), { nomeF: nome, partitaIva:iv, cellulare:cel});
-    notifyUpdateCli();
-    toast.clearWaitingQueue(); 
-  };
-
-  const handleEditDeb = async ( todo, nome, dd1, dd2, dd3, dd4) => {
-    console.log("entrato")
-    await updateDoc(doc(db, "debito", todo.id), { nomeF:nome, deb1:dd1, deb2:dd2, deb3:dd3, deb4:dd4});
-    notifyUpdateCli();
-    toast.clearWaitingQueue(); 
-  };
- //****************************************************************************************** */ 
 
   const handleDelete = async (id) => {
     const colDoc = doc(db, "fornitore", id); 
@@ -210,10 +205,17 @@ React.useEffect(() => {
     }
 
     {!matches ? <h1 className='title mt-3'>Lista Fornitori</h1> : <div style={{marginBottom:"60px"}}></div>} 
-    <div>
-        <span><button onClick={() => { setPopupActive(true) }}>Aggiungi Fornitore</button></span>
-        <span><button onClick={() => {setFlagDelete(!flagDelete)}}>elimina</button></span>
-      </div>
+
+      <ToggleButtonGroup
+      color="primary"
+      value={alignment}
+      exclusive
+      onChange={handleChangeTogg}
+      aria-label="Platform"
+    > 
+    {sup == true &&<Button onClick={() => { setPopupActive(true) }} size="small" variant="contained">Aggiungi Fornitore</Button>}
+      {sup == true && <Button onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
+    </ToggleButtonGroup>
 
 
     {sup ===true && (
@@ -285,7 +287,7 @@ React.useEffect(() => {
                 }
             }).map((todo) => (
     <div key={todo.id}>
-    <div className='row'>
+    <div className='row diviCol1'>
         <div className='col-4 diviCol'>
             <h4 className='inpTab'   onClick={() => {
             getFornId(todo.id, todo.nomeF)

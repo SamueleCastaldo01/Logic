@@ -1,14 +1,16 @@
 var s1="ZRcj7rjjUFfPbWIWwCCj1mJKkh83"  //sono io
-var s2="bBOeGRw4vHPHnRxn8ccZast5haY2"   //Nando
-var g1="gcZ2W8bqL1cI1D7VJMRjxx6lDJF2"  //noia
-var s4="JN8TAA74ueghixL5Cp1KjNfVFZG3" //fratm
+var s2="bBOeGRw4vHPHnRxn8ccZast5haY2"   //Nando Liguori
+var s3= "6aFLomc8ZXV33ze0EAKgRDh9iQV2"  //Paola Liguori
+var s5="gKV9G0Q3B7gvHX3ISXJO3HwTCmT2" //Davide Liguori
+var d1= "7JUgxspZncO0WD8H8Z7ANV0UuAA3"  //dipendente1
+var g1= "wX8dxc9QOsYEIqYWjZpMvQfLPsu1"  //guidatore
 
 
-export let supa= ["ZRcj7rjjUFfPbWIWwCCj1mJKkh83", "bBOeGRw4vHPHnRxn8ccZast5haY2", "JN8TAA74ueghixL5Cp1KjNfVFZG3"]  //array per i supervisori
+export let supa= [s1, s2, s5, s3]  //array per i supervisori
 
 
-export let guid= ["gcZ2W8bqL1cI1D7VJMRjxx6lDJF2"]  //array per i guidatori
+export let guid= [g1]  //array per i guidatori
 
-export let dipen= ["Xq0okbBkyLMTojXKLEeF4gaYdIr1", "ZRcj7rjjUFfPbWIWwCCj1mJKkh83"]  //array per i dipendenti
+export let dipen= [d1]  //array per i dipendenti
 
-export let tutti= ["ZRcj7rjjUFfPbWIWwCCj1mJKkh83", "gcZ2W8bqL1cI1D7VJMRjxx6lDJF2", "bBOeGRw4vHPHnRxn8ccZast5haY2", "Xq0okbBkyLMTojXKLEeF4gaYdIr1", "JN8TAA74ueghixL5Cp1KjNfVFZG3"] //array per chi può visualizzare la tabella
+export let tutti= [s1, s2, s5, d1, g1, s3] //array per chi può visualizzare la tabella

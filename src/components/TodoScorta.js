@@ -4,7 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from '@mui/icons-material/Search';
 import { ToastContainer, toast, Slide } from 'react-toastify';
-import { supa, guid, tutti } from '../components/utenti';
+import { supa, guid, tutti, dipen } from '../components/utenti';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 
@@ -12,6 +12,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
+    let dip= dipen.includes(localStorage.getItem("uid"))
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
@@ -90,11 +91,11 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
       style={{ textDecoration: todo.completed && "line-through" }}
         type="text"
         className="inpTab"
-        >{ newNomeP}</h4>
+        >{ newNomeP }</h4>
     )}
     </div>
 {/********************QUANTITA'*********************************************************** */}
-
+{sup ===true && ( 
 <div className="col-1 diviCol" style={{padding: "0px"}}>
     {ta ===true && ( 
     <h4
@@ -104,7 +105,21 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
         className="inpTab"
       >{todo.quantita === "" ? newQuantita : todo.quantita}</h4>
     )}
-    </div>
+</div>
+ )}
+
+ {dip ===true && ( 
+<div className="col-2 diviCol" style={{padding: "0px", position:"relative", right:"2%"}}>
+    {ta ===true && ( 
+    <h4
+      style={{ textDecoration: todo.completed && "line-through" }}
+        type="text"
+        onBlur={handleSubm}
+        className="inpTab"
+      >{todo.quantita === "" ? newQuantita : todo.quantita}</h4>
+    )}
+</div>
+ )}
   {/********************SOTTOSCORTA'*********************************************************** */}
 {sup ===true && ( 
   <div className="col-1 diviCol" style={{padding: "0px"}}>
@@ -144,8 +159,8 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
   </div>
     )}
 {/**********************AGGIUNGI************************************************************* */}
-
-<div className="col-1 diviCol" style={{padding: "0px"}}>
+{sup ===true && ( 
+<div className="col-1 diviCol1" style={{padding: "0px"}}>
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="number" min="1"
@@ -154,11 +169,24 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
         className="inpNumb"
       />
 </div>
+)}
+
+{dip ===true && ( 
+<div className="col-2 diviCol1" style={{width: "50px", padding: "0px", position:"relative", right:"2%"}}>
+    <input
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
+        type="number" min="1"
+        value={aggiungi}
+        onChange={(event) => {setAggiungi(event.target.value);}}
+        className="inpNumb"
+      />
+</div>
+)}
 {/***************************BUTTON aggiungi e rimuovi******************************************************** */}
     { FlagStampa==false &&
-    <div className="col diviCol" style={{padding:"0px"}}>
+    <div className="col diviCol" style={{padding:"0px", paddingRight: "15px"}}>
       <button 
-      className="butAddProd me-2"
+      className="butAddProd me-1"
       type="button"
       onClick={() =>{ { localStorage.setItem("flagCron", true); handleAddQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>+</button>
       <button

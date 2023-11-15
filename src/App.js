@@ -9,12 +9,14 @@ import {signOut} from "firebase/auth";
 import './App.css';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import AnimatedRoutes from './components/AnimatedRoutes';
+import BottomNavi from './components/BottomNavigation';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation} from "react-router-dom";
 import { styled } from "@mui/material/styles";
 import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
 import { BottomNavigation } from '@mui/material';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ContactPageIcon from '@mui/icons-material/ContactPage';
+import PersonIcon from '@mui/icons-material/Person';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AdUnitsIcon from '@mui/icons-material/AdUnits';
@@ -22,6 +24,7 @@ import MiniDrawer from './components/MiniDrawer';
 import Box from '@mui/material/Box';
 import moment from 'moment/moment';
 import 'moment/locale/it'
+import { Helmet } from 'react-helmet';
 import { guid, supa, tutti, dipen } from './components/utenti';
 
 /*  elimina tutti i dati di una collezione
@@ -79,7 +82,6 @@ function App() {
   //______________________________________________________________________________________________________________
     //signOut
     const signUserOut = () => {
-      console.log("hui")
       signOut(auth).then(() => {
         localStorage.clear();
         setIsAuth(false);
@@ -96,8 +98,7 @@ function App() {
   <MiniDrawer signUserOut={signUserOut}/>
 }
   
-
-
+  
     <Box component="main" sx={{ flexGrow: 1, p: 3, textAlign: "center", padding: matches ? "0px" : "24px", paddingTop: "24px" }}>
     <div><ToastContainer limit={1} /></div>
 
@@ -110,79 +111,7 @@ function App() {
 
     </Box>
 
-    {matches &&
-  <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3} >
-        <BottomNavigation 
-        sx={{
-      bgcolor: '#333',
-      '& .Mui-selected': {
-      '& .MuiBottomNavigationAction-label': {
-        fontSize: theme => theme.typography.caption,
-        transition: 'none',
-        fontWeight: 'bold',
-        lineHeight: '20px'
-      },
-      '& .MuiSvgIcon-root, & .MuiBottomNavigationAction-label': {
-        color: theme => theme.palette.primary.main
-        }}}}
-          showLabels
-          value={value}
-          onChange={(event, newValue) => {
-            setValue(newValue);
-          }}
-        >
-        {sup ==true   && 
-          <BottomNavigationAction
-          component={Link}
-          className="linq"
-          to="/"
-           label="Home" icon={<HomeIcon/>}/> }
-        {gui ==true   && 
-          <BottomNavigationAction
-          component={Link}
-          className="linq"
-          to="/scalettadatadip"
-           label="Scaletta" icon={<FormatListBulletedIcon/>}/> }
-        {sup ==true   && 
-          <BottomNavigationAction
-          component={Link}
-          className="linq"
-          to="/scalettadata"
-           label="Scaletta" icon={<FormatListBulletedIcon/>}/> }
-        {gui ==true  && 
-          <BottomNavigationAction
-          component={Link}
-          className="linq"
-          to="/listaclientidip"
-           label="Clienti" icon={<ContactPageIcon/>} /> }
-        {sup ==true  && 
-          <BottomNavigationAction
-          component={Link}
-          className="linq"
-          to="/listaclienti"
-           label="Clienti" icon={<ContactPageIcon/>} /> }
-        {(dip ==true || sup == true) &&
-          <BottomNavigationAction
-          component={Link}
-          className="linq"
-          to="/scorta"
-           label="Scorta"  icon={<InventoryIcon />} /> }
-        {sup ==true  &&
-          <BottomNavigationAction
-           component={Link}
-           className="linq"
-          to="/ordineclientidata"
-           label="Ordine" icon={<ShoppingCartIcon />} />}
-        {dip == true &&
-           <BottomNavigationAction
-           component={Link}
-           className="linq"
-          to="/notadipdata"
-           label="Nota Dip" icon={<AdUnitsIcon />} />}
-        </BottomNavigation>
-        
-      </Paper>
- }
+  <BottomNavi/>
 
  </Router>
 

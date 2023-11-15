@@ -105,18 +105,12 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
       style={{ textDecoration: todo.completed && "line-through"  }}
         type="text"
         className="inpTab"
-        onClick={() => {
-            getCliId(todo.id, todo.nomeC)
-            navigate("/dashclienti");
-            auto();
-            AutoCompProd.length = 0
-                            }}
         >{ newNomeC}</h5>
 
     </div>
 
 {/*********************D1******************************************************************************** */}
-<div className="col diviCol" style={{padding: "0px"}}>
+<div className="col diviCol1" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -130,7 +124,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     </div>
 
 {/***********************D2****************************************************************************** */}
-<div className="col diviCol" style={{padding: "0px"}}>
+<div className="col diviCol1" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -143,7 +137,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     )}
     </div>
 {/*******************D3********************************************************************************** */}
-<div className="col diviCol" style={{padding: "0px"}}>
+<div className="col diviCol1" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -156,7 +150,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     )}
     </div>
 {/*******************D4********************************************************************************** */}
-<div className="col diviCol" style={{padding: "0px"}}>
+<div className="col diviCol1" style={{padding: "0px"}}>
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}

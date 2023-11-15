@@ -77,7 +77,7 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
     <div className="prova">
 
 <form  onSubmit={handleSubm}>
-    <div className="row ">
+    <div className="row diviCol1">
 {/*********************NomeC************************************************************************ */}
     <div className="col-4 diviCol" >
     <h5
