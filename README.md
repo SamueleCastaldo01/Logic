@@ -2,6 +2,9 @@
 
 Gestionale magazzino
 
+demo: https://demologic-f33ed.web.app/
+(Eseguire l'accesso con google;  Non sono presenti permessi) 
+
 
 Tecnologie usate: React js e Firebase
 
