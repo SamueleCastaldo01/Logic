@@ -1,7 +1,7 @@
 # Logic
 
 Gestionale magazzino
-Tecnologie usate React js e Firebase
+Tecnologie usate: React js e Firebase
 
 Funzionalità:
 -Autenticazione, gestione dei permessi
