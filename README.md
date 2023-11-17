@@ -1,6 +1,8 @@
 # Logic
 
 Gestionale magazzino
+
+
 Tecnologie usate: React js e Firebase
 
 Funzionalità:
