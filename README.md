@@ -4,9 +4,13 @@ Gestionale magazzino
 Tecnologie usate: React js e Firebase
 
 Funzionalità:
+
 -Autenticazione, gestione dei permessi
+
 -Gestione delle scorte e scorte tinte (magazzino per parrucchieri) | compresa la cronoliga quando si modifica la quantità
+
 -Scaletta | Sezione che viene usata quando si vanno a fare le consegne soprattuto dal guidatore
+
 -Lista Clienti | Sezione dove sono riportati tutti i clienti con i dati, dove è possibile accedere alla dashboard Cliente. Ed è presente il debito dei clienti
 -DashBoard Cliente | Ci sono tutti gli ordini vecchi di quel cliente più la ricerca per prodotto e alcune statistiche
 -Lista Fornitori
